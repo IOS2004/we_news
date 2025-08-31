@@ -1,7 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Button, Header, ScreenWrapper } from '../../components/common';
+import { Button, ScreenWrapper } from '../../components/common';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 
 export default function SubscriptionFeeScreen() {
   const handlePayment = () => {
@@ -10,43 +13,206 @@ export default function SubscriptionFeeScreen() {
     router.replace('/(tabs)/home');
   };
 
+  const handleGoBack = () => {
+    router.back();
+  };
+
   return (
-    <ScreenWrapper>
-      <Header title="Subscription Fee" canGoBack />
-      <View style={styles.container}>
-        <Text style={styles.title}>One-Time Joining Fee</Text>
-        <Text style={styles.amount}>₹500</Text>
-        <Text style={styles.description}>
-          To activate your account, please pay the one-time joining fee.
-        </Text>
-        <Button title="Pay Now" onPress={handlePayment} />
-      </View>
+    <ScreenWrapper style={styles.screenWrapper}>
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        style={styles.gradient}
+      >
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={handleGoBack}
+          >
+            <Ionicons name="chevron-back" size={24} color={Colors.textOnDark} />
+          </TouchableOpacity>
+          
+          <View style={styles.logoContainer}>
+            <Ionicons name="diamond-outline" size={60} color={Colors.textOnDark} />
+          </View>
+          
+          <Text style={styles.headerTitle}>Subscription Fee</Text>
+          <Text style={styles.headerSubtitle}>Complete your membership</Text>
+        </View>
+
+        {/* Main Content */}
+        <View style={styles.contentContainer}>
+          <View style={styles.feeCard}>
+            <View style={styles.feeHeader}>
+              <Ionicons name="star" size={32} color={Colors.primary} />
+              <Text style={styles.feeTitle}>Premium Membership</Text>
+            </View>
+            
+            <View style={styles.amountSection}>
+              <Text style={styles.amountLabel}>One-Time Joining Fee</Text>
+              <Text style={styles.amount}>₹500</Text>
+              <Text style={styles.amountNote}>Unlock all premium features</Text>
+            </View>
+
+            <View style={styles.featuresSection}>
+              <Text style={styles.featuresTitle}>What you get:</Text>
+              <View style={styles.featureItem}>
+                <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                <Text style={styles.featureText}>Access to premium news content</Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                <Text style={styles.featureText}>Unlimited earnings potential</Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                <Text style={styles.featureText}>Priority customer support</Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                <Text style={styles.featureText}>Exclusive member benefits</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <Button title="Pay ₹500 & Continue" onPress={handlePayment} />
+            <TouchableOpacity style={styles.laterButton} onPress={handleGoBack}>
+              <Text style={styles.laterText}>I'll pay later</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </LinearGradient>
     </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screenWrapper: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 16,
+    paddingHorizontal: 0
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  gradient: {
+    flex: 1,
+  },
+  headerSection: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.lg,
+    alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    left: Spacing.lg,
+    top: Spacing.xl,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoContainer: {
+    marginBottom: Spacing.md,
+    marginTop: Spacing.md,
+  },
+  headerTitle: {
+    fontSize: Typography.fontSize['3xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.textOnDark,
+    marginBottom: Spacing.xs,
     textAlign: 'center',
-    marginBottom: 16,
+  },
+  headerSubtitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.normal,
+    color: Colors.textOnDark,
+    textAlign: 'center',
+    opacity: 0.9,
+  },
+  contentContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    paddingTop: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+  },
+  feeCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+    marginBottom: Spacing.xl,
+    ...Shadows.lg,
+  },
+  feeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.lg,
+  },
+  feeTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginLeft: Spacing.sm,
+  },
+  amountSection: {
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+    paddingVertical: Spacing.lg,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: Colors.border,
+  },
+  amountLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
   },
   amount: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
+    fontSize: Typography.fontSize['4xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.primary,
+    marginBottom: Spacing.xs,
   },
-  description: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#666',
-    marginBottom: 32,
+  amountNote: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.normal,
+    color: Colors.textSecondary,
+  },
+  featuresSection: {
+    gap: Spacing.md,
+  },
+  featuresTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
+    marginBottom: Spacing.sm,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  featureText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.normal,
+    color: Colors.text,
+    flex: 1,
+  },
+  buttonContainer: {
+    gap: Spacing.md,
+    paddingBottom: Spacing.xl,
+  },
+  laterButton: {
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+  },
+  laterText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.textSecondary,
   },
 });

@@ -65,8 +65,8 @@ export default function KycVerificationScreen() {
 
             <View style={styles.inputsContainer}>
               <InputField 
-                label="Aadhar Number" 
-                placeholder="Enter your 12-digit Aadhar number"
+                label="" 
+                placeholder="Aadhar Card"
                 value={aadharNumber}
                 onChangeText={setAadharNumber}
                 keyboardType="numeric"
@@ -75,8 +75,8 @@ export default function KycVerificationScreen() {
               />
 
               <InputField 
-                label="PAN Number" 
-                placeholder="Enter your PAN number"
+                label="" 
+                placeholder="PAN Number"
                 value={panNumber}
                 onChangeText={setPanNumber}
                 autoCapitalize="characters"
@@ -85,8 +85,8 @@ export default function KycVerificationScreen() {
               />
 
               <InputField 
-                label="Bank Account Number" 
-                placeholder="Enter your bank account number"
+                label="" 
+                placeholder="Bank Account Number"
                 value={bankAccount}
                 onChangeText={setBankAccount}
                 keyboardType="numeric"
@@ -94,8 +94,8 @@ export default function KycVerificationScreen() {
               />
 
               <InputField 
-                label="IFSC Code" 
-                placeholder="Enter your bank's IFSC code"
+                label="" 
+                placeholder="IFSC Code"
                 value={ifscCode}
                 onChangeText={setIfscCode}
                 autoCapitalize="characters"
@@ -172,13 +172,131 @@ export default function KycVerificationScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
+  screenWrapper: {
+    flex: 1,
+    paddingHorizontal: 0
+  },
+  gradient: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: Spacing.lg,
+  },
+  headerSection: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.lg,
+    alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    left: Spacing.lg,
+    top: Spacing.xl,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoContainer: {
+    marginBottom: Spacing.md,
+    marginTop: Spacing.md,
+  },
+  headerTitle: {
+    fontSize: Typography.fontSize['3xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.textOnDark,
+    marginBottom: Spacing.xs,
+    textAlign: 'center',
+  },
+  headerSubtitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.normal,
+    color: Colors.textOnDark,
+    textAlign: 'center',
+    opacity: 0.9,
+  },
+  formContainer: {
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.xl,
+    marginTop: 0,
+    flex: 1,
+    // --- FIX: Added horizontal padding here ---
+    paddingHorizontal: Spacing.lg,
+  },
+  titleSection: {
+    marginBottom: Spacing.xl,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: Typography.fontSize['2xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginBottom: Spacing.sm,
+  },
+  subtitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.normal,
+    color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 24,
+    lineHeight: 22,
+  },
+  inputsContainer: {
+    marginBottom: Spacing.xl,
+    // --- FIX: Removed horizontal padding from here ---
+  },
+  documentsSection: {
+    marginBottom: Spacing['2xl'],
+    // --- FIX: Removed horizontal padding from here ---
+  },
+  sectionTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
+    marginBottom: Spacing.xl,
+    textAlign: 'left',
+  },
+  uploadCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+    marginBottom: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    ...Shadows.md,
+  },
+  uploadedCard: {
+    backgroundColor: Colors.surfaceSecondary,
+    borderColor: Colors.success,
+  },
+  uploadIcon: {
+    marginRight: Spacing.md,
+  },
+  uploadText: {
+    flex: 1,
+  },
+  uploadTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text,
+    marginBottom: Spacing.xs,
+  },
+  uploadSubtitle: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.normal,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+  },
+  buttonContainer: {
+    marginTop: Spacing['2xl'],
+    paddingBottom: Spacing.lg,
+    // --- FIX: Removed horizontal padding from here ---
   },
 });
