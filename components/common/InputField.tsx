@@ -1,60 +1,103 @@
-import React from 'react';
-import { View, TextInput, Text, StyleSheet, TextInputProps } from 'react-native';
+import React, { forwardRef } from 'react';
+import { View, TextInput, Text, StyleSheet, TextInputProps, TouchableOpacity } from 'react-native';
+import { Colors, ComponentThemes, Spacing, Typography, BorderRadius } from '../../constants/theme';
 
 interface InputFieldProps extends TextInputProps {
   label: string;
   error?: string;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  onRightIconPress?: () => void;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ label, error, ...props }) => {
+const InputField = forwardRef<TextInput, InputFieldProps>(({ 
+  label, 
+  error, 
+  leftIcon, 
+  rightIcon, 
+  onRightIconPress,
+  style,
+  ...props 
+}, ref) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={[styles.input, error ? styles.inputError : null]}
-        placeholderTextColor="#999"
-        {...props}
-      />
+      {label ? <Text style={styles.label}>{label}</Text> : null}
+      <View style={[styles.inputContainer, error ? styles.inputError : null]}>
+        {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
+        <TextInput
+          ref={ref}
+          style={[
+            styles.input, 
+            leftIcon ? styles.inputWithLeftIcon : null,
+            rightIcon ? styles.inputWithRightIcon : null,
+            style
+          ]}
+          placeholderTextColor={Colors.inputPlaceholder}
+          {...props}
+        />
+        {rightIcon && (
+          <TouchableOpacity 
+            style={styles.rightIcon} 
+            onPress={onRightIconPress}
+            activeOpacity={0.7}
+          >
+            {rightIcon}
+          </TouchableOpacity>
+        )}
+      </View>
       {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
-};
+});
+
+InputField.displayName = 'InputField';
 
 const styles = StyleSheet.create({
   container: {
+    ...ComponentThemes.input.container,
     width: '100%',
-    marginVertical: 8,
   },
   label: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 8,
-    fontWeight: '600',
+    ...ComponentThemes.input.label,
+  },
+  inputContainer: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    ...ComponentThemes.input.field,
+    borderWidth: 1,
   },
   input: {
-    height: 56,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    flex: 1,
+    height: ComponentThemes.input.field.height,
+    paddingHorizontal: Spacing.base,
+    fontSize: Typography.fontSize.base,
+    color: Colors.inputText,
+  },
+  inputWithLeftIcon: {
+    paddingLeft: Spacing['5xl'],
+  },
+  inputWithRightIcon: {
+    paddingRight: Spacing['5xl'],
+  },
+  leftIcon: {
+    position: 'absolute',
+    left: Spacing.base,
+    zIndex: 1,
+  },
+  rightIcon: {
+    position: 'absolute',
+    right: Spacing.base,
+    zIndex: 1,
+    padding: Spacing.xs,
   },
   inputError: {
-    borderColor: '#ff4757',
+    ...ComponentThemes.input.error,
   },
   errorText: {
-    color: '#ff4757',
-    marginTop: 4,
-    fontSize: 12,
+    color: Colors.error,
+    marginTop: Spacing.xs,
+    fontSize: Typography.fontSize.sm,
   },
 });
 

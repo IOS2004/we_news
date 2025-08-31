@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors, Layout } from '../../constants/theme';
 
 interface ScreenWrapperProps {
   children: React.ReactNode;
@@ -18,11 +19,11 @@ const ScreenWrapper: React.FC<ScreenWrapperProps> = ({ children, style }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f4f8',
+    backgroundColor: Colors.background,
   },
   container: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: Layout.screenPaddingHorizontal,
   },
 });
 

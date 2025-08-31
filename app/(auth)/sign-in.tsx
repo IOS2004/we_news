@@ -1,11 +1,18 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { router } from 'expo-router';
-import { Button, Header, InputField, ScreenWrapper } from '../../components/common';
-
-const { width, height } = Dimensions.get('window');
+import { Button, InputField, ScreenWrapper } from '../../components/common';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, Gradients, Layout } from '../../constants/theme';
 
 export default function SignInScreen() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const passwordRef = useRef<TextInput>(null);
+
   const handleSignIn = () => {
     // For demo purposes, directly navigate to the main tabs
     // In a real app, you would validate credentials here
@@ -16,168 +23,204 @@ export default function SignInScreen() {
     router.push('/(auth)/sign-up');
   };
 
+  const handleForgotPassword = () => {
+    // Navigate to forgot password screen
+    console.log('Navigate to forgot password');
+  };
+
   return (
-    <ScreenWrapper>
-      <Header title="Sign In" />
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
-          <View style={styles.welcomeSection}>
-            <View style={styles.logoPlaceholder}>
-              <Text style={styles.logoText}>WE NEWS</Text>
+    <ScreenWrapper style={styles.screenWrapper}>
+      <LinearGradient
+        colors={Gradients.primary}
+        style={styles.gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <KeyboardAwareScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          extraScrollHeight={20}
+          extraHeight={120}
+        >
+            {/* Logo/Brand Section */}
+            <View style={styles.logoSection}>
+              <View style={styles.logoContainer}>
+                <Ionicons name="newspaper" size={48} color={Colors.textOnDark} />
+              </View>
+              <Text style={styles.appName}>WE NEWS</Text>
+              <Text style={styles.tagline}>Stay informed, earn rewards</Text>
             </View>
-            <Text style={styles.title}>Welcome Back!</Text>
-            <Text style={styles.subtitle}>Sign in to continue to your account</Text>
-          </View>
 
-          <View style={styles.formSection}>
-            <View style={styles.inputContainer}>
-              <InputField 
-                label="Email or Phone" 
-                placeholder="Enter your email or phone"
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <InputField 
-                label="Password" 
-                placeholder="Enter your password" 
-                secureTextEntry
-              />
-            </View>
-            
-            <TouchableOpacity style={styles.forgotPasswordContainer}>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            {/* Form Section */}
+            <View style={styles.formContainer}>
+              <View style={styles.welcomeSection}>
+                <Text style={styles.welcomeTitle}>Welcome Back!</Text>
+                <Text style={styles.welcomeSubtitle}>Sign in to continue your journey</Text>
+              </View>
 
-            <View style={styles.buttonContainer}>
-              <Button title="Sign In" onPress={handleSignIn} />
-            </View>
-          </View>
+              <View style={styles.inputsContainer}>
+                <InputField 
+                  label="" 
+                  placeholder="Email or Phone"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordRef.current?.focus()}
+                  leftIcon={<Ionicons name="mail-outline" size={20} color={Colors.textSecondary} />}
+                />
 
-          <View style={styles.signUpSection}>
-            <View style={styles.dividerContainer}>
-              <View style={styles.divider} />
-              <Text style={styles.dividerText}>OR</Text>
-              <View style={styles.divider} />
+                <InputField 
+                  ref={passwordRef}
+                  label="" 
+                  placeholder="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  returnKeyType="done"
+                  onSubmitEditing={handleSignIn}
+                  leftIcon={<Ionicons name="lock-closed-outline" size={20} color={Colors.textSecondary} />}
+                  rightIcon={<Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color={Colors.textSecondary} />}
+                  onRightIconPress={() => setShowPassword(!showPassword)}
+                />
+              </View>
+
+              <TouchableOpacity 
+                style={styles.forgotPasswordContainer}
+                onPress={handleForgotPassword}
+              >
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              </TouchableOpacity>
+
+              <View style={styles.buttonContainer}>
+                <Button title="Sign In" onPress={handleSignIn} />
+              </View>
+
+              <View style={styles.signUpSection}>
+                <Text style={styles.signUpText}>Don't have an account? </Text>
+                <TouchableOpacity onPress={handleSignUpNavigation}>
+                  <Text style={styles.signUpLink}>Sign Up</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            
-            <TouchableOpacity onPress={handleSignUpNavigation} style={styles.signUpButton}>
-              <Text style={styles.signUpText}>
-                Don't have an account? <Text style={styles.signUpLink}>Sign Up</Text>
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    </ScreenWrapper>
-  );
-}
+          </KeyboardAwareScrollView>
+        </LinearGradient>
+      </ScreenWrapper>
+    );
+  }
 
 const styles = StyleSheet.create({
+  screenWrapper: {
+    paddingHorizontal: 0,
+  },
+  gradient: {
+    flex: 1,
+  },
   scrollContainer: {
     flexGrow: 1,
-    minHeight: height - 100,
+    justifyContent: 'space-between',
+    paddingBottom: 40,
   },
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    backgroundColor: '#f8f9fa',
-  },
-  welcomeSection: {
+  logoSection: {
     alignItems: 'center',
-    marginBottom: 40,
-    paddingTop: 30,
+    paddingVertical: 60,
+    paddingHorizontal: 20,
   },
-  logoPlaceholder: {
+  logoContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#007bff',
-    justifyContent: 'center',
+    backgroundColor: Colors.whiteTransparent,
     alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: '#007bff',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    justifyContent: 'center',
+    marginBottom: 16,
   },
-  logoText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: 'bold',
+  appName: {
+    fontSize: 32,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.textOnDark,
+    marginBottom: 8,
     letterSpacing: 1,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#1a1a1a',
-    marginBottom: 8,
-  },
-  subtitle: {
+  tagline: {
     fontSize: 16,
+    color: Colors.tagline,
     textAlign: 'center',
-    color: '#666666',
-    lineHeight: 22,
   },
-  formSection: {
+  formContainer: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    paddingBottom: 40,
+    marginTop: 20,
+    ...Shadows.lg,
+  },
+  welcomeSection: {
+    alignItems: 'center',
     marginBottom: 32,
   },
-  inputContainer: {
-    marginBottom: 16,
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  inputsContainer: {
+    marginBottom: 24,
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
-    marginTop: 8,
-    marginBottom: 32,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    marginBottom: 24,
   },
   forgotPasswordText: {
-    color: '#007bff',
+    color: Colors.primary,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: Typography.fontWeight.semibold,
   },
   buttonContainer: {
-    marginTop: 8,
+    marginBottom: 24,
   },
   signUpSection: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  dividerContainer: {
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 24,
-    width: '100%',
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e0e0e0',
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: '#999999',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  signUpButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
   },
   signUpText: {
     fontSize: 16,
-    color: '#666666',
-    textAlign: 'center',
+    color: Colors.textSecondary,
   },
   signUpLink: {
-    color: '#007bff',
-    fontWeight: '600',
+    fontSize: 16,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  // Legacy styles for backward compatibility
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: Typography.fontWeight.bold,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  link: {
+    color: Colors.primary,
+    textAlign: 'center',
+    marginTop: 16,
   },
 });
