@@ -45,13 +45,17 @@ export default function TabsLayout() {
           ),
         }}
       />
+      {/* Hidden tabs - accessible via navigation but not in tab bar */}
       <Tabs.Screen 
         name="profile" 
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
+          href: null, // This hides the tab from the tab bar
+        }}
+      />
+      <Tabs.Screen 
+        name="plans" 
+        options={{
+          href: null, // This hides the tab from the tab bar
         }}
       />
     </Tabs>
