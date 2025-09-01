@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     gap: Spacing.base,
   },
   card: {
-    padding: Spacing.base,
+    padding: Spacing.lg,
   },
   header: {
     flexDirection: 'row',

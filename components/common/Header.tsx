@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Colors, Typography, Spacing } from '../../constants/theme';
 
 interface HeaderProps {
   title: string;
@@ -16,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ title, canGoBack = false }) => {
     <View style={styles.header}>
       {canGoBack && (
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
       )}
       <Text style={styles.title}>{title}</Text>
@@ -30,17 +30,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.lg,
     backgroundColor: Colors.background,
   },
   backButton: {
     position: 'absolute',
-    left: 16,
+    left: Spacing.lg,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
   },
 });
 

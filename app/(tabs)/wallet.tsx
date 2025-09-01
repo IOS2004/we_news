@@ -1,8 +1,94 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-import { Button, Header, ScreenWrapper } from '../../components/common';
-import { BalanceDisplay, TransactionListItem, WalletStats } from '../../components/wallet';
+import { Ionicons } from '@expo/vector-icons';
+import { ScreenWrapper, Header } from '../../components/common';
+import { TransactionListItem } from '../../components/wallet';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+
+// Dummy transaction data
+const dummyTransactions = [
+  {
+    id: '1',
+    type: 'credit' as const,
+    amount: 250,
+    date: '2024-01-20',
+    description: 'News Article Interaction',
+    status: 'completed' as const,
+    category: 'Reading',
+    time: '10:30 AM',
+  },
+  {
+    id: '2',
+    type: 'credit' as const,
+    amount: 180,
+    date: '2024-01-19',
+    description: 'Daily Streak Bonus',
+    status: 'completed' as const,
+    category: 'Bonus',
+    time: '11:45 AM',
+  },
+  {
+    id: '3',
+    type: 'debit' as const,
+    amount: 500,
+    date: '2024-01-18',
+    description: 'Withdrawal to Bank',
+    status: 'completed' as const,
+    category: 'Withdrawal',
+    time: '2:15 PM',
+  },
+  {
+    id: '4',
+    type: 'credit' as const,
+    amount: 320,
+    date: '2024-01-17',
+    description: 'News Sharing Reward',
+    status: 'completed' as const,
+    category: 'Sharing',
+    time: '4:20 PM',
+  },
+  {
+    id: '5',
+    type: 'credit' as const,
+    amount: 90,
+    date: '2024-01-16',
+    description: 'Article Comment Reward',
+    status: 'completed' as const,
+    category: 'Engagement',
+    time: '9:15 AM',
+  },
+  {
+    id: '6',
+    type: 'debit' as const,
+    amount: 200,
+    date: '2024-01-15',
+    description: 'Withdrawal to UPI',
+    status: 'pending' as const,
+    category: 'Withdrawal',
+    time: '6:30 PM',
+  },
+  {
+    id: '7',
+    type: 'credit' as const,
+    amount: 150,
+    date: '2024-01-14',
+    description: 'Weekly Challenge Completion',
+    status: 'completed' as const,
+    category: 'Challenge',
+    time: '12:00 PM',
+  },
+  {
+    id: '8',
+    type: 'credit' as const,
+    amount: 75,
+    date: '2024-01-13',
+    description: 'News Category Quiz',
+    status: 'completed' as const,
+    category: 'Quiz',
+    time: '3:45 PM',
+  },
+];
 
 interface Transaction {
   id: string;
@@ -12,16 +98,6 @@ interface Transaction {
   description: string;
   status?: 'completed' | 'pending';
 }
-
-const dummyTransactions: Transaction[] = [
-  { id: '1', type: 'credit', amount: 50, date: '2025-08-31', description: 'Daily Earnings', status: 'completed' },
-  { id: '2', type: 'debit', amount: 200, date: '2025-08-30', description: 'Withdrawal', status: 'completed' },
-  { id: '3', type: 'credit', amount: 10, date: '2025-08-29', description: 'Ad Video Reward', status: 'completed' },
-  { id: '4', type: 'credit', amount: 50, date: '2025-08-28', description: 'Daily Earnings', status: 'completed' },
-  { id: '5', type: 'credit', amount: 25, date: '2025-08-27', description: 'Referral Bonus', status: 'completed' },
-  { id: '6', type: 'credit', amount: 500, date: '2025-08-26', description: 'Level Reward', status: 'completed' },
-  { id: '7', type: 'debit', amount: 100, date: '2025-08-25', description: 'Withdrawal Request', status: 'pending' },
-];
 
 export default function WalletScreen() {
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -42,87 +118,269 @@ export default function WalletScreen() {
     .filter(t => t.type === 'debit' && t.status === 'completed')
     .reduce((sum, t) => sum + t.amount, 0);
 
+  const currentBalance = 1500;
+
   return (
-    <ScreenWrapper>
-      <Header title="Wallet" />
-      
-      <BalanceDisplay balance={1500} />
-      
-      <WalletStats 
-        totalIncome={totalIncome}
-        totalWithdrawn={totalWithdrawn}
-        pendingWithdrawals={100}
-        thisMonthEarnings={650}
-      />
+    <ScreenWrapper style={styles.container}>
+      <Header title="My Wallet" />
 
-      <View style={styles.actionButtons}>
-        <Button title="Request Withdrawal" onPress={handleWithdrawal} />
-        <Button 
-          title="View Withdrawal History" 
-          onPress={() => router.push('/withdrawals')} 
-          variant="secondary" 
-        />
-      </View>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Balance Card */}
+        <View style={styles.balanceCard}>
+          <View style={styles.balanceHeader}>
+            <Text style={styles.balanceLabel}>Available Balance</Text>
+            <TouchableOpacity>
+              <Ionicons name="eye-outline" size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.balanceAmount}>₹{currentBalance.toLocaleString()}</Text>
+          <Text style={styles.balanceSubtext}>Last updated: Today, 9:30 AM</Text>
+        </View>
 
-      <View style={styles.transactionSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Transaction History</Text>
-          <View style={styles.filterButtons}>
-            <Button 
-              title="All" 
-              onPress={() => setSelectedFilter('all')}
-              variant={selectedFilter === 'all' ? 'primary' : 'secondary'}
-            />
-            <Button 
-              title="Credit" 
-              onPress={() => setSelectedFilter('credit')}
-              variant={selectedFilter === 'credit' ? 'primary' : 'secondary'}
-            />
-            <Button 
-              title="Debit" 
-              onPress={() => setSelectedFilter('debit')}
-              variant={selectedFilter === 'debit' ? 'primary' : 'secondary'}
-            />
+        {/* Quick Actions */}
+        <View style={styles.quickActions}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleWithdrawal}>
+            <View style={styles.actionIcon}>
+              <Ionicons name="arrow-up-outline" size={24} color={Colors.primary} />
+            </View>
+            <Text style={styles.actionText}>Withdraw</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/(tabs)/earnings')}>
+            <View style={styles.actionIcon}>
+              <Ionicons name="add-outline" size={24} color={Colors.success} />
+            </View>
+            <Text style={styles.actionText}>Add Money</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/withdrawals')}>
+            <View style={styles.actionIcon}>
+              <Ionicons name="time-outline" size={24} color={Colors.warning} />
+            </View>
+            <Text style={styles.actionText}>History</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.actionButton}>
+            <View style={styles.actionIcon}>
+              <Ionicons name="card-outline" size={24} color={Colors.info} />
+            </View>
+            <Text style={styles.actionText}>Cards</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Stats Section */}
+        <View style={styles.statsSection}>
+          <Text style={styles.sectionTitle}>This Month</Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>₹{totalIncome}</Text>
+              <Text style={styles.statLabel}>Total Earned</Text>
+              <View style={styles.statTrend}>
+                <Ionicons name="trending-up" size={16} color={Colors.success} />
+                <Text style={styles.statTrendText}>+12%</Text>
+              </View>
+            </View>
+            
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>₹{totalWithdrawn}</Text>
+              <Text style={styles.statLabel}>Withdrawn</Text>
+              <View style={styles.statTrend}>
+                <Ionicons name="trending-down" size={16} color={Colors.error} />
+                <Text style={styles.statTrendText}>-5%</Text>
+              </View>
+            </View>
           </View>
         </View>
 
-        <FlatList
-          data={filteredTransactions}
-          renderItem={({ item }) => <TransactionListItem {...item} />}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
+        {/* Transaction History */}
+        <View style={styles.transactionSection}>
+          <View style={styles.transactionHeader}>
+            <Text style={styles.sectionTitle}>Recent Transactions</Text>
+            <TouchableOpacity>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Filter Tabs */}
+          <View style={styles.filterTabs}>
+            {['all', 'credit', 'debit'].map((filter) => (
+              <TouchableOpacity
+                key={filter}
+                style={[styles.filterTab, selectedFilter === filter && styles.activeFilterTab]}
+                onPress={() => setSelectedFilter(filter)}
+              >
+                <Text style={[styles.filterTabText, selectedFilter === filter && styles.activeFilterTabText]}>
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Transaction List */}
+          <View style={styles.transactionList}>
+            {filteredTransactions.slice(0, 5).map((item) => (
+              <TransactionListItem key={item.id} {...item} />
+            ))}
+          </View>
+        </View>
+      </ScrollView>
     </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  actionButtons: {
-    marginHorizontal: 16,
-    marginTop: 16,
-    gap: 8,
-  },
-  transactionSection: {
+  container: {
     flex: 1,
-    marginTop: 16,
+    backgroundColor: Colors.background,
   },
-  sectionHeader: {
-    marginHorizontal: 16,
-    marginBottom: 16,
+  scrollView: {
+    flex: 1,
+  },
+  balanceCard: {
+    margin: Spacing.lg,
+    padding: Spacing.xl,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.xl,
+    ...Shadows.md,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  balanceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+  },
+  balanceLabel: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.normal,
+    color: Colors.textSecondary,
+  },
+  balanceAmount: {
+    fontSize: 32,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginVertical: Spacing.sm,
+  },
+  balanceSubtext: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.normal,
+    color: Colors.textSecondary,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  actionButton: {
+    alignItems: 'center',
+    minWidth: 70,
+  },
+  actionIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xs,
+    ...Shadows.sm,
+  },
+  actionText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  statsSection: {
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
+    marginBottom: Spacing.md,
   },
-  filterButtons: {
+  statsGrid: {
     flexDirection: 'row',
-    gap: 8,
+    gap: Spacing.md,
   },
-  listContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+  statCard: {
+    flex: 1,
+    backgroundColor: Colors.surface,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.xl,
+    ...Shadows.md,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  statValue: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginBottom: Spacing.xs,
+  },
+  statLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.normal,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  statTrend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  statTrendText: {
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.success,
+  },
+  transactionSection: {
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  transactionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.md,
+  },
+  viewAllText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.primary,
+  },
+  filterTabs: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm,
+    marginBottom: Spacing.md,
+    ...Shadows.sm,
+  },
+  filterTab: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: 'center',
+  },
+  activeFilterTab: {
+    backgroundColor: Colors.primary,
+  },
+  filterTabText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.textSecondary,
+    paddingVertical: Spacing.unit,
+  },
+  activeFilterTabText: {
+    color: Colors.textOnPrimary,
+  },
+  transactionList: {
+    gap: Spacing.sm,
   },
 });

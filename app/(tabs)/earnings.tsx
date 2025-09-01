@@ -114,7 +114,7 @@ export default function EarningsScreen() {
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
               <LinearGradient
-                colors={[Colors.success, Colors.info]}
+                colors={[Colors.success, '#00D4AA']}
                 style={[styles.progressFill, { width: `${levelProgress.progress * 100}%` }]}
               />
             </View>
@@ -164,21 +164,7 @@ export default function EarningsScreen() {
         </Card>
 
         {/* Modern Action Buttons */}
-        <View style={styles.modernActionContainer}>
-          <TouchableOpacity style={styles.primaryActionButton}>
-            <View style={styles.actionButtonContent}>
-              <Ionicons name="card-outline" size={18} color={Colors.white} />
-              <Text style={styles.primaryActionText}>Withdraw</Text>
-            </View>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.secondaryActionButton}>
-            <View style={styles.actionButtonContent}>
-              <Ionicons name="analytics-outline" size={18} color={Colors.primary} />
-              <Text style={styles.secondaryActionText}>Analytics</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+        
       </ScrollView>
     </ScreenWrapper>
   );
@@ -400,14 +386,14 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   progressBar: {
-    height: 8,
+    height: 12,
     backgroundColor: Colors.borderLight,
-    borderRadius: 4,
+    borderRadius: 6,
     marginBottom: Spacing.sm,
   },
   progressFill: {
     height: '100%',
-    borderRadius: 4,
+    borderRadius: 6,
   },
   progressText: {
     fontSize: Typography.fontSize.xs,

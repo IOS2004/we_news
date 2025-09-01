@@ -112,8 +112,7 @@ const styles = StyleSheet.create({
     padding: Spacing.base,
   },
   cardWithPadding: {
-    padding: Spacing.base,
-    marginHorizontal: 8,
+    padding: Spacing.lg,
   },
   header: {
     flexDirection: 'row',

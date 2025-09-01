@@ -122,10 +122,10 @@ const styles = StyleSheet.create({
   card: {
     padding: Spacing.base,
     marginHorizontal: 0,
+    paddingHorizontal: 0,
   },
   cardWithPadding: {
-    padding: Spacing.base,
-    marginHorizontal: 0,
+    padding: Spacing.lg,
   },
   header: {
     flexDirection: 'row',

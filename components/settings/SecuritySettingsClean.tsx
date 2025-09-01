@@ -123,6 +123,7 @@ const SecuritySettings: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     gap: Spacing.base,
+    paddingHorizontal: 50,
   },
   card: {
     padding: Spacing.base,
