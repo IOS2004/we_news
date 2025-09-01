@@ -9,10 +9,10 @@ import { DashboardNotifications, QuickActions } from '../../components/dashboard
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 
 const dummyNews = [
-  { id: '1', title: 'Politics News Headline 1', thumbnail: 'https://picsum.photos/200', category: 'Politics' },
-  { id: '2', title: 'Business News Headline 2', thumbnail: 'https://picsum.photos/201', category: 'Business' },
-  { id: '3', title: 'Tech News Headline 3', thumbnail: 'https://picsum.photos/202', category: 'Technology' },
-  { id: '4', title: 'Entertainment News Headline 4', thumbnail: 'https://picsum.photos/203', category: 'Entertainment' },
+  { id: '1', title: 'Breaking: Major Political Development Reshapes Economic Policy', thumbnail: 'https://picsum.photos/800/600?random=1', category: 'Politics' },
+  { id: '2', title: 'Tech Giants Report Record Quarterly Earnings Growth', thumbnail: 'https://picsum.photos/800/600?random=2', category: 'Business' },
+  { id: '3', title: 'Revolutionary AI Technology Breakthrough Changes Industry', thumbnail: 'https://picsum.photos/800/600?random=3', category: 'Technology' },
+  { id: '4', title: 'Entertainment Industry Embraces New Digital Platforms', thumbnail: 'https://picsum.photos/800/600?random=4', category: 'Entertainment' },
 ];
 
 const notifications = [

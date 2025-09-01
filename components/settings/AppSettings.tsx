@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, Switch, Alert, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Card from '../common/Card';
 import Button from '../common/Button';
+import { Colors, Typography, Spacing } from '../../constants/theme';
 
 const AppSettings: React.FC = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [autoUpdate, setAutoUpdate] = useState(true);
-  const [dataUsage, setDataUsage] = useState('wifi'); // 'wifi', 'cellular', 'both'
+  const [dataUsage, setDataUsage] = useState('wifi');
   const [language, setLanguage] = useState('English');
-  const [currency, setCurrency] = useState('INR');
 
   const handleClearCache = () => {
     Alert.alert(
@@ -19,255 +20,155 @@ const AppSettings: React.FC = () => {
         { 
           text: 'Clear', 
           style: 'destructive',
-          onPress: () => {
-            Alert.alert('Success', 'Cache cleared successfully');
-          }
+          onPress: () => Alert.alert('Success', 'Cache cleared successfully')
         }
       ]
     );
   };
 
-  const handleResetSettings = () => {
+  const handleDataUsageChange = () => {
     Alert.alert(
-      'Reset Settings',
-      'This will reset all app settings to default values. Continue?',
+      'Data Usage',
+      'Choose how the app should use data:',
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Reset', 
-          style: 'destructive',
-          onPress: () => {
-            setDarkMode(false);
-            setAutoUpdate(true);
-            setDataUsage('wifi');
-            setLanguage('English');
-            setCurrency('INR');
-            Alert.alert('Success', 'Settings reset to default');
-          }
-        }
+        { text: 'WiFi Only', onPress: () => setDataUsage('wifi') },
+        { text: 'WiFi & Cellular', onPress: () => setDataUsage('both') },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  };
+
+  const handleLanguageChange = () => {
+    Alert.alert(
+      'Language',
+      'Choose your preferred language:',
+      [
+        { text: 'English', onPress: () => setLanguage('English') },
+        { text: 'Hindi', onPress: () => setLanguage('Hindi') },
+        { text: 'Cancel', style: 'cancel' }
       ]
     );
   };
 
   return (
-    <Card>
-      <Text style={styles.title}>App Settings</Text>
+    <Card style={styles.cardWithPadding}>
+      <View style={styles.header}>
+        <Ionicons name="settings" size={24} color={Colors.primary} />
+        <Text style={styles.headerTitle}>App Settings</Text>
+      </View>
       
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Appearance</Text>
-        
-        <View style={styles.settingItem}>
-          <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>Dark Mode</Text>
-            <Text style={styles.settingDescription}>
-              Use dark theme for better night viewing
-            </Text>
-          </View>
-          <Switch
-            value={darkMode}
-            onValueChange={setDarkMode}
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={darkMode ? '#f5dd4b' : '#f4f3f4'}
-          />
+      <View style={styles.settingItem}>
+        <View style={styles.settingContent}>
+          <Text style={styles.settingLabel}>Dark Mode</Text>
+          <Text style={styles.settingDescription}>
+            Use dark theme for better night viewing
+          </Text>
         </View>
+        <Switch
+          value={darkMode}
+          onValueChange={setDarkMode}
+          trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+          thumbColor={Colors.white}
+        />
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Data & Updates</Text>
-        
-        <View style={styles.settingItem}>
-          <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>Auto Update News</Text>
-            <Text style={styles.settingDescription}>
-              Automatically refresh news content
-            </Text>
-          </View>
-          <Switch
-            value={autoUpdate}
-            onValueChange={setAutoUpdate}
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={autoUpdate ? '#f5dd4b' : '#f4f3f4'}
-          />
+      <View style={styles.settingItem}>
+        <View style={styles.settingContent}>
+          <Text style={styles.settingLabel}>Auto Update News</Text>
+          <Text style={styles.settingDescription}>
+            Automatically refresh news content
+          </Text>
         </View>
-
-        <View style={styles.settingItem}>
-          <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>Data Usage</Text>
-            <Text style={styles.settingDescription}>
-              Currently: {dataUsage === 'wifi' ? 'WiFi Only' : dataUsage === 'cellular' ? 'Cellular Only' : 'WiFi & Cellular'}
-            </Text>
-          </View>
-          <Button
-            title="Change"
-            onPress={() => {
-              Alert.alert(
-                'Data Usage',
-                'Choose your preferred data usage setting',
-                [
-                  { text: 'WiFi Only', onPress: () => setDataUsage('wifi') },
-                  { text: 'Cellular Only', onPress: () => setDataUsage('cellular') },
-                  { text: 'Both', onPress: () => setDataUsage('both') },
-                  { text: 'Cancel', style: 'cancel' }
-                ]
-              );
-            }}
-            variant="secondary"
-          />
-        </View>
+        <Switch
+          value={autoUpdate}
+          onValueChange={setAutoUpdate}
+          trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+          thumbColor={Colors.white}
+        />
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Preferences</Text>
-        
-        <View style={styles.settingItem}>
-          <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>Language</Text>
-            <Text style={styles.settingDescription}>
-              Current: {language}
-            </Text>
-          </View>
-          <Button
-            title="Change"
-            onPress={() => {
-              Alert.alert(
-                'Language',
-                'Choose your preferred language',
-                [
-                  { text: 'English', onPress: () => setLanguage('English') },
-                  { text: 'हिंदी', onPress: () => setLanguage('Hindi') },
-                  { text: 'Cancel', style: 'cancel' }
-                ]
-              );
-            }}
-            variant="secondary"
-          />
+      <TouchableOpacity style={styles.settingItem} onPress={handleDataUsageChange}>
+        <View style={styles.settingContent}>
+          <Text style={styles.settingLabel}>Data Usage</Text>
+          <Text style={styles.settingDescription}>
+            Current: {dataUsage === 'wifi' ? 'WiFi Only' : 'WiFi & Cellular'}
+          </Text>
         </View>
+        <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+      </TouchableOpacity>
 
-        <View style={styles.settingItem}>
-          <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>Currency</Text>
-            <Text style={styles.settingDescription}>
-              Current: {currency}
-            </Text>
-          </View>
-          <Button
-            title="Change"
-            onPress={() => {
-              Alert.alert(
-                'Currency',
-                'Choose your preferred currency',
-                [
-                  { text: 'INR (₹)', onPress: () => setCurrency('INR') },
-                  { text: 'USD ($)', onPress: () => setCurrency('USD') },
-                  { text: 'Cancel', style: 'cancel' }
-                ]
-              );
-            }}
-            variant="secondary"
-          />
+      <TouchableOpacity style={styles.settingItem} onPress={handleLanguageChange}>
+        <View style={styles.settingContent}>
+          <Text style={styles.settingLabel}>Language</Text>
+          <Text style={styles.settingDescription}>
+            Current: {language}
+          </Text>
         </View>
-      </View>
+        <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+      </TouchableOpacity>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Storage</Text>
-        
-        <View style={styles.actionButtons}>
-          <Button
-            title="Clear Cache"
-            onPress={handleClearCache}
-            variant="secondary"
-          />
-          
-          <Button
-            title="Reset All Settings"
-            onPress={handleResetSettings}
-            variant="secondary"
-          />
-        </View>
-      </View>
-
-      <View style={styles.infoSection}>
-        <Text style={styles.infoTitle}>App Information</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Version:</Text>
-          <Text style={styles.infoValue}>1.0.0</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Build:</Text>
-          <Text style={styles.infoValue}>2025.08.31</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Platform:</Text>
-          <Text style={styles.infoValue}>React Native</Text>
-        </View>
+      <View style={styles.actionSection}>
+        <Button
+          title="Clear Cache"
+          onPress={handleClearCache}
+          variant="secondary"
+        />
       </View>
     </Card>
   );
 };
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+  card: {
+    padding: Spacing.base,
+    marginHorizontal: 0,
   },
-  section: {
-    marginBottom: 20,
+  cardWithPadding: {
+    padding: Spacing.base,
+    marginHorizontal: 0,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#007bff',
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.base,
+    paddingBottom: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  headerTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
   },
   settingItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: Colors.borderLight,
   },
-  settingInfo: {
+  settingContent: {
     flex: 1,
-    marginRight: 16,
+    marginRight: Spacing.base,
   },
   settingLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 2,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text,
+    marginBottom: Spacing.xs / 2,
   },
   settingDescription: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+    lineHeight: 18,
   },
-  actionButtons: {
-    gap: 12,
-  },
-  infoSection: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  infoTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: '600',
+  actionSection: {
+    marginTop: Spacing.base,
+    paddingTop: Spacing.base,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
   },
 });
 

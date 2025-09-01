@@ -1,18 +1,20 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { Header, ScreenWrapper } from '../components/common';
-import { 
-  SecuritySettings, 
-  NotificationSettings, 
-  AppSettings,
-  SupportSection 
-} from '../components/settings';
+import SecuritySettings from '../components/settings/SecuritySettings';
+import NotificationSettings from '../components/settings/NotificationSettings';
+import AppSettings from '../components/settings/AppSettings';
+import SupportSection from '../components/settings/SupportSection';
+import { Spacing } from '../constants/theme';
 
 export default function SettingsScreen() {
   return (
     <ScreenWrapper>
       <Header title="Settings" canGoBack />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView 
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
         <SecuritySettings />
         <NotificationSettings />
         <AppSettings />
@@ -24,6 +26,9 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 16,
+    paddingVertical: Spacing.base,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.xl,
+    gap: Spacing.base,
   },
 });

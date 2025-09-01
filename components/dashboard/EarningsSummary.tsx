@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Card from '../common/Card';
+import { Spacing } from '../../constants/theme';
 
 interface EarningsSummaryProps {
   today: number;
@@ -43,6 +44,7 @@ const EarningsSummary: React.FC<EarningsSummaryProps> = ({ today, week, month })
 };
 
 const styles = StyleSheet.create({
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -90,6 +92,13 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: '#27ae60',
+  },
+  card: {
+    margin: 0,
+    marginBottom: Spacing.xl,
+    marginHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
   },
 });
 

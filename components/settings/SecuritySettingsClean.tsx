@@ -59,7 +59,7 @@ const SecuritySettings: React.FC = () => {
           />
         </View>
 
-        <View style={[styles.settingItem, { borderBottomWidth: 0 }]}>
+        <View style={styles.settingItem}>
           <View style={styles.settingContent}>
             <Text style={styles.settingLabel}>Biometric Authentication</Text>
             <Text style={styles.settingDescription}>
@@ -166,11 +166,9 @@ const styles = StyleSheet.create({
   },
   passwordForm: {
     gap: Spacing.base,
-    paddingTop: Spacing.sm,
   },
   buttonContainer: {
-    marginTop: Spacing.base,
-    paddingBottom: Spacing.base,
+    marginTop: Spacing.sm,
   },
 });
 
