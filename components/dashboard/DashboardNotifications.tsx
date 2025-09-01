@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Card from '../common/Card';
+import { Colors, Typography, Spacing, BorderRadius } from '../../constants/theme';
 
 interface Notification {
   id: string;
@@ -14,8 +16,37 @@ interface DashboardNotificationsProps {
 }
 
 const DashboardNotifications: React.FC<DashboardNotificationsProps> = ({ notifications }) => {
+  const getNotificationIcon = (title: string) => {
+    if (title.toLowerCase().includes('earning')) {
+      return 'wallet';
+    } else if (title.toLowerCase().includes('ad') || title.toLowerCase().includes('video')) {
+      return 'play-circle';
+    } else if (title.toLowerCase().includes('level') || title.toLowerCase().includes('reward')) {
+      return 'trophy';
+    }
+    return 'notifications';
+  };
+
+  const getNotificationColor = (title: string) => {
+    if (title.toLowerCase().includes('earning')) {
+      return Colors.success;
+    } else if (title.toLowerCase().includes('ad') || title.toLowerCase().includes('video')) {
+      return Colors.info;
+    } else if (title.toLowerCase().includes('level') || title.toLowerCase().includes('reward')) {
+      return Colors.warning;
+    }
+    return Colors.primary;
+  };
+
   const renderNotification = ({ item }: { item: Notification }) => (
     <TouchableOpacity style={styles.notificationItem}>
+      <View style={[styles.iconContainer, { backgroundColor: `${getNotificationColor(item.title)}15` }]}>
+        <Ionicons 
+          name={getNotificationIcon(item.title) as any} 
+          size={20} 
+          color={getNotificationColor(item.title)} 
+        />
+      </View>
       <View style={styles.notificationContent}>
         <Text style={styles.notificationTitle}>{item.title}</Text>
         <Text style={styles.notificationMessage}>{item.message}</Text>
@@ -25,7 +56,7 @@ const DashboardNotifications: React.FC<DashboardNotificationsProps> = ({ notific
   );
 
   return (
-    <Card>
+    <Card style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.title}>Recent Notifications</Text>
         <TouchableOpacity>
@@ -39,54 +70,72 @@ const DashboardNotifications: React.FC<DashboardNotificationsProps> = ({ notific
         keyExtractor={(item) => item.id}
         scrollEnabled={false}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        showsVerticalScrollIndicator={false}
       />
     </Card>
   );
 };
 
 const styles = StyleSheet.create({
+  card: {
+    margin: 0,
+    marginBottom: Spacing.xl,
+    marginHorizontal: Spacing.lg,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Spacing.lg,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
   },
   viewAll: {
-    fontSize: 14,
-    color: '#007bff',
-    fontWeight: '600',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeight.semibold,
   },
   notificationItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingVertical: 8,
+    paddingVertical: Spacing.sm,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
   },
   notificationContent: {
     flex: 1,
-    marginRight: 12,
+    marginRight: Spacing.sm,
   },
   notificationTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
     marginBottom: 2,
   },
   notificationMessage: {
-    fontSize: 13,
-    color: '#666',
+    fontSize: Typography.fontSize.xs,
+    color: Colors.textSecondary,
+    lineHeight: Typography.fontSize.xs * 1.4,
   },
   notificationTime: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: Typography.fontSize.xs,
+    color: Colors.textLight,
+    marginTop: 2,
   },
   separator: {
     height: 1,
-    backgroundColor: '#eee',
-    marginVertical: 8,
+    backgroundColor: Colors.borderLight,
+    marginVertical: Spacing.sm,
+    marginLeft: 52, // Align with content, accounting for icon + margin
   },
 });
 

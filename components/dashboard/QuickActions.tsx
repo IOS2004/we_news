@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Card from '../common/Card';
-import Button from '../common/Button';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 
 interface QuickActionsProps {
   onWatchAds: () => void;
@@ -16,122 +17,116 @@ const QuickActions: React.FC<QuickActionsProps> = ({
   onViewEarnings,
   onViewLabels
 }) => {
+  const actionItems = [
+    {
+      id: 'watch-ads',
+      title: 'Watch Ads',
+      icon: 'play-circle' as keyof typeof Ionicons.glyphMap,
+      iconColor: '#5B7FFF',
+      backgroundColor: '#F0F2FF',
+      onPress: onWatchAds,
+    },
+    {
+      id: 'install-apps',
+      title: 'Install Apps',
+      icon: 'download' as keyof typeof Ionicons.glyphMap,
+      iconColor: '#00C896',
+      backgroundColor: '#F0FFF9',
+      onPress: onInstallApps,
+    },
+    {
+      id: 'earnings',
+      title: 'Earnings',
+      icon: 'bar-chart' as keyof typeof Ionicons.glyphMap,
+      iconColor: '#8B5CF6',
+      backgroundColor: '#FAF5FF',
+      onPress: onViewEarnings,
+    },
+    {
+      id: 'rewards',
+      title: 'Rewards',
+      icon: 'trophy' as keyof typeof Ionicons.glyphMap,
+      iconColor: '#F59E0B',
+      backgroundColor: '#FFFBEB',
+      onPress: onViewLabels,
+    },
+  ];
+
   return (
-    <Card>
+    <Card style={styles.container}>
       <Text style={styles.title}>Quick Actions</Text>
       <Text style={styles.subtitle}>Boost your earnings with these activities</Text>
       
       <View style={styles.actionsGrid}>
-        <View style={styles.actionRow}>
-          <View style={styles.actionItem}>
-            <View style={styles.actionIcon}>
-              <Text style={styles.iconText}>📺</Text>
+        {actionItems.map((item, index) => (
+          <TouchableOpacity
+            key={item.id}
+            style={[styles.actionCard, { backgroundColor: item.backgroundColor }]}
+            onPress={item.onPress}
+            activeOpacity={0.8}
+          >
+            <View style={styles.actionIconContainer}>
+              <Ionicons 
+                name={item.icon} 
+                size={24} 
+                color={item.iconColor} 
+              />
             </View>
-            <Text style={styles.actionTitle}>Watch Ads</Text>
-            <Text style={styles.actionSubtitle}>Earn ₹2-5</Text>
-            <Button 
-              title="Watch Now" 
-              onPress={onWatchAds} 
-              variant="secondary"
-            />
-          </View>
-          
-          <View style={styles.actionItem}>
-            <View style={styles.actionIcon}>
-              <Text style={styles.iconText}>📱</Text>
-            </View>
-            <Text style={styles.actionTitle}>Install Apps</Text>
-            <Text style={styles.actionSubtitle}>Earn ₹10-50</Text>
-            <Button 
-              title="Browse" 
-              onPress={onInstallApps} 
-              variant="secondary"
-            />
-          </View>
-        </View>
-
-        <View style={styles.actionRow}>
-          <View style={styles.actionItem}>
-            <View style={styles.actionIcon}>
-              <Text style={styles.iconText}>📊</Text>
-            </View>
-            <Text style={styles.actionTitle}>View Earnings</Text>
-            <Text style={styles.actionSubtitle}>Track progress</Text>
-            <Button 
-              title="View Details" 
-              onPress={onViewEarnings} 
-              variant="secondary"
-            />
-          </View>
-          
-          <View style={styles.actionItem}>
-            <View style={styles.actionIcon}>
-              <Text style={styles.iconText}>🏆</Text>
-            </View>
-            <Text style={styles.actionTitle}>Labels</Text>
-            <Text style={styles.actionSubtitle}>Unlock rewards</Text>
-            <Button 
-              title="View Labels" 
-              onPress={onViewLabels} 
-              variant="secondary"
-            />
-          </View>
-        </View>
+            <Text style={styles.actionTitle}>{item.title}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </Card>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    margin: 0,
+    marginBottom: Spacing.lg,
+  },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    marginBottom: Spacing.xs,
     textAlign: 'center',
+    color: Colors.text,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
   },
   actionsGrid: {
-    gap: 16,
-  },
-  actionRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 12,
   },
-  actionItem: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  actionIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+  actionCard: {
+    width: '47%',
+    aspectRatio: 1,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     justifyContent: 'center',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+    ...Shadows.sm,
   },
-  iconText: {
-    fontSize: 24,
+  actionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.xl,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+    ...Shadows.sm,
   },
   actionTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 2,
-    textAlign: 'center',
-  },
-  actionSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 12,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text,
     textAlign: 'center',
   },
 });
