@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: Layout.screenPaddingHorizontal,
+    paddingHorizontal:0,
   },
 });
 
