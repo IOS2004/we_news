@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Colors, Typography, Spacing, BorderRadius } from '../../constants/theme';
 
 interface CategoryFilterProps {
   categories: string[];
@@ -27,26 +28,41 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ categories, selectedCat
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    // paddingVertical: Spacing.sm,
+    // paddingHorizontal: Spacing.lg,
+    // alignItems: 'center',
+    // height:2,
+    height: 40,
+    // backgroundColor:'yellow'
+    paddingVertical: Spacing.sm,
+    margin: Spacing.lg,
+    marginBottom:Spacing['2xl'],
   },
   chip: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: '#eee',
-    marginRight: 8,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surfaceSecondary,
+    marginRight: Spacing.md,
+    minHeight: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   selectedChip: {
-    backgroundColor: '#007bff',
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   chipText: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text,
+    fontWeight: Typography.fontWeight.medium,
+    textAlign: 'center',
   },
   selectedChipText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: Colors.textOnPrimary,
+    fontWeight: Typography.fontWeight.bold,
   },
 });
 

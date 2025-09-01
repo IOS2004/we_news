@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
     paddingBottom: Spacing.sm,
-    backgroundColor: Colors.primary,
+    backgroundColor: '#a4a3bf59',
     borderBottomLeftRadius: BorderRadius.md,
     borderBottomRightRadius: BorderRadius.md,
   },

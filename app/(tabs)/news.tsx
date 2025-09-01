@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FlatList } from 'react-native';
+import { FlatList , StyleSheet,View } from 'react-native';
 import { Header, ScreenWrapper } from '../../components/common';
 import { CategoryFilter, NewsArticleCard } from '../../components/news';
 
@@ -21,7 +21,7 @@ export default function NewsScreen() {
     : dummyArticles.filter((article) => article.category === selectedCategory);
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper style={styles.container}>
       <Header title="News" />
       <CategoryFilter
         categories={categories}
@@ -29,6 +29,7 @@ export default function NewsScreen() {
         onSelectCategory={setSelectedCategory}
       />
       <FlatList
+        style={styles.flatList}
         data={filteredArticles}
         renderItem={({ item }) => (
           <NewsArticleCard
@@ -39,7 +40,21 @@ export default function NewsScreen() {
           />
         )}
         keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.flatListContent}
       />
     </ScreenWrapper>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  flatList: {
+    flex: 1,
+  },
+  flatListContent: {
+    paddingBottom: 20,
+  },
+});

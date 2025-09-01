@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-import { Button, Header, ScreenWrapper } from '../../components/common';
-import { ProfileMenuItem } from '../../components/profile';
+import { Ionicons } from '@expo/vector-icons';
+import { ScreenWrapper } from '../../components/common';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 
 export default function ProfileScreen() {
   const handleNavigation = (route: string) => {
@@ -14,141 +15,232 @@ export default function ProfileScreen() {
     router.replace('/(auth)/sign-in');
   };
 
+  const handleViewProfile = () => {
+    console.log('View profile pressed');
+  };
+
   return (
-    <ScreenWrapper>
-      <Header title="Profile" />
-      <ScrollView>
-        <View style={styles.profileHeader}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>RS</Text>
+    <ScreenWrapper style={styles.container}>
+      {/* Header with back button */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={Colors.text} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Profile Header */}
+        <View style={styles.profileSection}>
+          <View style={styles.profileHeader}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>RS</Text>
+            </View>
+            <View style={styles.profileInfo}>
+              <Text style={styles.name}>Rahul Sharma</Text>
+              <TouchableOpacity style={styles.viewProfileButton} onPress={handleViewProfile}>
+                <Text style={styles.viewProfileText}>View profile</Text>
+                <Ionicons name="arrow-forward" size={16} color={Colors.primary} />
+              </TouchableOpacity>
+            </View>
           </View>
-          <Text style={styles.name}>Rahul Sharma</Text>
-          <Text style={styles.email}>rahul@example.com</Text>
-          <Text style={styles.memberSince}>Member since: Aug 2025</Text>
         </View>
 
-        <View style={styles.statsSection}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>₹5,000</Text>
-            <Text style={styles.statLabel}>Total Earnings</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>L3</Text>
-            <Text style={styles.statLabel}>Current Level</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>Silver</Text>
-            <Text style={styles.statLabel}>Plan</Text>
-          </View>
-        </View>
-
-        <View style={styles.menuSection}>
-          <ProfileMenuItem 
-            title="Plans & Subscriptions" 
-            icon="newspaper-outline" 
-            onPress={() => handleNavigation('/plans')} 
+        {/* Earnings & Plans Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Earnings & Plans</Text>
+          <MenuItem 
+            title="My Wallet" 
+            icon="wallet-outline" 
+            onPress={() => handleNavigation('/(tabs)/wallet')} 
           />
-          <ProfileMenuItem 
-            title="Earnings & Rewards" 
+          <MenuItem 
+            title="My Earnings" 
             icon="trending-up-outline" 
             onPress={() => handleNavigation('/(tabs)/earnings')} 
           />
-          <ProfileMenuItem 
-            title="Labels & Achievements" 
-            icon="ribbon-outline" 
-            onPress={() => handleNavigation('/labels')} 
+          <MenuItem 
+            title="My Plans" 
+            icon="card-outline" 
+            onPress={() => handleNavigation('/plans')} 
           />
-          <ProfileMenuItem 
-            title="Withdrawal History" 
-            icon="wallet-outline" 
+          <MenuItem 
+            title="My Withdrawals" 
+            icon="arrow-down-circle-outline" 
             onPress={() => handleNavigation('/withdrawals')} 
           />
-          <ProfileMenuItem 
+        </View>
+
+        {/* Achievements Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Achievements</Text>
+          <MenuItem 
+            title="My Labels" 
+            icon="pricetag-outline" 
+            onPress={() => handleNavigation('/labels')} 
+          />
+        </View>
+
+        {/* Community Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Community</Text>
+          <MenuItem 
+            title="Community Feed" 
+            icon="people-outline" 
+            onPress={() => {}} 
+          />
+          <MenuItem 
+            title="Community Benefits" 
+            icon="gift-outline" 
+            onPress={() => {}} 
+          />
+        </View>
+
+        {/* Other Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Other</Text>
+          <MenuItem 
+            title="Refer & Earn" 
+            icon="share-outline" 
+            onPress={() => {}} 
+          />
+          <MenuItem 
+            title="Help & Support" 
+            icon="help-circle-outline" 
+            onPress={() => handleNavigation('/settings')} 
+          />
+          <MenuItem 
             title="Settings" 
             icon="settings-outline" 
             onPress={() => handleNavigation('/settings')} 
           />
-          <ProfileMenuItem 
-            title="Help & Support" 
-            icon="help-circle-outline" 
-            onPress={() => {}} 
+          <MenuItem 
+            title="Logout" 
+            icon="log-out-outline" 
+            onPress={handleLogout}
+            isLogout 
           />
-          <ProfileMenuItem 
-            title="Refer Friends" 
-            icon="share-outline" 
-            onPress={() => {}} 
-          />
-        </View>
-
-        <View style={styles.logoutButtonContainer}>
-          <Button title="Logout" onPress={handleLogout} variant="secondary" />
         </View>
       </ScrollView>
     </ScreenWrapper>
   );
 }
 
+interface MenuItemProps {
+  title: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  onPress: () => void;
+  isLogout?: boolean;
+}
+
+const MenuItem: React.FC<MenuItemProps> = ({ title, icon, onPress, isLogout = false }) => {
+  return (
+    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
+      <View style={styles.menuItemLeft}>
+        <Ionicons 
+          name={icon} 
+          size={22} 
+          color={isLogout ? Colors.error : Colors.textSecondary} 
+        />
+        <Text style={[styles.menuItemText, isLogout && styles.logoutText]}>{title}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 const styles = StyleSheet.create({
-  profileHeader: {
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    paddingHorizontal: 0,
+  },
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 24,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    marginBottom: 8,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
+  },
+  backButton: {
+    padding: Spacing.xs,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  profileSection: {
+    backgroundColor: Colors.surface,
+    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#007bff',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#11059eff',
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: Spacing.lg,
   },
   avatarText: {
-    fontSize: 40,
-    color: '#fff',
-    fontWeight: 'bold',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.textOnPrimary,
+  },
+  profileInfo: {
+    flex: 1,
   },
   name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 16,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginBottom: Spacing.xs,
   },
-  email: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 4,
-  },
-  memberSince: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 4,
-  },
-  statsSection: {
+  viewProfileButton: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#fff',
-    paddingVertical: 20,
-    marginBottom: 8,
-  },
-  statItem: {
     alignItems: 'center',
   },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#007bff',
+  viewProfileText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.primary,
+    marginRight: Spacing.xs,
   },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+  section: {
+    backgroundColor: Colors.surface,
+    marginBottom: Spacing.md,
   },
-  menuSection: {
-    backgroundColor: '#fff',
+  sectionTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
+    // paddingBottom: Spacing.sm,
   },
-  logoutButtonContainer: {
-    margin: 16,
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.base,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  menuItemText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text,
+    marginLeft: Spacing.md,
+  },
+  logoutText: {
+    color: Colors.error,
   },
 });
