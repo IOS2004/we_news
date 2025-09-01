@@ -1,5 +1,6 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View, Text, TouchableOpacity, TextInput, StatusBar } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, TouchableOpacity, StatusBar } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, ScreenWrapper } from '../../components/common';
@@ -51,70 +52,108 @@ export default function HomeScreen() {
     <ScreenWrapper style={styles.screenWrapper}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
       
-      {/* Custom Header */}
+      {/* Clean Minimal Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.profileButton} onPress={handleProfilePress}>
-          <Ionicons name="person-circle-outline" size={32} color={Colors.textOnDark} />
-        </TouchableOpacity>
+        <View style={styles.leftSection}>
+          <TouchableOpacity style={styles.profileButton} onPress={handleProfilePress}>
+            <View style={styles.profileAvatar}>
+              <Ionicons name="person" size={20} color="#fff" />
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.greetingText}>Hi, User!</Text>
+        </View>
         
         <View style={styles.rightSection}>
-          <View style={styles.statusIndicators}>
-            {/* Money Badge */}
-            <View style={styles.moneyBadge}>
-              <Ionicons name="wallet" size={16} color={Colors.textOnDark} />
-              <Text style={styles.moneyText}>₹25000.0</Text>
-            </View>
-            
-            {/* Level Badge */}
-            <View style={styles.levelStatusBadge}>
-              <Ionicons name="trending-up" size={16} color={Colors.textOnDark} />
-              <Text style={styles.levelStatusText}>Level 3</Text>
-            </View>
-          </View>
-          
           <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={24} color={Colors.textOnDark} />
+            <Ionicons name="notifications-outline" size={22} color={Colors.textSecondary} />
+            <View style={styles.notificationDot} />
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* What are you looking for? */}
-        <View style={styles.categorySection}>
-          <Text style={styles.sectionTitle}>What are you looking for?</Text>
-          <View style={styles.categoryGrid}>
-            <TouchableOpacity style={styles.categoryCard} onPress={() => handleNavigation('/(tabs)/earnings')}>
-              <View style={styles.categoryImagePlaceholder}>
-                <Ionicons name="trending-up" size={40} color={Colors.primary} />
-              </View>
-              <Text style={styles.categoryLabel}>Earnings</Text>
+        {/* Enhanced Quick Access Section */}
+        <View style={styles.quickAccessSection}>
+          <Text style={styles.quickAccessTitle}>What would you like to do?</Text>
+          <View style={styles.quickAccessGrid}>
+            <TouchableOpacity style={styles.quickAccessCard} onPress={() => handleNavigation('/(tabs)/earnings')}>
+              <LinearGradient
+                colors={['#3498db', '#2980b9']}
+                style={styles.quickAccessGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="trending-up" size={32} color={Colors.textOnDark} />
+              </LinearGradient>
+              <Text style={styles.quickAccessLabel}>Earnings</Text>
+              <Text style={styles.quickAccessSubLabel}>Track your progress</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.categoryCard} onPress={() => handleNavigation('/(tabs)/news')}>
-              <View style={styles.categoryImagePlaceholder}>
-                <Ionicons name="newspaper" size={40} color={Colors.primary} />
-              </View>
-              <Text style={styles.categoryLabel}>News</Text>
+            <TouchableOpacity style={styles.quickAccessCard} onPress={() => handleNavigation('/(tabs)/news')}>
+              <LinearGradient
+                colors={['#e74c3c', '#c0392b']}
+                style={styles.quickAccessGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="newspaper" size={32} color={Colors.textOnDark} />
+              </LinearGradient>
+              <Text style={styles.quickAccessLabel}>News</Text>
+              <Text style={styles.quickAccessSubLabel}>Stay updated</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Overview Cards Section */}
+        {/* Enhanced Dashboard Overview */}
         <View style={styles.overviewSection}>
           <Text style={styles.sectionTitle}>Your Dashboard</Text>
-          <OverviewCard 
-            balance={1500} 
-            earnings={5000} 
-            plan="Silver"
-            onWithdraw={handleWithdraw}
-            onUpgradePlan={handleUpgradePlan}
-          />
+          <View style={styles.enhancedOverviewCard}>
+            <LinearGradient
+              colors={[Colors.surface, '#f8f9fa']}
+              style={styles.overviewGradient}
+            >
+              <View style={styles.overviewHeader}>
+                <View style={styles.balanceSection}>
+                  <Text style={styles.balanceLabel}>Wallet Balance</Text>
+                  <Text style={styles.balanceValue}>₹1,500.00</Text>
+                </View>
+                <View style={styles.earningsSection}>
+                  <Text style={styles.earningsLabel}>Total Earnings</Text>
+                  <Text style={styles.earningsValue}>₹5,000.00</Text>
+                </View>
+              </View>
+              
+              <View style={styles.planSection}>
+                <Text style={styles.planLabel}>Current Plan</Text>
+                <View style={styles.planBadge}>
+                  <Text style={styles.planText}>Silver</Text>
+                </View>
+              </View>
+              
+              <View style={styles.actionButtons}>
+                <TouchableOpacity style={styles.withdrawButton} onPress={handleWithdraw}>
+                  <Ionicons name="card-outline" size={20} color={Colors.textSecondary} />
+                  <Text style={styles.withdrawText}>Withdraw</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgradePlan}>
+                  <LinearGradient
+                    colors={[Colors.primary, Colors.primaryDark]}
+                    style={styles.upgradeGradient}
+                  >
+                    <Ionicons name="arrow-up-circle" size={20} color={Colors.textOnDark} />
+                    <Text style={styles.upgradeText}>Upgrade Plan</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
+          </View>
         </View>
 
-        {/* Earnings Summary */}
+        {/* Enhanced Earnings Summary */}
         <EarningsSummary today={50} week={350} month={1500} />
 
-        {/* Quick Actions */}
+        {/* Enhanced Quick Actions */}
         <QuickActions
           onWatchAds={handleWatchAds}
           onInstallApps={handleInstallApps}
@@ -122,83 +161,93 @@ export default function HomeScreen() {
           onViewLabels={() => handleNavigation('/labels')}
         />
 
-        {/* Investment Status */}
-        <View style={styles.investmentStatus}>
+        {/* Enhanced Investment Status */}
+        <View style={styles.investmentSection}>
           <Text style={styles.sectionTitle}>Today's Investment</Text>
           <View style={styles.investmentCard}>
-            <View style={styles.investmentRow}>
-              <Text style={styles.investmentLabel}>Plan:</Text>
-              <Text style={styles.investmentValue}>Silver (₹500)</Text>
-            </View>
-            <View style={styles.investmentRow}>
-              <Text style={styles.investmentLabel}>Daily Return:</Text>
-              <Text style={styles.investmentValue}>₹4.00 (0.8%)</Text>
-            </View>
-            <View style={styles.investmentRow}>
-              <Text style={styles.investmentLabel}>Status:</Text>
-              <Text style={[styles.investmentValue, styles.activeStatus]}>Active</Text>
-            </View>
+            <LinearGradient
+              colors={[Colors.surface, '#f8f9fa']}
+              style={styles.investmentGradient}
+            >
+              <View style={styles.investmentHeader}>
+                <LinearGradient
+                  colors={['rgba(39, 174, 96, 0.1)', 'rgba(39, 174, 96, 0.05)']}
+                  style={styles.investmentIcon}
+                >
+                  <Ionicons name="trending-up" size={28} color={Colors.success} />
+                </LinearGradient>
+                <View style={styles.investmentDetails}>
+                  <Text style={styles.investmentPlan}>Silver Plan</Text>
+                  <Text style={styles.investmentAmount}>₹500 invested</Text>
+                </View>
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusText}>Active</Text>
+                </View>
+              </View>
+              
+              <View style={styles.divider} />
+              
+              <View style={styles.returnInfo}>
+                <View style={styles.returnItem}>
+                  <Text style={styles.returnLabel}>Daily Return</Text>
+                  <Text style={styles.returnValue}>₹4.00</Text>
+                </View>
+                <View style={styles.returnDivider} />
+                <View style={styles.returnItem}>
+                  <Text style={styles.returnLabel}>Return Rate</Text>
+                  <Text style={styles.returnRate}>0.8%</Text>
+                </View>
+              </View>
+            </LinearGradient>
           </View>
         </View>
 
-        {/* Level Progress */}
-        <View style={styles.levelProgress}>
+        {/* Enhanced Level Progress */}
+        <View style={styles.levelSection}>
           <Text style={styles.sectionTitle}>Level Progress</Text>
           <View style={styles.levelCard}>
-            <View style={styles.levelBadge}>
-              <Text style={styles.levelText}>L3</Text>
-            </View>
-            <View style={styles.levelInfo}>
-              <Text style={styles.levelName}>Silver Tier</Text>
-              <Text style={styles.levelDescription}>8 more referrals to Level 4</Text>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: '60%' }]} />
+            <LinearGradient
+              colors={[Colors.surface, '#f8f9fa']}
+              style={styles.levelGradient}
+            >
+              <View style={styles.levelHeader}>
+                <LinearGradient
+                  colors={[Colors.primary, Colors.primaryDark]}
+                  style={styles.levelBadge}
+                >
+                  <Text style={styles.levelNumber}>L3</Text>
+                </LinearGradient>
+                <View style={styles.levelInfo}>
+                  <Text style={styles.levelTier}>Silver Tier</Text>
+                  <Text style={styles.levelProgress}>8 more referrals to Level 4</Text>
+                </View>
               </View>
-            </View>
+              
+              <View style={styles.progressContainer}>
+                <View style={styles.progressHeader}>
+                  <Text style={styles.progressLabel}>Progress to Level 4</Text>
+                  <Text style={styles.progressPercentage}>60%</Text>
+                </View>
+                <View style={styles.progressBar}>
+                  <LinearGradient
+                    colors={[Colors.success, '#27ae60']}
+                    style={[styles.progressFill, { width: '60%' }]}
+                  />
+                </View>
+                <View style={styles.progressFooter}>
+                  <Text style={styles.progressText}>12 referrals</Text>
+                  <Text style={styles.progressText}>20 referrals</Text>
+                </View>
+              </View>
+            </LinearGradient>
           </View>
         </View>
 
-        {/* Notifications */}
+        {/* Enhanced Notifications */}
         <DashboardNotifications notifications={notifications} />
 
-        {/* News Highlight */}
+        {/* Enhanced News Highlight */}
         <NewsHighlightReel articles={dummyNews} />
-
-        {/* Investment Status */}
-        <View style={styles.investmentStatus}>
-          <Text style={styles.sectionTitle}>Today's Investment</Text>
-          <View style={styles.investmentCard}>
-            <View style={styles.investmentRow}>
-              <Text style={styles.investmentLabel}>Plan:</Text>
-              <Text style={styles.investmentValue}>Silver (₹500)</Text>
-            </View>
-            <View style={styles.investmentRow}>
-              <Text style={styles.investmentLabel}>Daily Return:</Text>
-              <Text style={styles.investmentValue}>₹4.00 (0.8%)</Text>
-            </View>
-            <View style={styles.investmentRow}>
-              <Text style={styles.investmentLabel}>Status:</Text>
-              <Text style={[styles.investmentValue, styles.activeStatus]}>Active</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Level Progress */}
-        <View style={styles.levelProgress}>
-          <Text style={styles.sectionTitle}>Level Progress</Text>
-          <View style={styles.levelCard}>
-            <View style={styles.levelBadge}>
-              <Text style={styles.levelText}>L3</Text>
-            </View>
-            <View style={styles.levelInfo}>
-              <Text style={styles.levelName}>Silver Tier</Text>
-              <Text style={styles.levelDescription}>8 more referrals to Level 4</Text>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: '60%' }]} />
-              </View>
-            </View>
-          </View>
-        </View>
       </ScrollView>
     </ScreenWrapper>
   );
@@ -209,100 +258,137 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 0,
     backgroundColor: Colors.background,
-
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
-    backgroundColor: Colors.primary,
-    borderBottomLeftRadius: BorderRadius.md,
-    borderBottomRightRadius: BorderRadius.md,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.lg,
+    backgroundColor: Colors.background,
+  },
+  leftSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
   },
   profileButton: {
-    padding: Spacing.xs,
+    padding: 0,
+  },
+  profileAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  greetingText: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
   },
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.xs,
   },
-  statusIndicators: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  moneyBadge: {
+  headerStatusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#e74c3c',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.lg,
-    gap: Spacing.xs,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
   },
-  moneyText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.textOnDark,
+  headerStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#fff',
   },
-  levelStatusBadge: {
+  headerLevelBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#27ae60',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.lg,
-    gap: Spacing.xs,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
   },
-  levelStatusText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.textOnDark,
+  headerLevelText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#fff',
   },
   notificationButton: {
     padding: Spacing.xs,
+    position: 'relative',
+    marginLeft: Spacing.xs,
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.error,
   },
   container: {
-    paddingBottom: Spacing.xl,
+    paddingBottom: Spacing.xl * 2,
   },
-  categorySection: {
+  
+  // Enhanced Quick Access Section
+  quickAccessSection: {
     paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.lg,
+    paddingTop: Spacing.xl,
+    marginBottom: Spacing.xl,
   },
-  categoryGrid: {
+  quickAccessTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginBottom: Spacing.lg,
+    textAlign: 'center',
+  },
+  quickAccessGrid: {
     flexDirection: 'row',
     gap: Spacing.md,
   },
-  categoryCard: {
+  quickAccessCard: {
     flex: 1,
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     alignItems: 'center',
-    ...Shadows.sm,
+    ...Shadows.md,
   },
-  categoryImagePlaceholder: {
-    width: 80,
-    height: 80,
-    backgroundColor: Colors.surfaceSecondary,
-    borderRadius: BorderRadius.md,
+  quickAccessGradient: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
   },
-  categoryLabel: {
+  quickAccessLabel: {
     fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.medium,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.text,
+    marginBottom: Spacing.xs,
+  },
+  quickAccessSubLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
+  
+  // Enhanced Overview Section
   overviewSection: {
     paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.xl,
   },
   sectionTitle: {
     fontSize: Typography.fontSize.lg,
@@ -310,86 +396,267 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: Spacing.md,
   },
-  investmentStatus: {
-    paddingHorizontal: Spacing.lg,
+  enhancedOverviewCard: {
+    borderRadius: BorderRadius.xl,
+    overflow: 'hidden',
+    ...Shadows.lg,
+  },
+  overviewGradient: {
+    padding: Spacing.xl,
+  },
+  overviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: Spacing.lg,
   },
-  investmentCard: {
-    backgroundColor: Colors.surface,
-    padding: Spacing.xl,
-    borderRadius: BorderRadius.lg,
-    ...Shadows.md,
+  balanceSection: {
+    flex: 1,
   },
-  investmentRow: {
+  balanceLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  balanceValue: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+  },
+  earningsSection: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  earningsLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  earningsValue: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.success,
+  },
+  planSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  investmentLabel: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.normal,
-    color: Colors.textSecondary,
-  },
-  investmentValue: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text,
-  },
-  activeStatus: {
-    color: Colors.success,
-    fontWeight: Typography.fontWeight.bold,
-  },
-  levelProgress: {
-    paddingHorizontal: Spacing.lg,
     marginBottom: Spacing.lg,
   },
-  levelCard: {
-    backgroundColor: Colors.surface,
-    padding: Spacing.xl,
+  planLabel: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.textSecondary,
+  },
+  planBadge: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.lg,
+  },
+  planText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.textOnPrimary,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  withdrawButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    ...Shadows.md,
+    justifyContent: 'center',
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.surfaceSecondary,
+    gap: Spacing.xs,
   },
-  levelBadge: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: Colors.primary,
+  withdrawText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.textSecondary,
+  },
+  upgradeButton: {
+    flex: 1,
+  },
+  upgradeGradient: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    gap: Spacing.xs,
+  },
+  upgradeText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.textOnPrimary,
+  },
+  
+  // Enhanced Investment Section
+  investmentSection: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.xl,
+  },
+  investmentCard: {
+    borderRadius: BorderRadius.xl,
+    overflow: 'hidden',
+    ...Shadows.md,
+  },
+  investmentGradient: {
+    padding: Spacing.xl,
+  },
+  investmentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+  },
+  investmentIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+  },
+  investmentDetails: {
+    flex: 1,
+  },
+  investmentPlan: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginBottom: Spacing.xs,
+  },
+  investmentAmount: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+  },
+  statusBadge: {
+    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.lg,
+  },
+  statusText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.success,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginVertical: Spacing.md,
+  },
+  returnInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  returnItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  returnDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: Colors.border,
+    marginHorizontal: Spacing.md,
+  },
+  returnLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  returnValue: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+  },
+  returnRate: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.success,
+  },
+  
+  // Enhanced Level Section
+  levelSection: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.xl,
+  },
+  levelCard: {
+    borderRadius: BorderRadius.xl,
+    overflow: 'hidden',
+    ...Shadows.md,
+  },
+  levelGradient: {
+    padding: Spacing.xl,
+  },
+  levelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+  },
+  levelBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: Spacing.lg,
   },
-  levelText: {
-    fontSize: Typography.fontSize.lg,
+  levelNumber: {
+    fontSize: Typography.fontSize.xl,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.textOnPrimary,
   },
   levelInfo: {
     flex: 1,
   },
-  levelName: {
+  levelTier: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text,
     marginBottom: Spacing.xs,
   },
-  levelDescription: {
+  levelProgress: {
     fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.normal,
     color: Colors.textSecondary,
+  },
+  progressContainer: {
+    marginTop: Spacing.md,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: Spacing.sm,
   },
+  progressLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+  },
+  progressPercentage: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.success,
+  },
   progressBar: {
-    height: 8,
+    height: 12,
     backgroundColor: Colors.border,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.md,
     overflow: 'hidden',
+    marginBottom: Spacing.sm,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.success,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.md,
+  },
+  progressFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  progressText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.textSecondary,
   },
 });
