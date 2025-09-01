@@ -10,7 +10,15 @@ interface CategoryFilterProps {
 
 const CategoryFilter: React.FC<CategoryFilterProps> = ({ categories, selectedCategory, onSelectCategory }) => {
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.container}>
+    <View >
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        // The style prop styles the container OF the scrollable content
+        style={styles.mainContainer}
+      // The contentContainerStyle prop styles the content INSIDE
+      contentContainerStyle={styles.container}
+    >
       {categories.map((category) => (
         <TouchableOpacity
           key={category}
@@ -23,27 +31,35 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ categories, selectedCat
         </TouchableOpacity>
       ))}
     </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  // This is the outer container with the blue background.
+  // We remove all height and spacing from here to let it wrap its content.
+  mainContainer: {
+    backgroundColor: '#ffffff29',
+    // paddingVertical: Spacing.md,
+  },
+  // This styles the content area *inside* the ScrollView.
+  // This is where all spacing should be handled.
   container: {
-    // paddingVertical: Spacing.sm,
-    // paddingHorizontal: Spacing.lg,
+    // Add padding above and below the chips for vertical spacing.
+    paddingVertical: Spacing.md,
+    // Add padding on the left for the first item.
+    paddingHorizontal: Spacing.lg,
+    // Vertically center the chips within the padded area.
     // alignItems: 'center',
-    // height:2,
-    height: 40,
-    // backgroundColor:'yellow'
-    paddingVertical: Spacing.sm,
-    margin: Spacing.lg,
-    marginBottom:Spacing['2xl'],
+    justifyContent: 'center',
+    // height: 60,
   },
   chip: {
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.surfaceSecondary,
-    marginRight: Spacing.md,
+    marginRight: Spacing.md, // This creates space between the chips
     minHeight: 40,
     justifyContent: 'center',
     alignItems: 'center',

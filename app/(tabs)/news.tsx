@@ -4,14 +4,54 @@ import { Header, ScreenWrapper } from '../../components/common';
 import { CategoryFilter, NewsArticleCard } from '../../components/news';
 
 const dummyArticles = [
-  { id: '1', title: 'Politics News Headline 1', thumbnail: 'https://picsum.photos/200', category: 'Politics' },
-  { id: '2', title: 'Business News Headline 2', thumbnail: 'https://picsum.photos/201', category: 'Business' },
-  { id: '3', title: 'Tech News Headline 3', thumbnail: 'https://picsum.photos/202', category: 'Tech' },
-  { id: '4', title: 'Entertainment News Headline 4', thumbnail: 'https://picsum.photos/203', category: 'Entertainment' },
-  { id: '5', title: 'Politics News Headline 5', thumbnail: 'https://picsum.photos/204', category: 'Politics' },
+  { 
+    id: '1', 
+    title: 'Local Community Garden Opens in Downtown', 
+    thumbnail: 'https://picsum.photos/400/200?random=1', 
+    category: 'Local News',
+    description: 'A new community garden has opened in the heart of downtown, providing fresh produce and a green space for residents.',
+    author: 'Sarah Johnson',
+    timeAgo: '3h ago'
+  },
+  { 
+    id: '2', 
+    title: 'New Library Branch to Open Next Month', 
+    thumbnail: 'https://picsum.photos/400/200?random=2', 
+    category: 'Local News',
+    description: 'Construction is complete on the new library branch, which will serve the growing northern district.',
+    author: 'Mike Chen',
+    timeAgo: '5h ago'
+  },
+  { 
+    id: '3', 
+    title: 'Tech Innovation Hub Launches Startup Program', 
+    thumbnail: 'https://picsum.photos/400/200?random=3', 
+    category: 'Tech',
+    description: 'Local entrepreneurs can now apply for the new accelerator program focusing on sustainable technology solutions.',
+    author: 'Emily Rodriguez',
+    timeAgo: '1d ago'
+  },
+  { 
+    id: '4', 
+    title: 'Annual Arts Festival Returns This Weekend', 
+    thumbnail: 'https://picsum.photos/400/200?random=4', 
+    category: 'Entertainment',
+    description: 'The city\'s beloved arts festival is back with live performances, local vendors, and interactive workshops.',
+    author: 'David Park',
+    timeAgo: '2d ago'
+  },
+  { 
+    id: '5', 
+    title: 'City Council Approves New Traffic Safety Measures', 
+    thumbnail: 'https://picsum.photos/400/200?random=5', 
+    category: 'Politics',
+    description: 'New speed limits and crosswalk improvements aim to reduce accidents in high-traffic areas.',
+    author: 'Lisa Thompson',
+    timeAgo: '3d ago'
+  },
 ];
 
-const categories = ['All', 'Politics', 'Business', 'Tech', 'Entertainment'];
+const categories = ['All', 'Local News', 'Politics', 'Tech', 'Entertainment'];
 
 export default function NewsScreen() {
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -36,6 +76,9 @@ export default function NewsScreen() {
             title={item.title}
             thumbnail={item.thumbnail}
             category={item.category}
+            description={item.description}
+            author={item.author}
+            timeAgo={item.timeAgo}
             onPress={() => {}}
           />
         )}
@@ -50,6 +93,8 @@ export default function NewsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // paddingHorizontal: 0,
+    // backgroundColor: 'yellow',
   },
   flatList: {
     flex: 1,

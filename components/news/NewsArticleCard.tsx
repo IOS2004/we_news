@@ -1,20 +1,56 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 
 interface NewsArticleCardProps {
   title: string;
   thumbnail: string;
   category: string;
+  description?: string;
+  author?: string;
+  timeAgo?: string;
   onPress: () => void;
 }
 
-const NewsArticleCard: React.FC<NewsArticleCardProps> = ({ title, thumbnail, category, onPress }) => {
+const NewsArticleCard: React.FC<NewsArticleCardProps> = ({ 
+  title, 
+  thumbnail, 
+  category, 
+  description,
+  author,
+  timeAgo,
+  onPress 
+}) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
+      {/* Image Container */}
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
+        {/* Category Badge */}
+        <View style={styles.categoryBadge}>
+          <Text style={styles.categoryText}>{category}</Text>
+        </View>
+      </View>
+      
+      {/* Content Container */}
       <View style={styles.contentContainer}>
-        <Text style={styles.category}>{category}</Text>
-        <Text style={styles.title} numberOfLines={3}>{title}</Text>
+        <Text style={styles.title} numberOfLines={2}>{title}</Text>
+        {description && (
+          <Text style={styles.description} numberOfLines={3}>{description}</Text>
+        )}
+        
+        {/* Bottom Info Row */}
+        <View style={styles.bottomInfo}>
+          <View style={styles.authorInfo}>
+            <Ionicons name="person-outline" size={14} color={Colors.textSecondary} />
+            <Text style={styles.author}>{author || 'Anonymous'}</Text>
+          </View>
+          <View style={styles.timeInfo}>
+            <Ionicons name="time-outline" size={14} color={Colors.textSecondary} />
+            <Text style={styles.timeAgo}>{timeAgo || 'Just now'}</Text>
+          </View>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -22,38 +58,76 @@ const NewsArticleCard: React.FC<NewsArticleCardProps> = ({ title, thumbnail, cat
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    marginVertical: Spacing.sm,
+    marginHorizontal: Spacing.lg,
+    overflow: 'hidden',
+    ...Shadows.md,
+  },
+  imageContainer: {
+    position: 'relative',
+    height: 200,
   },
   thumbnail: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
+    width: '100%',
+    height: '100%',
+    backgroundColor: Colors.surfaceSecondary,
+  },
+  categoryBadge: {
+    position: 'absolute',
+    bottom: Spacing.sm,
+    left: Spacing.sm,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+  },
+  categoryText: {
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.textOnPrimary,
+    textTransform: 'capitalize',
   },
   contentContainer: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  category: {
-    fontSize: 14,
-    color: '#007bff',
-    marginBottom: 4,
+    padding: Spacing.lg,
   },
   title: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginBottom: Spacing.sm,
+    lineHeight: Typography.lineHeight.tight * Typography.fontSize.lg,
+  },
+  description: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.md,
+    lineHeight: Typography.lineHeight.normal * Typography.fontSize.sm,
+  },
+  bottomInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  authorInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  author: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.textSecondary,
+    marginLeft: Spacing.xs,
+  },
+  timeInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timeAgo: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.textSecondary,
+    marginLeft: Spacing.xs,
   },
 });
 
