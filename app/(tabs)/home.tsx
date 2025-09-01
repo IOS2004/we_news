@@ -104,49 +104,50 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Enhanced Dashboard Overview */}
+        {/* Dashboard Card - Exact Match to Design */}
         <View style={styles.overviewSection}>
-          <Text style={styles.sectionTitle}>Your Dashboard</Text>
-          <View style={styles.enhancedOverviewCard}>
-            <LinearGradient
-              colors={[Colors.surface, '#f8f9fa']}
-              style={styles.overviewGradient}
-            >
-              <View style={styles.overviewHeader}>
-                <View style={styles.balanceSection}>
-                  <Text style={styles.balanceLabel}>Wallet Balance</Text>
-                  <Text style={styles.balanceValue}>₹1,500.00</Text>
-                </View>
-                <View style={styles.earningsSection}>
-                  <Text style={styles.earningsLabel}>Total Earnings</Text>
-                  <Text style={styles.earningsValue}>₹5,000.00</Text>
-                </View>
+          <View style={styles.dashboardCard}>
+            {/* Plan Header with dot and menu */}
+            <View style={styles.planHeader}>
+              <View style={styles.planIndicator}>
+                <View style={styles.planDot} />
+                <Text style={styles.planName}>Silver Plan</Text>
               </View>
+              <TouchableOpacity style={styles.menuButton}>
+                <Ionicons name="menu" size={24} color={Colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Total Earnings Section */}
+            <View style={styles.earningsSection}>
+              <Text style={styles.earningsLabel}>Total Earnings</Text>
+              <View style={styles.earningsRow}>
+                <Text style={styles.earningsAmount}>₹5,000</Text>
+                <Text style={styles.earningsDecimal}>.00</Text>
+              </View>
+              <View style={styles.monthlyGainContainer}>
+                <Ionicons name="trending-up" size={14} color={Colors.success} />
+                <Text style={styles.monthlyGain}>+₹500 this month</Text>
+              </View>
+            </View>
+
+            {/* Wallet Balance Section */}
+            <View style={styles.walletSection}>
+              <Text style={styles.walletLabel}>Wallet Balance</Text>
+              <Text style={styles.walletAmount}>₹1,500.00</Text>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.actionButtonsContainer}>
+              <TouchableOpacity style={styles.withdrawButton} onPress={handleWithdraw}>
+                <Text style={styles.withdrawButtonText}>Withdraw</Text>
+              </TouchableOpacity>
               
-              <View style={styles.planSection}>
-                <Text style={styles.planLabel}>Current Plan</Text>
-                <View style={styles.planBadge}>
-                  <Text style={styles.planText}>Silver</Text>
-                </View>
-              </View>
-              
-              <View style={styles.actionButtons}>
-                <TouchableOpacity style={styles.withdrawButton} onPress={handleWithdraw}>
-                  <Ionicons name="card-outline" size={20} color={Colors.textSecondary} />
-                  <Text style={styles.withdrawText}>Withdraw</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgradePlan}>
-                  <LinearGradient
-                    colors={[Colors.primary, Colors.primaryDark]}
-                    style={styles.upgradeGradient}
-                  >
-                    <Ionicons name="arrow-up-circle" size={20} color={Colors.textOnDark} />
-                    <Text style={styles.upgradeText}>Upgrade Plan</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            </LinearGradient>
+              <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgradePlan}>
+                <Text style={styles.upgradeButtonText}>Upgrade Plan</Text>
+                <Ionicons name="arrow-forward" size={16} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -163,12 +164,12 @@ export default function HomeScreen() {
 
         {/* Enhanced Investment Status */}
         <View style={styles.investmentSection}>
-          <Text style={styles.sectionTitle}>Today's Investment</Text>
           <View style={styles.investmentCard}>
             <LinearGradient
               colors={[Colors.surface, '#f8f9fa']}
               style={styles.investmentGradient}
             >
+              <Text style={styles.cardTitle}>Today's Investment</Text>
               <View style={styles.investmentHeader}>
                 <LinearGradient
                   colors={['rgba(39, 174, 96, 0.1)', 'rgba(39, 174, 96, 0.05)']}
@@ -204,12 +205,12 @@ export default function HomeScreen() {
 
         {/* Enhanced Level Progress */}
         <View style={styles.levelSection}>
-          <Text style={styles.sectionTitle}>Level Progress</Text>
           <View style={styles.levelCard}>
             <LinearGradient
               colors={[Colors.surface, '#f8f9fa']}
               style={styles.levelGradient}
             >
+              <Text style={styles.cardTitle}>Level Progress</Text>
               <View style={styles.levelHeader}>
                 <LinearGradient
                   colors={[Colors.primary, Colors.primaryDark]}
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
   // Enhanced Quick Access Section
   quickAccessSection: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
+    paddingTop: Spacing.md,
     marginBottom: Spacing.xl,
   },
   quickAccessTitle: {
@@ -385,9 +386,123 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   
-  // Enhanced Overview Section
+  // Dashboard Card Styles - Exact Match to Design
+  dashboardCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    marginHorizontal: Spacing.lg,
+    ...Shadows.md,
+  },
+  planHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+  },
+  planIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  planDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.text,
+  },
+  planName: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text,
+  },
+  menuButton: {
+    padding: Spacing.xs,
+  },
+  earningsSection: {
+    marginBottom: Spacing.lg,
+  },
+  earningsLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  earningsRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: Spacing.xs,
+  },
+  earningsAmount: {
+    fontSize: Typography.fontSize['5xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    lineHeight: 40,
+  },
+  earningsDecimal: {
+    fontSize: Typography.fontSize.xl,
+    color: Colors.textSecondary,
+    marginLeft: 2,
+  },
+  monthlyGainContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  monthlyGain: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.success,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  walletSection: {
+    marginBottom: Spacing.xl,
+  },
+  walletLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  walletAmount: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    marginTop: Spacing.lg,
+    gap: Spacing.md,
+  },
+  withdrawButton: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    borderRadius: BorderRadius.xl,
+    paddingVertical: Spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  withdrawButtonText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  upgradeButton: {
+    flex: 1,
+    backgroundColor: '#1f2937',
+    borderRadius: BorderRadius.xl,
+    paddingVertical: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+  },
+  upgradeButtonText: {
+    fontSize: Typography.fontSize.sm,
+    color: '#ffffff',
+    fontWeight: Typography.fontWeight.medium,
+  },
+  
+  // Enhanced Overview Section (old styles now removed)
   overviewSection: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: 0, // Remove horizontal padding since card has its own
     marginBottom: Spacing.xl,
   },
   sectionTitle: {
@@ -396,101 +511,12 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: Spacing.md,
   },
-  enhancedOverviewCard: {
-    borderRadius: BorderRadius.xl,
-    overflow: 'hidden',
-    ...Shadows.lg,
-  },
-  overviewGradient: {
-    padding: Spacing.xl,
-  },
-  overviewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.lg,
-  },
-  balanceSection: {
-    flex: 1,
-  },
-  balanceLabel: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  balanceValue: {
-    fontSize: Typography.fontSize.xl,
+  cardTitle: {
+    fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text,
-  },
-  earningsSection: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  earningsLabel: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  earningsValue: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.success,
-  },
-  planSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  planLabel: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.textSecondary,
-  },
-  planBadge: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.lg,
-  },
-  planText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.textOnPrimary,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-  },
-  withdrawButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.surfaceSecondary,
-    gap: Spacing.xs,
-  },
-  withdrawText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.textSecondary,
-  },
-  upgradeButton: {
-    flex: 1,
-  },
-  upgradeGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    gap: Spacing.xs,
-  },
-  upgradeText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.textOnPrimary,
+    marginBottom: Spacing.md,
+    textAlign: 'left',
   },
   
   // Enhanced Investment Section
