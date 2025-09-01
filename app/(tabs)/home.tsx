@@ -9,10 +9,10 @@ import { DashboardNotifications, QuickActions } from '../../components/dashboard
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 
 const dummyNews = [
-  { id: '1', title: 'Politics News Headline 1', thumbnail: 'https://picsum.photos/200' },
-  { id: '2', title: 'Business News Headline 2', thumbnail: 'https://picsum.photos/201' },
-  { id: '3', title: 'Tech News Headline 3', thumbnail: 'https://picsum.photos/202' },
-  { id: '4', title: 'Entertainment News Headline 4', thumbnail: 'https://picsum.photos/203' },
+  { id: '1', title: 'Politics News Headline 1', thumbnail: 'https://picsum.photos/200', category: 'Politics' },
+  { id: '2', title: 'Business News Headline 2', thumbnail: 'https://picsum.photos/201', category: 'Business' },
+  { id: '3', title: 'Tech News Headline 3', thumbnail: 'https://picsum.photos/202', category: 'Technology' },
+  { id: '4', title: 'Entertainment News Headline 4', thumbnail: 'https://picsum.photos/203', category: 'Entertainment' },
 ];
 
 const notifications = [
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
   },
   upgradeButton: {
     flex: 1,
-    backgroundColor: '#1f2937',
+    backgroundColor: Colors.primary,
     borderRadius: BorderRadius.xl,
     paddingVertical: Spacing.lg,
     flexDirection: 'row',
