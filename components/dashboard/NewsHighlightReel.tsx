@@ -47,7 +47,13 @@ const NewsHighlightReel: React.FC<NewsHighlightReelProps> = ({ articles }) => {
   const renderItem = ({ item, index }: { item: NewsArticle; index: number }) => (
     <TouchableOpacity style={styles.articleContainer}>
       <View style={styles.imageContainer}>
-        <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+        <Image 
+          source={{ uri: item.thumbnail }} 
+          style={styles.thumbnail}
+          resizeMode="cover"
+          loadingIndicatorSource={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' }}
+        />
+        <View style={styles.imageOverlay} />
         <View style={styles.categoryOverlay}>
           <View style={[styles.categoryTag, { backgroundColor: getCategoryColor(item.category) }]}>
             <Text style={styles.categoryText}>{item.category}</Text>
@@ -141,38 +147,49 @@ const styles = StyleSheet.create({
   imageContainer: {
     position: 'relative',
     marginBottom: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    overflow: 'hidden',
+    ...Shadows.sm,
   },
   thumbnail: {
     width: '100%',
-    height: 180,
-    borderRadius: BorderRadius.lg,
+    height: 200,
     backgroundColor: Colors.surfaceSecondary,
+  },
+  imageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   categoryOverlay: {
     position: 'absolute',
-    top: Spacing.sm,
-    left: Spacing.sm,
+    top: Spacing.md,
+    left: Spacing.md,
   },
   categoryTag: {
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.base,
+    ...Shadows.sm,
   },
   categoryText: {
     fontSize: Typography.fontSize.xs,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.textOnPrimary,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.white,
     textTransform: 'capitalize',
   },
   contentContainer: {
     paddingHorizontal: Spacing.sm,
-    paddingTop: Spacing.sm,
+    paddingTop: Spacing.md,
   },
   articleTitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.text,
-    lineHeight: Typography.fontSize.base * 1.4,
+    lineHeight: Typography.fontSize.lg * 1.3,
   },
 });
 

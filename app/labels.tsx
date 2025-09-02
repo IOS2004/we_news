@@ -16,7 +16,7 @@ export default function LabelsScreen() {
       description: '30 days of premium features',
       points: 500,
       category: 'subscription',
-      image: 'https://picsum.photos/100/100?random=1',
+      image: 'https://picsum.photos/400/400?random=10',
       available: true,
     },
     {
@@ -25,7 +25,7 @@ export default function LabelsScreen() {
       description: '₹100 Amazon voucher',
       points: 800,
       category: 'voucher',
-      image: 'https://picsum.photos/100/100?random=2',
+      image: 'https://picsum.photos/400/400?random=11',
       available: true,
     },
     {
@@ -34,7 +34,7 @@ export default function LabelsScreen() {
       description: 'Silver tier exclusive badge',
       points: 300,
       category: 'badge',
-      image: 'https://picsum.photos/100/100?random=3',
+      image: 'https://picsum.photos/400/400?random=12',
       available: false,
     },
     {
@@ -43,7 +43,7 @@ export default function LabelsScreen() {
       description: '₹50 direct to wallet',
       points: 600,
       category: 'cash',
-      image: 'https://picsum.photos/100/100?random=4',
+      image: 'https://picsum.photos/400/400?random=13',
       available: true,
     },
   ];
@@ -188,7 +188,11 @@ export default function LabelsScreen() {
             {availableRewards.map((reward) => (
               <View key={reward.id} style={styles.rewardCard}>
                 <View style={styles.rewardContent}>
-                  <Image source={{ uri: reward.image }} style={styles.rewardImage} />
+                  <Image 
+                    source={{ uri: reward.image }} 
+                    style={styles.rewardImage}
+                    resizeMode="cover"
+                  />
                   <View style={styles.rewardDetails}>
                     <Text style={styles.rewardTitle}>{reward.title}</Text>
                     <Text style={styles.rewardDescription}>{reward.description}</Text>

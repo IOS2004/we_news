@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from 'expo-router';
+import { router, useRootNavigationState } from 'expo-router';
 import { Colors, Typography, Spacing } from '../../constants/theme';
 
 interface HeaderProps {
@@ -10,12 +10,22 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title, canGoBack = false }) => {
-  const navigation = useNavigation();
+  const navigationState = useRootNavigationState();
+
+  const handleBackPress = () => {
+    // Check if there's a previous screen in the navigation history
+    if (navigationState?.routes && navigationState.routes.length > 1) {
+      router.back();
+    } else {
+      // If no previous screen, go to home/dashboard
+      router.replace('/(tabs)/home');
+    }
+  };
 
   return (
     <View style={styles.header}>
       {canGoBack && (
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
       )}

@@ -39,7 +39,7 @@ export default function ProfileScreen() {
               <Text style={styles.name}>Rahul Sharma</Text>
               <TouchableOpacity style={styles.viewProfileButton} onPress={handleViewProfile}>
                 <Text style={styles.viewProfileText}>View profile</Text>
-                <Ionicons name="arrow-forward" size={16} color={Colors.primary} />
+                <Ionicons name="arrow-forward" size={14} color={Colors.textSecondary} />
               </TouchableOpacity>
             </View>
           </View>
@@ -170,12 +170,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     marginBottom: Spacing.md,
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.xl,
+    paddingVertical: Spacing.lg,
   },
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.xl,
   },
   avatar: {
     width: 60,
@@ -205,8 +204,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   viewProfileText: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.primary,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
     marginRight: Spacing.xs,
   },
   section: {

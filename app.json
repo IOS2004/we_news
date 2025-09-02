@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "we_news",
-    "slug": "we_news",
+    "name": "WeNews",
+    "slug": "we-news",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.wenews.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,10 +22,16 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "softwareKeyboardLayoutMode": "pan"
+      "package": "com.wenews.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "79ed2a90-c9e2-4281-b0ed-646bfede4c83"
+      }
+    },
+    "owner": "om_sahu2004"
   }
 }

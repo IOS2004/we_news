@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { OptimizedImage } from '../common';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 
 interface NewsArticleCardProps {
@@ -26,7 +27,7 @@ const NewsArticleCard: React.FC<NewsArticleCardProps> = ({
     <TouchableOpacity style={styles.container} onPress={onPress}>
       {/* Image Container */}
       <View style={styles.imageContainer}>
-        <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
+        <OptimizedImage source={{ uri: thumbnail }} style={styles.thumbnail} />
         {/* Category Badge */}
         <View style={styles.categoryBadge}>
           <Text style={styles.categoryText}>{category}</Text>
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: 'relative',
-    height: 200,
+    height: 220,
   },
   thumbnail: {
     width: '100%',

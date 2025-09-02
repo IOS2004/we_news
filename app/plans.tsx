@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View, Text } from 'react-native';
-import { Header, ScreenWrapper, Button } from '../components/common';
+import { Header, ScreenWrapper } from '../components/common';
 import { PlanDetailCard, PlanToggleButton } from '../components/plans';
 
+import { useRouter } from 'expo-router';
+import { Button } from '../components/common';
 const plans = {
   Base: { 
     price: 100, 
@@ -66,6 +68,7 @@ export default function PlansScreen() {
   const [selectedPlan, setSelectedPlan] = useState('Silver');
   const activePlan = 'Silver'; // This would come from user data
 
+  const router = useRouter();
   const selectedPlanData = plans[selectedPlan as keyof typeof plans];
 
   const calculateDailyEarnings = (plan: typeof selectedPlanData) => {
@@ -79,7 +82,6 @@ export default function PlansScreen() {
   return (
     <ScreenWrapper>
       <Header title="Plans & Subscriptions" canGoBack />
-      
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerSection}>
           <Text style={styles.title}>Choose Your Investment Plan</Text>

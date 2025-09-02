@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { router } from 'expo-router';
-import { Button, InputField, ScreenWrapper } from '../../components/common';
+import { Button, InputField, ScreenWrapper, Logo } from '../../components/common';
 import { Colors, Typography, Spacing, BorderRadius, Shadows, Gradients, Layout } from '../../constants/theme';
 
 export default function SignUpScreen() {
@@ -58,7 +58,7 @@ export default function SignUpScreen() {
               <Ionicons name="arrow-back" size={24} color={Colors.textOnDark} />
             </TouchableOpacity>
             <View style={styles.logoContainer}>
-              <Ionicons name="newspaper" size={48} color={Colors.textOnDark} />
+              <Logo size={48} />
             </View>
             <Text style={styles.appName}>WE NEWS</Text>
             <Text style={styles.tagline}>Join the community today</Text>

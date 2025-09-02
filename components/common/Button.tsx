@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { Colors, Spacing, Typography, Shadows } from '../../constants/theme';
+import { Colors, ComponentThemes, Spacing, Typography } from '../../constants/theme';
 
 interface ButtonProps {
   title: string;
@@ -32,13 +32,12 @@ const Button: React.FC<ButtonProps> = ({ title, onPress, loading = false, varian
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    ...ComponentThemes.button.primary,
+    paddingVertical: Spacing.base,
+    paddingHorizontal: Spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 10,
-    ...Shadows.base,
+    marginVertical: Spacing.sm,
   },
   primary: {
     backgroundColor: Colors.buttonPrimary,
