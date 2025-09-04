@@ -51,7 +51,7 @@ const AppSettings: React.FC = () => {
   };
 
   return (
-    <Card style={styles.cardWithPadding}>
+    <Card style={styles.card}>
       <View style={styles.header}>
         <Ionicons name="settings" size={24} color={Colors.primary} />
         <Text style={styles.headerTitle}>App Settings</Text>
@@ -67,7 +67,7 @@ const AppSettings: React.FC = () => {
         <Switch
           value={darkMode}
           onValueChange={setDarkMode}
-          trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+          trackColor={{ false: Colors.borderLight, true: Colors.primary }}
           thumbColor={Colors.white}
         />
       </View>
@@ -82,7 +82,7 @@ const AppSettings: React.FC = () => {
         <Switch
           value={autoUpdate}
           onValueChange={setAutoUpdate}
-          trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+          trackColor={{ false: Colors.borderLight, true: Colors.primary }}
           thumbColor={Colors.white}
         />
       </View>
@@ -121,11 +121,6 @@ const AppSettings: React.FC = () => {
 const styles = StyleSheet.create({
   card: {
     padding: Spacing.base,
-    marginHorizontal: 0,
-    paddingHorizontal: 0,
-  },
-  cardWithPadding: {
-    padding: Spacing.lg,
   },
   header: {
     flexDirection: 'row',

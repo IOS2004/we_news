@@ -18,10 +18,38 @@ export default function EarningsScreen() {
   };
 
   const quickActions = [
-    { id: 'watch-ads', title: 'Watch Ads', icon: 'play-circle', earning: '+₹5-15', color: Colors.info },
-    { id: 'install-apps', title: 'Install Apps', icon: 'download', earning: '+₹10-50', color: Colors.success },
-    { id: 'daily-checkin', title: 'Daily Check-in', icon: 'calendar', earning: '+₹20', color: Colors.warning },
-    { id: 'refer-friends', title: 'Refer Friends', icon: 'people', earning: '+₹100', color: Colors.secondary },
+    { 
+      id: 'watch-ads', 
+      title: 'Watch Ads', 
+      icon: 'play-circle', 
+      earning: '+₹5-15', 
+      iconColor: '#5B7FFF',
+      backgroundColor: '#F0F2FF'
+    },
+    { 
+      id: 'install-apps', 
+      title: 'Install Apps', 
+      icon: 'download', 
+      earning: '+₹10-50', 
+      iconColor: '#00C896',
+      backgroundColor: '#F0FFF9'
+    },
+    { 
+      id: 'daily-checkin', 
+      title: 'Daily Check-in', 
+      icon: 'calendar', 
+      earning: '+₹20', 
+      iconColor: '#F59E0B',
+      backgroundColor: '#FFFBEB'
+    },
+    { 
+      id: 'refer-friends', 
+      title: 'Refer Friends', 
+      icon: 'people', 
+      earning: '+₹100', 
+      iconColor: '#8B5CF6',
+      backgroundColor: '#FAF5FF'
+    },
   ];
 
   const recentTransactions = [
@@ -127,11 +155,16 @@ export default function EarningsScreen() {
         {/* Quick Actions */}
         <Card style={styles.actionsCard}>
           <Text style={styles.sectionTitle}>Earn More</Text>
+          <Text style={styles.sectionSubtitle}>Boost your earnings with these activities</Text>
           <View style={styles.actionsGrid}>
             {quickActions.map((action) => (
-              <TouchableOpacity key={action.id} style={styles.actionItem}>
-                <View style={[styles.actionIcon, { backgroundColor: `${action.color}15` }]}>
-                  <Ionicons name={action.icon as any} size={24} color={action.color} />
+              <TouchableOpacity 
+                key={action.id} 
+                style={[styles.actionItem, { backgroundColor: action.backgroundColor }]}
+                activeOpacity={0.8}
+              >
+                <View style={styles.actionIconContainer}>
+                  <Ionicons name={action.icon as any} size={24} color={action.iconColor} />
                 </View>
                 <Text style={styles.actionTitle}>{action.title}</Text>
                 <Text style={styles.actionEarning}>{action.earning}</Text>
@@ -406,6 +439,13 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text,
+    marginBottom: Spacing.xs,
+    textAlign: 'center',
+  },
+  sectionSubtitle: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+    textAlign: 'center',
     marginBottom: Spacing.lg,
   },
   
@@ -420,20 +460,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   actionItem: {
-    width: '48%',
-    alignItems: 'center',
-    padding: Spacing.lg,
-    backgroundColor: Colors.surfaceSecondary,
+    width: '47%',
+    aspectRatio: 1,
     borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.md,
-  },
-  actionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    padding: Spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: Spacing.md,
+    ...Shadows.sm,
+  },
+  actionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.xl,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+    ...Shadows.sm,
   },
   actionTitle: {
     fontSize: Typography.fontSize.sm,
@@ -444,8 +488,9 @@ const styles = StyleSheet.create({
   },
   actionEarning: {
     fontSize: Typography.fontSize.xs,
-    color: Colors.success,
-    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeight.bold,
+    textAlign: 'center',
   },
   
   // Transactions Card

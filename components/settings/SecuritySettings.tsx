@@ -54,12 +54,12 @@ const SecuritySettings: React.FC = () => {
           <Switch
             value={twoFactorEnabled}
             onValueChange={setTwoFactorEnabled}
-            trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+            trackColor={{ false: Colors.borderLight, true: Colors.primary }}
             thumbColor={Colors.white}
           />
         </View>
 
-        <View style={[styles.settingItem, { borderBottomWidth: 0 }]}>
+        <View style={styles.settingItem}>
           <View style={styles.settingContent}>
             <Text style={styles.settingLabel}>Biometric Authentication</Text>
             <Text style={styles.settingDescription}>
@@ -69,7 +69,7 @@ const SecuritySettings: React.FC = () => {
           <Switch
             value={biometricEnabled}
             onValueChange={setBiometricEnabled}
-            trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+            trackColor={{ false: Colors.borderLight, true: Colors.primary }}
             thumbColor={Colors.white}
           />
         </View>
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     gap: Spacing.base,
   },
   card: {
-    padding: Spacing.lg,
+    padding: Spacing.base,
   },
   header: {
     flexDirection: 'row',
@@ -166,11 +166,9 @@ const styles = StyleSheet.create({
   },
   passwordForm: {
     gap: Spacing.base,
-    paddingTop: Spacing.sm,
   },
   buttonContainer: {
-    marginTop: Spacing.base,
-    paddingBottom: Spacing.base,
+    marginTop: Spacing.sm,
   },
 });
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Card from '../common/Card';
+import { Colors } from '../../constants/theme';
 
 interface WalletStatsProps {
   totalIncome: number;
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
   },
   statItem: {
     width: '48%',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: Colors.surfaceSecondary,
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -83,18 +84,18 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#007bff',
+    color: Colors.primary,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
+    color: Colors.textLight,
     textAlign: 'center',
   },
   summarySection: {
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: Colors.border,
   },
   summaryItem: {
     flexDirection: 'row',
@@ -103,12 +104,12 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: '#666',
+    color: Colors.textLight,
   },
   summaryValue: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#28a745',
+    color: Colors.success,
   },
 });
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View, Text } from 'react-native';
 import { Header, ScreenWrapper } from '../components/common';
 import { PlanDetailCard, PlanToggleButton } from '../components/plans';
-
+import { Colors } from '../constants/theme';
 import { useRouter } from 'expo-router';
 import { Button } from '../components/common';
 const plans = {
@@ -165,15 +165,15 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
   calculatorSection: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     margin: 16,
     padding: 16,
     borderRadius: 12,
-    shadowColor: '#000',
+    shadowColor: Colors.secondary,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -200,10 +200,10 @@ const styles = StyleSheet.create({
   calculatorValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#28a745',
+    color: Colors.success,
   },
   benefitsSection: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: Colors.surfaceSecondary,
     margin: 16,
     padding: 16,
     borderRadius: 12,
@@ -217,10 +217,10 @@ const styles = StyleSheet.create({
   benefitItem: {
     fontSize: 16,
     marginBottom: 8,
-    color: '#333',
+    color: Colors.text,
   },
   upgradeSection: {
-    backgroundColor: '#e8f4fd',
+    backgroundColor: Colors.surfaceSecondary,
     margin: 16,
     padding: 16,
     borderRadius: 12,
@@ -230,12 +230,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#007bff',
+    color: Colors.primary,
   },
   upgradeDescription: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 16,
-    color: '#495057',
+    color: Colors.textSecondary,
   },
 });

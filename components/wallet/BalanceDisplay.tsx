@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Card from '../common/Card';
+import { Colors } from '../../constants/theme';
 
 interface BalanceDisplayProps {
   balance: number;
@@ -18,13 +19,13 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ balance }) => {
 const styles = StyleSheet.create({
   label: {
     fontSize: 18,
-    color: '#666',
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
   balance: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#333',
+    color: Colors.text,
     textAlign: 'center',
     marginTop: 8,
   },

@@ -1,65 +1,65 @@
 // Theme configuration for consistent UI across the app
 
 export const Colors = {
-  // Primary colors
-  primary: "#667eea",
-  primaryDark: "#5a67d8",
-  primaryLight: "#7c8ff4",
+  // Primary colors - Using medium blue as main accent
+  primary: "#3F72AF",
+  primaryDark: "#2E5A8A",
+  primaryLight: "#5A8BC7",
 
-  // Secondary colors
-  secondary: "#764ba2",
-  secondaryDark: "#6a4190",
-  secondaryLight: "#8a5bb8",
+  // Secondary colors - Using dark navy blue
+  secondary: "#112D4E",
+  secondaryDark: "#0B1F35",
+  secondaryLight: "#1A3B5C",
 
   // Gradient colors
-  gradientStart: "#667eea",
-  gradientEnd: "#764ba2",
+  gradientStart: "#3F72AF",
+  gradientEnd: "#112D4E",
 
   // Background colors
-  background: "#f4f4f8",
+  background: "#F9F7F7",
   surface: "#ffffff",
-  surfaceSecondary: "#f8f9fa",
-  overlay: "rgba(0, 0, 0, 0.1)",
+  surfaceSecondary: "#DBE2EF",
+  overlay: "rgba(17, 45, 78, 0.5)",
 
   // Text colors
-  text: "#2c3e50",
-  textSecondary: "#7f8c8d",
-  textLight: "#bdc3c7",
+  text: "#112D4E",
+  textSecondary: "#3F72AF",
+  textLight: "#6B7280",
   textOnPrimary: "#ffffff",
-  textOnDark: "#ffffff",
+  textOnDark: "#F9F7F7",
 
   // Border colors
-  border: "#e9ecef",
-  borderLight: "#f1f3f4",
-  borderDark: "#dee2e6",
+  border: "#DBE2EF",
+  borderLight: "#E5E7EB",
+  borderDark: "#3F72AF",
 
   // Status colors
-  success: "#27ae60",
-  warning: "#f39c12",
-  error: "#e74c3c",
-  info: "#3498db",
+  success: "#10B981",
+  warning: "#F59E0B",
+  error: "#EF4444",
+  info: "#3F72AF",
 
   // Input colors
-  inputBackground: "#f8f9fa",
-  inputBorder: "#e9ecef",
-  inputBorderFocused: "#667eea",
-  inputText: "#333333",
-  inputPlaceholder: "#999999",
+  inputBackground: "#ffffff",
+  inputBorder: "#DBE2EF",
+  inputBorderFocused: "#3F72AF",
+  inputText: "#112D4E",
+  inputPlaceholder: "#6B7280",
 
   // Button colors
-  buttonPrimary: "#667eea",
-  buttonSecondary: "#6c757d",
-  buttonDisabled: "#cccccc",
+  buttonPrimary: "#3F72AF",
+  buttonSecondary: "#DBE2EF",
+  buttonDisabled: "#9CA3AF",
 
   // Transparent colors
   white: "#ffffff",
   black: "#000000",
   transparent: "transparent",
   whiteTransparent: "rgba(255, 255, 255, 0.1)",
-  blackTransparent: "rgba(0, 0, 0, 0.1)",
+  blackTransparent: "rgba(17, 45, 78, 0.3)",
 
   // tagline
-  tagline: "#ffffff75",
+  tagline: "#F9F7F7",
 };
 
 export const Typography = {
@@ -275,7 +275,7 @@ export const ComponentThemes = {
     },
     error: {
       borderColor: Colors.error,
-      backgroundColor: "#fdf2f2",
+      backgroundColor: "#FFE5E5",
     },
   },
 
@@ -312,12 +312,12 @@ export const ComponentThemes = {
 export const Gradients = {
   primary: [Colors.gradientStart, Colors.gradientEnd] as const,
   secondary: [Colors.secondary, Colors.primaryDark] as const,
-  success: ["#56ab2f", "#a8e6cf"] as const,
-  warning: ["#f7971e", "#ffd200"] as const,
-  error: ["#ff512f", "#f09819"] as const,
-  info: ["#4facfe", "#00f2fe"] as const,
-  dark: ["#232526", "#414345"] as const,
-  light: ["#ffecd2", "#fcb69f"] as const,
+  success: ["#10B981", "#34D399"] as const,
+  warning: ["#F59E0B", "#FCD34D"] as const,
+  error: ["#EF4444", "#F87171"] as const,
+  info: ["#3F72AF", "#5A8BC7"] as const,
+  dark: ["#112D4E", "#1A3B5C"] as const,
+  light: ["#F9F7F7", "#DBE2EF"] as const,
 };
 
 export default {

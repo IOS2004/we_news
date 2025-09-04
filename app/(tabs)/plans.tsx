@@ -15,8 +15,8 @@ const plans = {
     yearlyOriginalPrice: 1800,
     duration: { monthly: '30 days', yearly: '1 year' },
     features: ['5 News Sources', 'Basic Analytics', 'Standard Support'],
-    color: '#6c757d',
-    gradient: ['#6c757d', '#495057'],
+    color: Colors.textSecondary,
+    gradient: [Colors.textSecondary, Colors.secondary],
     savings: '50% OFF',
     popular: false
   },
@@ -27,8 +27,8 @@ const plans = {
     yearlyOriginalPrice: 6750,
     duration: { monthly: '30 days', yearly: '1 year' },
     features: ['15 News Sources', 'Advanced Analytics', 'Priority Support', 'Ad-Free Experience'],
-    color: '#6f42c1',
-    gradient: ['#6f42c1', '#5a32a3'],
+    color: Colors.primary,
+    gradient: [Colors.primary, Colors.primaryDark],
     savings: '33% OFF',
     popular: true
   },
@@ -39,8 +39,8 @@ const plans = {
     yearlyOriginalPrice: 13500,
     duration: { monthly: '30 days', yearly: '1 year' },
     features: ['Unlimited News Sources', 'Premium Analytics', '24/7 Support', 'Ad-Free Experience', 'Exclusive Content'],
-    color: '#fd7e14',
-    gradient: ['#fd7e14', '#e8590c'],
+    color: Colors.warning,
+    gradient: [Colors.warning, '#E67E22'],
     savings: '33% OFF',
     popular: false
   },
@@ -51,8 +51,8 @@ const plans = {
     yearlyOriginalPrice: 67500,
     duration: { monthly: '30 days', yearly: '1 year' },
     features: ['Everything in Gold', 'AI-Powered Insights', 'Personal News Assistant', 'Early Access Features', 'VIP Support'],
-    color: '#20c997',
-    gradient: ['#20c997', '#17a085'],
+    color: Colors.success,
+    gradient: [Colors.success, '#0E9749'],
     savings: '33% OFF',
     popular: false
   },

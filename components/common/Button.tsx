@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: Spacing.sm,
+    minHeight: 56, // Ensure minimum height for text
   },
   primary: {
     backgroundColor: Colors.buttonPrimary,
@@ -52,6 +53,8 @@ const styles = StyleSheet.create({
     color: Colors.textOnPrimary,
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semibold,
+    lineHeight: Typography.fontSize.base * 1.5, // Add line height for better text rendering
+    textAlign: 'center',
   },
 });
 

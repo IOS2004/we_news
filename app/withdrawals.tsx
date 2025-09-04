@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   backButton: {
     padding: Spacing.xs,
     borderRadius: BorderRadius.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.whiteTransparent,
   },
   headerTitle: {
     fontSize: Typography.fontSize.xl,
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   helpButton: {
     padding: Spacing.xs,
     borderRadius: BorderRadius.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.whiteTransparent,
   },
   tabContainer: {
     flexDirection: 'row',

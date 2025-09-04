@@ -27,8 +27,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     paddingVertical: Spacing.base,
-    paddingBottom: Spacing.xl,
+    paddingHorizontal: Spacing.sm,
     gap: Spacing.base,
-    paddingHorizontal: 0,
   },
 });

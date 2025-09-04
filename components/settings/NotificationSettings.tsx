@@ -13,7 +13,7 @@ const NotificationSettings: React.FC = () => {
   const [marketingNotifications, setMarketingNotifications] = useState(false);
 
   return (
-    <Card style={styles.cardWithPadding}>
+    <Card style={styles.card}>
       <View style={styles.header}>
         <Ionicons name="notifications" size={24} color={Colors.primary} />
         <Text style={styles.headerTitle}>Notification Settings</Text>
@@ -29,7 +29,7 @@ const NotificationSettings: React.FC = () => {
         <Switch
           value={earningsNotifications}
           onValueChange={setEarningsNotifications}
-          trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+          trackColor={{ false: Colors.borderLight, true: Colors.primary }}
           thumbColor={Colors.white}
         />
       </View>
@@ -44,7 +44,7 @@ const NotificationSettings: React.FC = () => {
         <Switch
           value={levelRewardNotifications}
           onValueChange={setLevelRewardNotifications}
-          trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+          trackColor={{ false: Colors.borderLight, true: Colors.primary }}
           thumbColor={Colors.white}
         />
       </View>
@@ -59,7 +59,7 @@ const NotificationSettings: React.FC = () => {
         <Switch
           value={withdrawalNotifications}
           onValueChange={setWithdrawalNotifications}
-          trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+          trackColor={{ false: Colors.borderLight, true: Colors.primary }}
           thumbColor={Colors.white}
         />
       </View>
@@ -74,7 +74,7 @@ const NotificationSettings: React.FC = () => {
         <Switch
           value={adNotifications}
           onValueChange={setAdNotifications}
-          trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+          trackColor={{ false: Colors.borderLight, true: Colors.primary }}
           thumbColor={Colors.white}
         />
       </View>
@@ -89,7 +89,7 @@ const NotificationSettings: React.FC = () => {
         <Switch
           value={newsNotifications}
           onValueChange={setNewsNotifications}
-          trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+          trackColor={{ false: Colors.borderLight, true: Colors.primary }}
           thumbColor={Colors.white}
         />
       </View>
@@ -104,7 +104,7 @@ const NotificationSettings: React.FC = () => {
         <Switch
           value={marketingNotifications}
           onValueChange={setMarketingNotifications}
-          trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+          trackColor={{ false: Colors.borderLight, true: Colors.primary }}
           thumbColor={Colors.white}
         />
       </View>
@@ -115,10 +115,6 @@ const NotificationSettings: React.FC = () => {
 const styles = StyleSheet.create({
   card: {
     padding: Spacing.base,
-    paddingHorizontal: 0,
-  },
-  cardWithPadding: {
-    padding: Spacing.lg,
   },
   header: {
     flexDirection: 'row',

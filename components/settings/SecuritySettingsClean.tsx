@@ -54,7 +54,7 @@ const SecuritySettings: React.FC = () => {
           <Switch
             value={twoFactorEnabled}
             onValueChange={setTwoFactorEnabled}
-            trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+            trackColor={{ false: Colors.borderLight, true: Colors.primary }}
             thumbColor={Colors.white}
           />
         </View>
@@ -69,7 +69,7 @@ const SecuritySettings: React.FC = () => {
           <Switch
             value={biometricEnabled}
             onValueChange={setBiometricEnabled}
-            trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+            trackColor={{ false: Colors.borderLight, true: Colors.primary }}
             thumbColor={Colors.white}
           />
         </View>

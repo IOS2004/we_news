@@ -53,7 +53,7 @@ const SupportSection: React.FC = () => {
   };
 
   return (
-    <Card style={styles.cardWithPadding}>
+    <Card style={styles.card}>
       <View style={styles.header}>
         <Ionicons name="help-circle" size={24} color={Colors.primary} />
         <Text style={styles.headerTitle}>Help & Support</Text>
@@ -110,9 +110,6 @@ const SupportSection: React.FC = () => {
 const styles = StyleSheet.create({
   card: {
     padding: Spacing.base,
-  },
-  cardWithPadding: {
-    padding: Spacing.lg,
   },
   header: {
     flexDirection: 'row',

@@ -20,7 +20,7 @@ export default function SubscriptionFeeScreen() {
   return (
     <ScreenWrapper style={styles.screenWrapper}>
       <LinearGradient
-        colors={['#667eea', '#764ba2']}
+        colors={[Colors.primary, Colors.secondary]}
         style={styles.gradient}
       >
         {/* Header Section */}
@@ -213,6 +213,7 @@ const styles = StyleSheet.create({
   laterText: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.textSecondary,
+    color: Colors.textOnDark,
+    textDecorationLine: 'underline',
   },
 });

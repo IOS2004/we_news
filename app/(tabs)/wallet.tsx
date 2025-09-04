@@ -3,8 +3,33 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper, Header } from '../../components/common';
-import { TransactionListItem } from '../../components/wallet';
+import { TransactionListItem, AddMoneyCard } from '../../components/wallet';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+
+// Dummy add money transactions
+const addMoneyTransactions = [
+  {
+    id: '1',
+    amount: 1000,
+    method: 'UPI Payment',
+    date: '2024-01-21',
+    status: 'success' as const,
+  },
+  {
+    id: '2',
+    amount: 500,
+    method: 'Net Banking',
+    date: '2024-01-20',
+    status: 'success' as const,
+  },
+  {
+    id: '3',
+    amount: 2000,
+    method: 'Debit Card',
+    date: '2024-01-19',
+    status: 'pending' as const,
+  },
+];
 
 // Dummy transaction data
 const dummyTransactions = [
@@ -102,6 +127,10 @@ interface Transaction {
 export default function WalletScreen() {
   const [selectedFilter, setSelectedFilter] = useState('all');
   
+  const handleAddMoney = () => {
+    router.push('/add-money');
+  };
+
   const handleWithdrawal = () => {
     router.push('/withdrawals');
   };
@@ -146,7 +175,7 @@ export default function WalletScreen() {
             <Text style={styles.actionText}>Withdraw</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/(tabs)/earnings')}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleAddMoney}>
             <View style={styles.actionIcon}>
               <Ionicons name="add-outline" size={24} color={Colors.success} />
             </View>
@@ -189,6 +218,33 @@ export default function WalletScreen() {
                 <Text style={styles.statTrendText}>-5%</Text>
               </View>
             </View>
+          </View>
+        </View>
+
+        {/* Recent Add Money */}
+        <View style={styles.addMoneySection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recent Add Money</Text>
+            <TouchableOpacity onPress={handleAddMoney}>
+              <Text style={styles.viewAllText}>Add More</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.addMoneyList}>
+            {addMoneyTransactions.slice(0, 3).map((item) => (
+              <AddMoneyCard
+                key={item.id}
+                amount={item.amount}
+                method={item.method}
+                date={new Date(item.date).toLocaleDateString('en-IN', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+                status={item.status}
+                onPress={() => {}}
+              />
+            ))}
           </View>
         </View>
 
@@ -381,6 +437,19 @@ const styles = StyleSheet.create({
     color: Colors.textOnPrimary,
   },
   transactionList: {
+    gap: Spacing.sm,
+  },
+  addMoneySection: {
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.md,
+  },
+  addMoneyList: {
     gap: Spacing.sm,
   },
 });
