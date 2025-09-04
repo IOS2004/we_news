@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Button, ScreenWrapper } from '../../components/common';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, Gradients } from '../../constants/theme';
 
 export default function SubscriptionFeeScreen() {
   const handlePayment = () => {
@@ -20,8 +20,10 @@ export default function SubscriptionFeeScreen() {
   return (
     <ScreenWrapper style={styles.screenWrapper}>
       <LinearGradient
-        colors={[Colors.primary, Colors.secondary]}
+        colors={Gradients.primary}
         style={styles.gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       >
         {/* Header Section */}
         <View style={styles.headerSection}>
