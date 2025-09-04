@@ -114,6 +114,11 @@ export default function ProfileScreen() {
             onPress={() => handleNavigation('/settings')} 
           />
           <MenuItem 
+            title="Developer Settings" 
+            icon="code-slash-outline" 
+            onPress={() => handleNavigation('/developer-settings')} 
+          />
+          <MenuItem 
             title="Logout" 
             icon="log-out-outline" 
             onPress={handleLogout}

@@ -9,6 +9,12 @@ import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants
 export default function WithdrawalsScreen() {
   const [activeTab, setActiveTab] = useState<'request' | 'history'>('request');
 
+  // Redirect to separate pages for better UX
+  React.useEffect(() => {
+    // Auto-navigate to withdrawal request page
+    router.replace('/withdrawal-request');
+  }, []);
+
   return (
     <ScreenWrapper style={styles.container}>
       {/* Custom Header */}

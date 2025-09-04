@@ -127,16 +127,20 @@ interface Transaction {
 export default function WalletScreen() {
   const [selectedFilter, setSelectedFilter] = useState('all');
   
+  const handleWithdrawal = () => {
+    router.push('/withdrawal-request');
+  };
+
   const handleAddMoney = () => {
     router.push('/add-money');
   };
 
-  const handleWithdrawal = () => {
-    router.push('/withdrawals');
-  };
-
   const handleRedeem = () => {
     router.push('/redeem');
+  };
+
+  const handleHistory = () => {
+    router.push('/withdrawal-history');
   };
 
   const filteredTransactions = selectedFilter === 'all' 
@@ -193,7 +197,7 @@ export default function WalletScreen() {
             <Text style={styles.actionText}>Redeem</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/withdrawals')}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleHistory}>
             <View style={styles.actionIcon}>
               <Ionicons name="time-outline" size={24} color={Colors.warning} />
             </View>

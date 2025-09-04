@@ -3,6 +3,7 @@
 ## 🚀 Quick Setup (5 minutes)
 
 ### Step 1: Push to GitHub
+
 ```bash
 # If you haven't initialized git yet
 git init
@@ -16,6 +17,7 @@ git push -u origin main
 ```
 
 ### Step 2: Trigger Build
+
 The build will start automatically when you push to `main` branch, or you can:
 
 1. Go to your GitHub repository
@@ -24,6 +26,7 @@ The build will start automatically when you push to `main` branch, or you can:
 4. Click **Run workflow** button
 
 ### Step 3: Download APK
+
 1. Wait for build to complete (15-20 minutes)
 2. Go to **Actions** tab
 3. Click on the completed build
@@ -36,6 +39,7 @@ The build will start automatically when you push to `main` branch, or you can:
 ## 🔧 Advanced Options
 
 ### Manual Trigger
+
 ```bash
 # Push any changes to trigger build
 git add .
@@ -44,6 +48,7 @@ git push
 ```
 
 ### Create Release
+
 ```bash
 # Tag a release to create GitHub release with APK
 git tag v1.0.0
@@ -51,6 +56,7 @@ git push origin v1.0.0
 ```
 
 ### Check Build Status
+
 - Green ✅ = Build successful, APK ready
 - Red ❌ = Build failed, check logs
 - Yellow 🟡 = Build in progress
@@ -69,14 +75,17 @@ git push origin v1.0.0
 ## 🛠 Troubleshooting
 
 ### Build Fails?
+
 - Check **Actions** logs for specific errors
 - Common issues: dependency conflicts, SDK versions
 
 ### APK Too Large?
+
 - Enable Proguard/R8 in `android/app/build.gradle`
 - Remove unused assets
 
 ### Can't Install APK?
+
 - Enable "Install unknown apps" in Android settings
 - Check if APK is corrupted during download
 
@@ -89,7 +98,7 @@ git push origin v1.0.0
 ✅ **Automatic** - builds on every push  
 ✅ **Reliable** - consistent environment  
 ✅ **Shareable** - easy APK distribution  
-✅ **Version control** - build history tracking  
+✅ **Version control** - build history tracking
 
 ---
 
