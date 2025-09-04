@@ -2,7 +2,7 @@
   "expo": {
     "name": "WeNews",
     "slug": "we-news",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -27,6 +27,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "assetBundlePatterns": ["**/*"],
     "extra": {
       "eas": {
         "projectId": "79ed2a90-c9e2-4281-b0ed-646bfede4c83"

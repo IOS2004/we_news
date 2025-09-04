@@ -1,65 +1,72 @@
 // Theme configuration for consistent UI across the app
 
 export const Colors = {
-  // Primary colors - Using medium blue as main accent
-  primary: "#3F72AF",
-  primaryDark: "#2E5A8A",
-  primaryLight: "#5A8BC7",
+  // Primary colors - Modern vibrant blue-purple gradient
+  primary: "#6366F1", // Vibrant indigo
+  primaryDark: "#4F46E5", // Deeper indigo
+  primaryLight: "#8B5CF6", // Light purple
 
-  // Secondary colors - Using dark navy blue
-  secondary: "#112D4E",
-  secondaryDark: "#0B1F35",
-  secondaryLight: "#1A3B5C",
+  // Secondary colors - Complementary teal/emerald
+  secondary: "#10B981", // Emerald green
+  secondaryDark: "#059669", // Dark emerald
+  secondaryLight: "#34D399", // Light emerald
 
-  // Gradient colors
-  gradientStart: "#3F72AF",
-  gradientEnd: "#112D4E",
+  // Gradient colors - Beautiful gradient combinations
+  gradientStart: "#6366F1", // Indigo
+  gradientEnd: "#8B5CF6", // Purple
+  gradientSecondary: "#10B981", // Emerald accent
 
-  // Background colors
-  background: "#F9F7F7",
-  surface: "#ffffff",
-  surfaceSecondary: "#DBE2EF",
-  overlay: "rgba(17, 45, 78, 0.5)",
+  // Background colors - Clean and modern
+  background: "#F8FAFC", // Very light gray-blue
+  surface: "#FFFFFF", // Pure white
+  surfaceSecondary: "#F1F5F9", // Light slate
+  overlay: "rgba(99, 102, 241, 0.1)", // Soft indigo overlay
 
-  // Text colors
-  text: "#112D4E",
-  textSecondary: "#3F72AF",
-  textLight: "#6B7280",
-  textOnPrimary: "#ffffff",
-  textOnDark: "#F9F7F7",
+  // Text colors - High contrast and readable
+  text: "#0F172A", // Dark slate
+  textSecondary: "#475569", // Medium slate
+  textLight: "#64748B", // Light slate
+  textOnPrimary: "#FFFFFF", // White on primary
+  textOnDark: "#F8FAFC", // Light on dark
 
-  // Border colors
-  border: "#DBE2EF",
-  borderLight: "#E5E7EB",
-  borderDark: "#3F72AF",
+  // Border colors - Subtle and modern
+  border: "#E2E8F0", // Light slate border
+  borderLight: "#F1F5F9", // Very light border
+  borderDark: "#CBD5E1", // Medium border
 
-  // Status colors
-  success: "#10B981",
-  warning: "#F59E0B",
-  error: "#EF4444",
-  info: "#3F72AF",
+  // Status colors - Vibrant and clear
+  success: "#22C55E", // Bright green
+  warning: "#F59E0B", // Amber warning
+  error: "#EF4444", // Red error
+  info: "#3B82F6", // Blue info
 
   // Input colors
-  inputBackground: "#ffffff",
-  inputBorder: "#DBE2EF",
-  inputBorderFocused: "#3F72AF",
-  inputText: "#112D4E",
-  inputPlaceholder: "#6B7280",
+  inputBackground: "#FFFFFF",
+  inputBorder: "#E2E8F0",
+  inputBorderFocused: "#6366F1",
+  inputText: "#0F172A",
+  inputPlaceholder: "#94A3B8",
 
   // Button colors
-  buttonPrimary: "#3F72AF",
-  buttonSecondary: "#DBE2EF",
-  buttonDisabled: "#9CA3AF",
+  buttonPrimary: "#6366F1",
+  buttonSecondary: "#F1F5F9",
+  buttonDisabled: "#CBD5E1",
 
   // Transparent colors
-  white: "#ffffff",
+  white: "#FFFFFF",
   black: "#000000",
   transparent: "transparent",
   whiteTransparent: "rgba(255, 255, 255, 0.1)",
-  blackTransparent: "rgba(17, 45, 78, 0.3)",
+  blackTransparent: "rgba(15, 23, 42, 0.3)",
+
+  // Accent colors for variety
+  accent1: "#F97316", // Orange
+  accent2: "#EC4899", // Pink
+  accent3: "#8B5CF6", // Purple
+  accent4: "#06B6D4", // Cyan
 
   // tagline
-  tagline: "#F9F7F7",
+  tagline: "#F8FAFC",
 };
 
 export const Typography = {

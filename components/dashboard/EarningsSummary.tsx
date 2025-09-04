@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Card from '../common/Card';
+import { Colors, Typography, Spacing } from '../../constants/theme';
 
 interface EarningsSummaryProps {
   today: number;
@@ -47,49 +48,49 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Spacing.lg,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
   },
   badge: {
-    backgroundColor: '#d4edda',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    backgroundColor: Colors.success + '20',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
     borderRadius: 12,
   },
   badgeText: {
-    fontSize: 12,
-    color: '#155724',
-    fontWeight: '500',
+    fontSize: Typography.fontSize.xs,
+    color: Colors.success,
+    fontWeight: Typography.fontWeight.medium,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   label: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: Typography.fontSize.base,
+    color: Colors.textSecondary,
   },
   valueContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   value: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginRight: 8,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginRight: Spacing.sm,
   },
   greenDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#27ae60',
+    backgroundColor: Colors.secondary,
   },
 });
 

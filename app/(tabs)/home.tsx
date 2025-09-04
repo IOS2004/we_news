@@ -78,7 +78,7 @@ export default function HomeScreen() {
           <View style={styles.quickAccessGrid}>
             <TouchableOpacity style={styles.quickAccessCard} onPress={() => handleNavigation('/(tabs)/earnings')}>
               <LinearGradient
-                colors={['#3498db', '#2980b9']}
+                colors={[Colors.primary, Colors.primaryLight]}
                 style={styles.quickAccessGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -91,7 +91,7 @@ export default function HomeScreen() {
             
             <TouchableOpacity style={styles.quickAccessCard} onPress={() => handleNavigation('/(tabs)/news')}>
               <LinearGradient
-                colors={['#e74c3c', '#c0392b']}
+                colors={[Colors.secondary, Colors.secondaryLight]}
                 style={styles.quickAccessGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -231,7 +231,7 @@ export default function HomeScreen() {
                 </View>
                 <View style={styles.progressBar}>
                   <LinearGradient
-                    colors={[Colors.success, '#27ae60']}
+                    colors={[Colors.secondary, Colors.secondaryLight]}
                     style={[styles.progressFill, { width: '60%' }]}
                   />
                 </View>

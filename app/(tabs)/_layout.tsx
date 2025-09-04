@@ -9,6 +9,24 @@ export default function TabsLayout() {
       headerShown: false,
       tabBarActiveTintColor: Colors.primary,
       tabBarInactiveTintColor: Colors.textLight,
+      tabBarStyle: {
+        backgroundColor: Colors.surface,
+        borderTopColor: Colors.border,
+        borderTopWidth: 1,
+        elevation: 8,
+        shadowColor: Colors.black,
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        paddingBottom: 5,
+        paddingTop: 5,
+        height: 65,
+      },
+      tabBarLabelStyle: {
+        fontSize: 12,
+        fontWeight: '500',
+        marginTop: 4,
+      },
     }}>
       <Tabs.Screen 
         name="home" 
