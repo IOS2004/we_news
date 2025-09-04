@@ -135,6 +135,10 @@ export default function WalletScreen() {
     router.push('/withdrawals');
   };
 
+  const handleRedeem = () => {
+    router.push('/redeem');
+  };
+
   const filteredTransactions = selectedFilter === 'all' 
     ? dummyTransactions 
     : dummyTransactions.filter(t => t.type === selectedFilter);
@@ -182,18 +186,18 @@ export default function WalletScreen() {
             <Text style={styles.actionText}>Add Money</Text>
           </TouchableOpacity>
           
+          <TouchableOpacity style={styles.actionButton} onPress={handleRedeem}>
+            <View style={styles.actionIcon}>
+              <Ionicons name="gift-outline" size={24} color={Colors.accent2} />
+            </View>
+            <Text style={styles.actionText}>Redeem</Text>
+          </TouchableOpacity>
+          
           <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/withdrawals')}>
             <View style={styles.actionIcon}>
               <Ionicons name="time-outline" size={24} color={Colors.warning} />
             </View>
             <Text style={styles.actionText}>History</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.actionButton}>
-            <View style={styles.actionIcon}>
-              <Ionicons name="card-outline" size={24} color={Colors.info} />
-            </View>
-            <Text style={styles.actionText}>Cards</Text>
           </TouchableOpacity>
         </View>
 

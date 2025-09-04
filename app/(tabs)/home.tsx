@@ -72,6 +72,9 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Enhanced News Highlight - Moved to top */}
+        <NewsHighlightReel articles={dummyNews} />
+
         {/* Enhanced Quick Access Section */}
         <View style={styles.quickAccessSection}>
           <Text style={styles.quickAccessTitle}>What would you like to do?</Text>
@@ -246,9 +249,6 @@ export default function HomeScreen() {
 
         {/* Enhanced Notifications */}
         <DashboardNotifications notifications={notifications} />
-
-        {/* Enhanced News Highlight */}
-        <NewsHighlightReel articles={dummyNews} />
       </ScrollView>
     </ScreenWrapper>
   );

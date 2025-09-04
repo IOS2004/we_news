@@ -1,0 +1,75 @@
+name: Build Android APK
+
+on:
+  # Trigger on push to main branch
+  push:
+    branches: [ main ]
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📦 Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: 🏗 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: ☕ Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: 🔧 Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: 📱 Install dependencies
+      run: npm ci
+      
+    - name: 🏗 Setup Expo
+      uses: expo/expo-github-action@v8
+      with:
+        expo-version: latest
+        
+    - name: 🔨 Prebuild Android
+      run: npx expo prebuild --platform android --clear
+      
+    - name: 🏭 Build APK
+      run: |
+        cd android
+        chmod +x ./gradlew
+        ./gradlew assembleRelease
+        
+    - name: 📊 Get APK info
+      run: |
+        APK_PATH="android/app/build/outputs/apk/release/app-release.apk"
+        if [ -f "$APK_PATH" ]; then
+          echo "✅ APK built successfully!"
+          echo "📦 APK size: $(du -h $APK_PATH | cut -f1)"
+          echo "📍 APK path: $APK_PATH"
+        else
+          echo "❌ APK not found!"
+          exit 1
+        fi
+        
+    - name: 📤 Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: wenews-apk-${{ github.run_number }}
+        path: android/app/build/outputs/apk/release/app-release.apk
+        retention-days: 30
+        
+    - name: 📋 Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: android/app/build/outputs/apk/release/app-release.apk
+        generate_release_notes: true

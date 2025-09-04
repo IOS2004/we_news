@@ -105,9 +105,9 @@ const styles = StyleSheet.create({
   },
   actionCard: {
     width: '47%',
-    aspectRatio: 1,
+    aspectRatio: 1.2,
     borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
+    padding: Spacing.md,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: Spacing.md,
