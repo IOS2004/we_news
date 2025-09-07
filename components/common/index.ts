@@ -5,3 +5,8 @@ export { default as InputField } from "./InputField";
 export { default as Logo } from "./Logo";
 export { default as OptimizedImage } from "./OptimizedImage";
 export { default as ScreenWrapper } from "./ScreenWrapper";
+export {
+  SkeletonLoader,
+  NewsCardSkeleton,
+  NewsListSkeleton,
+} from "./SkeletonLoader";

@@ -1,26 +1,35 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { router } from 'expo-router';
 import Card from '../common/Card';
+import { NewsCardSkeleton } from '../common/SkeletonLoader';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
-
-interface NewsArticle {
-  id: string;
-  title: string;
-  thumbnail: string;
-  category: string;
-}
+import { Article } from '../../types/news';
 
 interface NewsHighlightReelProps {
-  articles: NewsArticle[];
+  articles: Article[];
+  isLoading?: boolean;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 const cardWidth = screenWidth - (Spacing.lg * 2); // Account for card padding
 const itemWidth = cardWidth - (Spacing.lg * 2); // Account for internal padding
 
-const NewsHighlightReel: React.FC<NewsHighlightReelProps> = ({ articles }) => {
+const NewsHighlightReel: React.FC<NewsHighlightReelProps> = ({ articles, isLoading = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
+
+  // Show skeleton loading if loading or no articles
+  if (isLoading || articles.length === 0) {
+    return (
+      <Card style={styles.card}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Latest News</Text>
+        </View>
+        <NewsCardSkeleton />
+      </Card>
+    );
+  }
 
   const getCategoryColor = (category: string) => {
     switch (category.toLowerCase()) {
@@ -44,8 +53,23 @@ const NewsHighlightReel: React.FC<NewsHighlightReelProps> = ({ articles }) => {
     setCurrentIndex(index);
   };
 
-  const renderItem = ({ item, index }: { item: NewsArticle; index: number }) => (
-    <TouchableOpacity style={styles.articleContainer}>
+  const renderItem = ({ item, index }: { item: Article; index: number }) => (
+    <TouchableOpacity 
+      style={styles.articleContainer}
+      onPress={() => router.push({
+        pathname: '/article/[id]',
+        params: {
+          id: item.id,
+          title: item.title,
+          description: item.description || '',
+          author: item.author || '',
+          image: item.thumbnail,
+          timeAgo: item.timeAgo || '',
+          url: item.url || '',
+          source: item.source || '',
+        }
+      })}
+    >
       <View style={styles.imageContainer}>
         <Image 
           source={{ uri: item.thumbnail }} 

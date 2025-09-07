@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, View, Text, TouchableOpacity, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -7,12 +7,54 @@ import { Button, ScreenWrapper } from '../../components/common';
 import { EarningsSummary, NewsHighlightReel, OverviewCard } from '../../components/dashboard';
 import { DashboardNotifications, QuickActions } from '../../components/dashboard';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { getTopHeadlines } from '../../services/externalNewsApi';
+import { Article } from '../../types/news';
 
 const dummyNews = [
-  { id: '1', title: 'Breaking: Major Political Development Reshapes Economic Policy', thumbnail: 'https://picsum.photos/800/600?random=1', category: 'Politics' },
-  { id: '2', title: 'Tech Giants Report Record Quarterly Earnings Growth', thumbnail: 'https://picsum.photos/800/600?random=2', category: 'Business' },
-  { id: '3', title: 'Revolutionary AI Technology Breakthrough Changes Industry', thumbnail: 'https://picsum.photos/800/600?random=3', category: 'Technology' },
-  { id: '4', title: 'Entertainment Industry Embraces New Digital Platforms', thumbnail: 'https://picsum.photos/800/600?random=4', category: 'Entertainment' },
+  { 
+    id: '1', 
+    title: 'Breaking: Major Political Development Reshapes Economic Policy', 
+    thumbnail: 'https://picsum.photos/800/600?random=1', 
+    category: 'Politics',
+    description: 'Latest political developments are bringing significant changes to the economic landscape of the country.',
+    author: 'Political Correspondent',
+    timeAgo: '2h ago',
+    source: 'Sample News',
+    url: 'https://example.com/article1'
+  },
+  { 
+    id: '2', 
+    title: 'Tech Giants Report Record Quarterly Earnings Growth', 
+    thumbnail: 'https://picsum.photos/800/600?random=2', 
+    category: 'Business',
+    description: 'Major technology companies have announced exceptional quarterly results showing unprecedented growth.',
+    author: 'Business Reporter',
+    timeAgo: '4h ago',
+    source: 'Business Today',
+    url: 'https://example.com/article2'
+  },
+  { 
+    id: '3', 
+    title: 'Revolutionary AI Technology Breakthrough Changes Industry', 
+    thumbnail: 'https://picsum.photos/800/600?random=3', 
+    category: 'Technology',
+    description: 'A new artificial intelligence breakthrough is set to transform multiple industries worldwide.',
+    author: 'Tech Analyst',
+    timeAgo: '6h ago',
+    source: 'Tech Times',
+    url: 'https://example.com/article3'
+  },
+  { 
+    id: '4', 
+    title: 'Entertainment Industry Embraces New Digital Platforms', 
+    thumbnail: 'https://picsum.photos/800/600?random=4', 
+    category: 'Entertainment',
+    description: 'The entertainment sector is rapidly adopting new digital distribution platforms and technologies.',
+    author: 'Entertainment Reporter',
+    timeAgo: '8h ago',
+    source: 'Entertainment Weekly',
+    url: 'https://example.com/article4'
+  },
 ];
 
 const notifications = [
@@ -22,6 +64,33 @@ const notifications = [
 ];
 
 export default function HomeScreen() {
+  const [newsArticles, setNewsArticles] = useState<Article[]>([]);
+  const [isLoadingNews, setIsLoadingNews] = useState(true);
+
+  // Fetch latest news on component mount
+  useEffect(() => {
+    const fetchLatestNews = async () => {
+      setIsLoadingNews(true);
+      try {
+        const latestNews = await getTopHeadlines();
+        if (latestNews && latestNews.length > 0) {
+          // Take first 4 articles for homepage highlights
+          setNewsArticles(latestNews.slice(0, 4));
+        } else {
+          // Use dummy data as fallback only if API returns nothing
+          setNewsArticles(dummyNews);
+        }
+      } catch (error) {
+        console.error('Error fetching latest news for homepage:', error);
+        // Use dummy data as fallback on error
+        setNewsArticles(dummyNews);
+      } finally {
+        setIsLoadingNews(false);
+      }
+    };
+
+    fetchLatestNews();
+  }, []);
   const handleNavigation = (route: string) => {
     router.push(route as any);
   };
@@ -72,8 +141,8 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Enhanced News Highlight - Moved to top */}
-        <NewsHighlightReel articles={dummyNews} />
+        {/* Enhanced News Highlight - Now with real news data and skeleton loading */}
+        <NewsHighlightReel articles={newsArticles} isLoading={isLoadingNews} />
 
         {/* Enhanced Quick Access Section */}
         <View style={styles.quickAccessSection}>
