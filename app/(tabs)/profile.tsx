@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper } from '../../components/common';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import { useAuth } from '../../contexts/AuthContext';
+import { showToast } from '../../utils/toast';
 
 export default function ProfileScreen() {
   const { user, signOut, isAuthenticated } = useAuth();
@@ -14,24 +15,18 @@ export default function ProfileScreen() {
   };
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await signOut();
-            router.replace('/(auth)/sign-in');
-          },
-        },
-      ]
-    );
+    // Show confirmation toast
+    showToast.warning({
+      title: 'Confirm Logout',
+      message: 'Please use the sign out option. Logging out...',
+      duration: 2000,
+    });
+    
+    // Wait a moment for user to see the message, then sign out
+    setTimeout(async () => {
+      await signOut();
+      router.replace('/(auth)/sign-in');
+    }, 1500);
   };
 
   const handleViewProfile = () => {

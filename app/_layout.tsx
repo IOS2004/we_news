@@ -1,7 +1,9 @@
 import { Stack } from 'expo-router';
 import React from 'react';
+import Toast from 'react-native-toast-message';
 import { DeveloperProvider } from '../contexts/DeveloperContext';
 import { AuthProvider } from '../contexts/AuthContext';
+import { toastConfig } from '../config/toastConfig';
 
 export default function RootLayout() {
   return (
@@ -21,6 +23,8 @@ export default function RootLayout() {
           <Stack.Screen name="add-money" />
           <Stack.Screen name="redeem" />
         </Stack>
+        {/* Toast Component with custom config */}
+        <Toast config={toastConfig} />
       </DeveloperProvider>
     </AuthProvider>
   );

@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Alert } from 'react-native';
 import { 
   authAPI, 
   userAPI, 
@@ -11,6 +10,7 @@ import {
   UpdateProfileData,
   ApiResponse 
 } from '../services/api';
+import { showToast, handleApiError } from '../utils/toast';
 
 interface AuthContextType {
   // State
@@ -78,12 +78,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const handleError = (error: any) => {
-    const message = error?.message || 'An unexpected error occurred';
-    setError(message);
-    console.error('Auth error:', error);
-  };
-
   const clearError = () => {
     setError(null);
   };
@@ -98,13 +92,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.success && response.data) {
         await storage.saveAuthData(response.data);
         setUser(response.data.user);
+        showToast.success({
+          title: 'Welcome!',
+          message: `Account created successfully. Welcome ${response.data.user.firstName}!`,
+        });
         return true;
       } else {
-        handleError(response);
+        handleApiError(response, 'Failed to create account');
         return false;
       }
     } catch (error: any) {
-      handleError(error);
+      handleApiError(error, 'Failed to create account');
       return false;
     } finally {
       setIsLoading(false);
@@ -121,13 +119,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.success && response.data) {
         await storage.saveAuthData(response.data);
         setUser(response.data.user);
+        showToast.success({
+          title: 'Welcome back!',
+          message: `Successfully signed in. Hi ${response.data.user.firstName}!`,
+        });
         return true;
       } else {
-        handleError(response);
+        handleApiError(response, 'Failed to sign in');
         return false;
       }
     } catch (error: any) {
-      handleError(error);
+      handleApiError(error, 'Failed to sign in');
       return false;
     } finally {
       setIsLoading(false);
@@ -140,8 +142,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await storage.clearAuthData();
       setUser(null);
       setError(null);
+      showToast.info({
+        title: 'Signed out',
+        message: 'You have been successfully signed out',
+      });
     } catch (error) {
       console.error('Error signing out:', error);
+      handleApiError(error, 'Failed to sign out');
     } finally {
       setIsLoading(false);
     }
@@ -158,13 +165,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const updatedUser = response.data.user;
         setUser(updatedUser);
         await storage.saveUser(updatedUser);
+        showToast.success({
+          title: 'Profile Updated',
+          message: 'Your profile has been updated successfully',
+        });
         return true;
       } else {
-        handleError(response);
+        handleApiError(response, 'Failed to update profile');
         return false;
       }
     } catch (error: any) {
-      handleError(error);
+      handleApiError(error, 'Failed to update profile');
       return false;
     } finally {
       setIsLoading(false);
@@ -179,13 +190,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await userAPI.changePassword(currentPassword, newPassword);
       
       if (response.success) {
+        showToast.success({
+          title: 'Password Changed',
+          message: 'Your password has been changed successfully',
+        });
         return true;
       } else {
-        handleError(response);
+        handleApiError(response, 'Failed to change password');
         return false;
       }
     } catch (error: any) {
-      handleError(error);
+      handleApiError(error, 'Failed to change password');
       return false;
     } finally {
       setIsLoading(false);
@@ -200,13 +215,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authAPI.forgotPassword(email);
       
       if (response.success) {
+        showToast.success({
+          title: 'Email Sent',
+          message: 'Password reset link has been sent to your email',
+        });
         return true;
       } else {
-        handleError(response);
+        handleApiError(response, 'Failed to send reset email');
         return false;
       }
     } catch (error: any) {
-      handleError(error);
+      handleApiError(error, 'Failed to send reset email');
       return false;
     } finally {
       setIsLoading(false);
@@ -221,13 +240,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authAPI.resetPassword(token, password);
       
       if (response.success) {
+        showToast.success({
+          title: 'Password Reset',
+          message: 'Your password has been reset successfully',
+        });
         return true;
       } else {
-        handleError(response);
+        handleApiError(response, 'Failed to reset password');
         return false;
       }
     } catch (error: any) {
-      handleError(error);
+      handleApiError(error, 'Failed to reset password');
       return false;
     } finally {
       setIsLoading(false);

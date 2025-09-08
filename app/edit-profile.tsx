@@ -6,7 +6,6 @@ import {
   ScrollView, 
   TouchableOpacity, 
   TextInput, 
-  Alert,
   ActivityIndicator 
 } from 'react-native';
 import { router } from 'expo-router';
@@ -14,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button, InputField, ScreenWrapper } from '../components/common';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/theme';
 import { useAuth } from '../contexts/AuthContext';
+import { showToast } from '../utils/toast';
 
 export default function EditProfileScreen() {
   const { user, updateProfile, isLoading } = useAuth();
@@ -30,7 +30,10 @@ export default function EditProfileScreen() {
 
   const handleSave = async () => {
     if (!firstName.trim() || !lastName.trim()) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      showToast.warning({
+        title: 'Missing Information',
+        message: 'Please fill in all required fields',
+      });
       return;
     }
 
@@ -43,10 +46,9 @@ export default function EditProfileScreen() {
     const success = await updateProfile(updateData);
     
     if (success) {
-      Alert.alert('Success', 'Profile updated successfully', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
+      router.back();
     }
+    // Success toast is shown in AuthContext
   };
 
   const handleNotificationToggle = () => {

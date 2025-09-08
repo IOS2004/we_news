@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { Button, InputField, ScreenWrapper, Logo } from '../../components/common';
 import { Colors, Typography, Spacing, BorderRadius, Shadows, Gradients, Layout } from '../../constants/theme';
 import { useAuth } from '../../contexts/AuthContext';
+import { showToast } from '../../utils/toast';
 
 export default function SignUpScreen() {
   const [firstName, setFirstName] = useState('');
@@ -27,12 +28,18 @@ export default function SignUpScreen() {
 
   const handleSignUp = async () => {
     if (!firstName.trim() || !lastName.trim() || !username.trim() || !email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      showToast.warning({
+        title: 'Missing Information',
+        message: 'Please fill in all required fields',
+      });
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
+      showToast.warning({
+        title: 'Invalid Password',
+        message: 'Password must be at least 6 characters long',
+      });
       return;
     }
 
@@ -50,9 +57,8 @@ export default function SignUpScreen() {
     if (success) {
       // After successful backend signup, redirect to KYC verification
       router.push('/(auth)/kyc-verification');
-    } else if (error) {
-      Alert.alert('Sign Up Failed', error);
     }
+    // Error handling is now done through toast notifications in AuthContext
   };
 
   const handleSignInNavigation = () => {
