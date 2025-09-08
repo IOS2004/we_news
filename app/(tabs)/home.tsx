@@ -9,6 +9,7 @@ import { DashboardNotifications, QuickActions } from '../../components/dashboard
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import { getTopHeadlines } from '../../services/externalNewsApi';
 import { Article } from '../../types/news';
+import { useAuth } from '../../contexts/AuthContext';
 
 const dummyNews = [
   { 
@@ -66,6 +67,7 @@ const notifications = [
 export default function HomeScreen() {
   const [newsArticles, setNewsArticles] = useState<Article[]>([]);
   const [isLoadingNews, setIsLoadingNews] = useState(true);
+  const { user } = useAuth();
 
   // Fetch latest news on component mount
   useEffect(() => {
@@ -129,7 +131,7 @@ export default function HomeScreen() {
               <Ionicons name="person" size={20} color="#fff" />
             </View>
           </TouchableOpacity>
-          <Text style={styles.greetingText}>Hi, User!</Text>
+          <Text style={styles.greetingText}>Hi, {user?.firstName || 'User'}!</Text>
         </View>
         
         <View style={styles.rightSection}>

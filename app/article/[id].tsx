@@ -131,6 +131,7 @@ export default function ArticleDetailScreen() {
     <ScreenWrapper>
       <Header 
         title="समाचार विवरण / Article Details"
+        canGoBack
       />
       
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>

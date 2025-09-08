@@ -3,13 +3,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // API Configuration
 const getApiBaseUrl = () => {
-  if (!__DEV__) {
-    return "https://your-production-api.com/api";
-  }
-
-  // For development, use IP address for mobile (Expo Go)
-  // React Native doesn't have window object, so this should work for mobile
-  return "http://10.10.4.239:5000/api";
+  // Always use the hosted backend on Render
+  return "https://wenews.onrender.com/api";
 };
 
 const API_BASE_URL = getApiBaseUrl();
