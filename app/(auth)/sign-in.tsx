@@ -1,22 +1,34 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { router } from 'expo-router';
 import { Button, InputField, ScreenWrapper, Logo } from '../../components/common';
 import { Colors, Typography, Spacing, BorderRadius, Shadows, Gradients, Layout } from '../../constants/theme';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const passwordRef = useRef<TextInput>(null);
+  
+  const { signIn, isLoading, error } = useAuth();
 
-  const handleSignIn = () => {
-    // For demo purposes, directly navigate to the main tabs
-    // In a real app, you would validate credentials here
-    router.replace('/(tabs)/home');
+  const handleSignIn = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    const success = await signIn({ email: email.trim(), password });
+    
+    if (success) {
+      router.replace('/(tabs)/home');
+    } else if (error) {
+      Alert.alert('Sign In Failed', error);
+    }
   };
 
   const handleSignUpNavigation = () => {
@@ -98,7 +110,11 @@ export default function SignInScreen() {
               </TouchableOpacity>
 
               <View style={styles.buttonContainer}>
-                <Button title="Sign In" onPress={handleSignIn} />
+                <Button 
+                  title="Sign In" 
+                  onPress={handleSignIn} 
+                  loading={isLoading}
+                />
               </View>
 
               <View style={styles.signUpSection}>

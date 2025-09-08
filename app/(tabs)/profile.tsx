@@ -1,23 +1,75 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper } from '../../components/common';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ProfileScreen() {
+  const { user, signOut, isAuthenticated } = useAuth();
+
   const handleNavigation = (route: string) => {
     router.push(route as any);
   };
 
-  const handleLogout = () => {
-    // In a real app, you would clear user session here
-    router.replace('/(auth)/sign-in');
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            router.replace('/(auth)/sign-in');
+          },
+        },
+      ]
+    );
   };
 
   const handleViewProfile = () => {
-    console.log('View profile pressed');
+    router.push('/edit-profile');
   };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    const firstInitial = user.firstName?.[0] || '';
+    const lastInitial = user.lastName?.[0] || '';
+    return (firstInitial + lastInitial).toUpperCase() || user.username?.[0]?.toUpperCase() || 'U';
+  };
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (!user) return 'User';
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    return user.username || user.email || 'User';
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <ScreenWrapper style={styles.container}>
+        <View style={styles.notAuthenticatedContainer}>
+          <Text style={styles.notAuthenticatedText}>Please sign in to view your profile</Text>
+          <TouchableOpacity 
+            style={styles.signInButton}
+            onPress={() => router.replace('/(auth)/sign-in')}
+          >
+            <Text style={styles.signInButtonText}>Sign In</Text>
+          </TouchableOpacity>
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper style={styles.container}>
@@ -33,10 +85,10 @@ export default function ProfileScreen() {
         <View style={styles.profileSection}>
           <View style={styles.profileHeader}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>RS</Text>
+              <Text style={styles.avatarText}>{getUserInitials()}</Text>
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.name}>Rahul Sharma</Text>
+              <Text style={styles.name}>{getUserDisplayName()}</Text>
               <TouchableOpacity style={styles.viewProfileButton} onPress={handleViewProfile}>
                 <Text style={styles.viewProfileText}>View profile</Text>
                 <Ionicons name="arrow-forward" size={14} color={Colors.textSecondary} />
@@ -246,5 +298,28 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: Colors.error,
+  },
+  notAuthenticatedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+  },
+  notAuthenticatedText: {
+    fontSize: Typography.fontSize.lg,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+  },
+  signInButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+  },
+  signInButtonText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.textOnPrimary,
+    fontWeight: Typography.fontWeight.bold,
   },
 });

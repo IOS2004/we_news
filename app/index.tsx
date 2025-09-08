@@ -1,10 +1,25 @@
 import { Redirect } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
+import { Colors } from '../constants/theme';
 
 export default function Index() {
-  // Check if user is authenticated
-  // For demo purposes, we'll redirect to auth for new users
-  const isAuthenticated = false; // This would come from your auth context/storage
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <View style={{ 
+        flex: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        backgroundColor: Colors.background 
+      }}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
   
   if (isAuthenticated) {
     return <Redirect href="/(tabs)/home" />;

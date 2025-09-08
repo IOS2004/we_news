@@ -1,29 +1,58 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { router } from 'expo-router';
 import { Button, InputField, ScreenWrapper, Logo } from '../../components/common';
 import { Colors, Typography, Spacing, BorderRadius, Shadows, Gradients, Layout } from '../../constants/theme';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function SignUpScreen() {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
+  const lastNameRef = useRef<TextInput>(null);
+  const usernameRef = useRef<TextInput>(null);
   const emailRef = useRef<TextInput>(null);
-  const phoneRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const referralRef = useRef<TextInput>(null);
 
-  const handleSignUp = () => {
-    // For demo purposes, navigate to KYC verification after sign up
-    // In a real app, you would validate and create the account here
-    router.push('/(auth)/kyc-verification');
+  const { signUp, isLoading, error } = useAuth();
+
+  const handleSignUp = async () => {
+    if (!firstName.trim() || !lastName.trim() || !username.trim() || !email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return;
+    }
+
+    const signUpData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      username: username.trim(),
+      email: email.trim(),
+      password,
+      ...(referralCode.trim() && { referralCode: referralCode.trim() })
+    };
+
+    const success = await signUp(signUpData);
+    
+    if (success) {
+      // After successful backend signup, redirect to KYC verification
+      router.push('/(auth)/kyc-verification');
+    } else if (error) {
+      Alert.alert('Sign Up Failed', error);
+    }
   };
 
   const handleSignInNavigation = () => {
@@ -74,13 +103,37 @@ export default function SignUpScreen() {
             <View style={styles.inputsContainer}>
               <InputField 
                 label="" 
-                placeholder="Full Name"
-                value={name}
-                onChangeText={setName}
+                placeholder="First Name"
+                value={firstName}
+                onChangeText={setFirstName}
                 autoCapitalize="words"
                 returnKeyType="next"
-                onSubmitEditing={() => emailRef.current?.focus()}
+                onSubmitEditing={() => lastNameRef.current?.focus()}
                 leftIcon={<Ionicons name="person-outline" size={20} color={Colors.textSecondary} />}
+              />
+
+              <InputField 
+                ref={lastNameRef}
+                label="" 
+                placeholder="Last Name"
+                value={lastName}
+                onChangeText={setLastName}
+                autoCapitalize="words"
+                returnKeyType="next"
+                onSubmitEditing={() => usernameRef.current?.focus()}
+                leftIcon={<Ionicons name="person-outline" size={20} color={Colors.textSecondary} />}
+              />
+
+              <InputField 
+                ref={usernameRef}
+                label="" 
+                placeholder="Username"
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+                returnKeyType="next"
+                onSubmitEditing={() => emailRef.current?.focus()}
+                leftIcon={<Ionicons name="at-outline" size={20} color={Colors.textSecondary} />}
               />
 
               <InputField 
@@ -92,20 +145,8 @@ export default function SignUpScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 returnKeyType="next"
-                onSubmitEditing={() => phoneRef.current?.focus()}
-                leftIcon={<Ionicons name="mail-outline" size={20} color={Colors.textSecondary} />}
-              />
-
-              <InputField 
-                ref={phoneRef}
-                label="" 
-                placeholder="Phone Number"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                returnKeyType="next"
                 onSubmitEditing={() => passwordRef.current?.focus()}
-                leftIcon={<Ionicons name="call-outline" size={20} color={Colors.textSecondary} />}
+                leftIcon={<Ionicons name="mail-outline" size={20} color={Colors.textSecondary} />}
               />
 
               <InputField 
@@ -136,7 +177,11 @@ export default function SignUpScreen() {
             </View>
 
             <View style={styles.buttonContainer}>
-              <Button title="Sign Up" onPress={handleSignUp} />
+              <Button 
+                title="Sign Up" 
+                onPress={handleSignUp} 
+                loading={isLoading}
+              />
             </View>
 
             <View style={styles.signInSection}>
