@@ -2,8 +2,13 @@ import axios from "axios";
 import { Article } from "../types/news";
 
 // --- Configuration ---
-const API_KEY = "F7NzUjVFm6T4xrFSa6ZnvR3qt0GqQvqx5f1Ko0FX";
-const BASE_URL = "https://api.thenewsapi.com/v1";
+const API_KEY = process.env.EXPO_PUBLIC_NEWS_API_KEY;
+const BASE_URL =
+  process.env.EXPO_PUBLIC_NEWS_API_BASE_URL || "https://api.thenewsapi.com/v1";
+
+if (!API_KEY) {
+  console.error("Missing EXPO_PUBLIC_NEWS_API_KEY in environment variables");
+}
 
 // --- Axios Instance ---
 const externalNewsApi = axios.create({

@@ -3,8 +3,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // API Configuration
 const getApiBaseUrl = () => {
-  // Always use the hosted backend on Render
-  return "https://wenews.onrender.com/api";
+  // Use environment variable, fallback to hosted backend
+  return (
+    process.env.EXPO_PUBLIC_API_BASE_URL || "https://wenews.onrender.com/api"
+  );
 };
 
 const API_BASE_URL = getApiBaseUrl();
