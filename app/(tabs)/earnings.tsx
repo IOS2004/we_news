@@ -3,15 +3,12 @@ import { ScrollView, StyleSheet, View, Text, TouchableOpacity, Dimensions, FlatL
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Header, ScreenWrapper, Card, Button } from '../../components/common';
-import { TierSlider } from '../../components/earnings';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
-import { useUserSubscriptions } from '../../contexts/DeveloperContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function EarningsScreen() {
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('today');
-  const userSubscriptions = useUserSubscriptions(); // Get subscriptions from developer context
   
   // Mock data - replace with actual data
   const earningsData = {
@@ -19,85 +16,6 @@ export default function EarningsScreen() {
     week: { amount: 875, change: '+8%' },
     month: { amount: 3250, change: '+15%' },
   };
-  
-  // Tier levels data - this should come from user's purchased plans
-  const allTierLevels = [
-    {
-      id: 'bronze',
-      name: 'Bronze Tier',
-      level: 1,
-      color: '#CD7F32',
-      gradient: ['#CD7F32', '#B8860B'],
-      icon: 'medal',
-      currentPoints: 500,
-      nextLevelPoints: 500,
-      maxEarnings: '₹50/day',
-      perks: ['Basic rewards', 'Daily check-in bonus'],
-      price: '₹99/month',
-      isUnlocked: true,
-      isPurchased: userSubscriptions.includes('bronze'),
-    },
-    {
-      id: 'silver',
-      name: 'Silver Tier',
-      level: 3,
-      color: '#C0C0C0',
-      gradient: ['#C0C0C0', '#A8A8A8'],
-      icon: 'trophy',
-      currentPoints: 1250,
-      nextLevelPoints: 2000,
-      maxEarnings: '₹150/day',
-      perks: ['Enhanced rewards', 'Weekly bonuses', 'Priority support'],
-      price: '₹299/month',
-      isUnlocked: true,
-      isPurchased: userSubscriptions.includes('silver'),
-    },
-    {
-      id: 'gold',
-      name: 'Gold Tier',
-      level: 5,
-      color: '#FFD700',
-      gradient: ['#FFD700', '#FFA500'],
-      icon: 'star',
-      currentPoints: 0,
-      nextLevelPoints: 5000,
-      maxEarnings: '₹300/day',
-      perks: ['Premium rewards', 'Exclusive offers', 'VIP support', 'Monthly bonuses'],
-      price: '₹599/month',
-      isUnlocked: true,
-      isPurchased: userSubscriptions.includes('gold'),
-    },
-    {
-      id: 'platinum',
-      name: 'Platinum Tier',
-      level: 7,
-      color: '#E5E4E2',
-      gradient: ['#E5E4E2', '#D3D3D3'],
-      icon: 'diamond',
-      currentPoints: 0,
-      nextLevelPoints: 10000,
-      maxEarnings: '₹500/day',
-      perks: ['Ultimate rewards', 'Instant withdrawals', 'Personal manager', 'Exclusive events'],
-      price: '₹999/month',
-      isUnlocked: true,
-      isPurchased: userSubscriptions.includes('platinum'),
-    },
-  ];
-
-  // Get user's current tier (highest purchased tier)
-  const currentUserTier = allTierLevels.find(tier => tier.isPurchased) || null;
-  
-  // Available tiers: current tier + next tier (if not already at highest)
-  const availableTiers = currentUserTier 
-    ? [
-        currentUserTier,
-        ...allTierLevels.filter(tier => 
-          tier.level > currentUserTier.level && !tier.isPurchased
-        ).slice(0, 1) // Only show the next immediate tier
-      ]
-    : allTierLevels.slice(0, 1); // If no subscription, show only bronze
-
-  const [currentTierIndex, setCurrentTierIndex] = useState(0); // Always start with current tier
 
   const quickActions = [
     { 
@@ -194,9 +112,6 @@ export default function EarningsScreen() {
             ))}
           </View>
         </View>
-
-        {/* Tier Slider - Shows all active subscriptions */}
-        <TierSlider activeTiers={userSubscriptions} />
 
         {/* Quick Actions */}
         <Card style={styles.actionsCard}>

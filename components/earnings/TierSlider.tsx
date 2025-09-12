@@ -13,10 +13,6 @@ interface TierData {
   investmentAmount: string;
   color: string;
   icon: keyof typeof Ionicons.glyphMap;
-  dailyInvestment: {
-    amount: string;
-    dailyLimit: string;
-  };
   level: number;
   currentPoints: number;
   nextLevelPoints: number;
@@ -29,10 +25,6 @@ const tierData: TierData[] = [
     investmentAmount: '₹99/month',
     color: '#CD7F32',
     icon: 'medal',
-    dailyInvestment: {
-      amount: '₹3.30',
-      dailyLimit: '₹3.30'
-    },
     level: 1,
     currentPoints: 650,
     nextLevelPoints: 1000
@@ -43,10 +35,6 @@ const tierData: TierData[] = [
     investmentAmount: '₹299/month',
     color: '#C0C0C0',
     icon: 'trophy',
-    dailyInvestment: {
-      amount: '₹9.97',
-      dailyLimit: '₹9.97'
-    },
     level: 2,
     currentPoints: 1200,
     nextLevelPoints: 2000
@@ -57,10 +45,6 @@ const tierData: TierData[] = [
     investmentAmount: '₹599/month',
     color: '#FFD700',
     icon: 'star',
-    dailyInvestment: {
-      amount: '₹19.97',
-      dailyLimit: '₹19.97'
-    },
     level: 3,
     currentPoints: 2800,
     nextLevelPoints: 4000
@@ -71,10 +55,6 @@ const tierData: TierData[] = [
     investmentAmount: '₹999/month',
     color: '#E5E4E2',
     icon: 'diamond',
-    dailyInvestment: {
-      amount: '₹33.30',
-      dailyLimit: '₹33.30'
-    },
     level: 4,
     currentPoints: 5000,
     nextLevelPoints: 8000
@@ -96,9 +76,9 @@ export const TierSlider: React.FC<TierSliderProps> = ({ activeTiers }) => {
     return (
       <View style={styles.noTierContainer}>
         <Ionicons name="trending-up-outline" size={32} color={Colors.textSecondary} />
-        <Text style={styles.noTierTitle}>No Active Contribution Plans</Text>
+        <Text style={styles.noTierTitle}>No Active Subscription Plans</Text>
         <Text style={styles.noTierDescription}>
-          Visit the profile settings to enable contribution plans for testing
+          Visit the profile settings to enable subscription plans for testing
         </Text>
       </View>
     );
@@ -118,9 +98,9 @@ export const TierSlider: React.FC<TierSliderProps> = ({ activeTiers }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Your Contribution Plans</Text>
+        <Text style={styles.headerTitle}>Your Subscription Plans</Text>
         <Text style={styles.headerSubtitle}>
-          {currentIndex + 1} of {activeTierData.length} active contribution plans
+          {currentIndex + 1} of {activeTierData.length} active subscription plans
         </Text>
       </View>
 
@@ -195,7 +175,7 @@ const TierCard: React.FC<TierCardProps> = ({ tier, isActive, isSingle = false })
       <View style={styles.activeStatusBar}>
         <View style={styles.activeIndicator}>
           <Ionicons name="trending-up" size={16} color={Colors.success} />
-          <Text style={styles.activeText}>Contribution Active</Text>
+          <Text style={styles.activeText}>Subscription Active</Text>
         </View>
       </View>
 
@@ -215,25 +195,6 @@ const TierCard: React.FC<TierCardProps> = ({ tier, isActive, isSingle = false })
             />
           </View>
           <Text style={styles.progressPercent}>{Math.round(progressPercentage)}%</Text>
-        </View>
-      </View>
-
-      {/* Daily Contribution */}
-      <View style={styles.investmentSection}>
-        <Text style={styles.sectionTitle}>Daily Contribution Details</Text>
-        <View style={styles.investmentGrid}>
-          <View style={styles.investmentItem}>
-            <Text style={styles.investmentLabel}>Daily Amount</Text>
-            <Text style={[styles.investmentValue, { color: tier.color }]}>
-              {tier.dailyInvestment.amount}
-            </Text>
-          </View>
-          <View style={styles.investmentItem}>
-            <Text style={styles.investmentLabel}>Contribution Limit</Text>
-            <Text style={[styles.investmentValue, { color: tier.color }]}>
-              {tier.dailyInvestment.dailyLimit}
-            </Text>
-          </View>
         </View>
       </View>
     </View>
@@ -430,39 +391,6 @@ const styles = StyleSheet.create({
     color: Colors.text,
     minWidth: 35,
     textAlign: 'right',
-  },
-
-  // Contribution Section
-  investmentSection: {
-    padding: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-  },
-  sectionTitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text,
-    marginBottom: Spacing.md,
-  },
-  investmentGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  investmentItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  investmentLabel: {
-    fontSize: Typography.fontSize.xs,
-    color: Colors.textSecondary,
-    marginBottom: 4,
-    fontWeight: Typography.fontWeight.medium,
-    textAlign: 'center',
-  },
-  investmentValue: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.bold,
-    textAlign: 'center',
   },
 
   // Benefits Section
