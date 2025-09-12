@@ -25,55 +25,38 @@ export default function HomeScreen() {
   // Mock subscriptions data - Mixed plan types
   const subscriptions = [
     {
-      id: 'silver_1',
-      name: 'Silver Plan #1',
-      planType: 'silver',
-      planColor: '#C0C0C0',
+      id: 'base_daily',
+      name: 'Base Plan',
+      planType: 'base',
+      planColor: '#3B82F6',
       purchaseDate: '2024-01-15',
-      daysRemaining: 685,
-      totalEarnings: 3200,
+      daysRemaining: 705,
+      totalEarnings: 2850,
       monthlyGain: 350,
-      referralTreeSize: 15,
+      referralTreeSize: 12,
       directReferrals: 3,
       currentLevel: 2,
       maxLevels: 5,
-      referralLink: 'SLV123ABC',
+      referralLink: 'BSE123ABC',
       isActive: true,
-      dailyEarning: 50
+      dailyEarning: 45
     },
     {
-      id: 'gold_1',
-      name: 'Gold Plan #1',
-      planType: 'gold',
-      planColor: '#FFD700',
-      purchaseDate: '2024-03-10',
-      daysRemaining: 630,
-      totalEarnings: 4800,
-      monthlyGain: 580,
-      referralTreeSize: 25,
-      directReferrals: 5,
-      currentLevel: 3,
-      maxLevels: 8,
-      referralLink: 'GLD456DEF',
-      isActive: true,
-      dailyEarning: 100
-    },
-    {
-      id: 'diamond_1',
-      name: 'Diamond Plan #1',
-      planType: 'diamond',
-      planColor: '#B9F2FF',
-      purchaseDate: '2024-02-20',
-      daysRemaining: 665,
-      totalEarnings: 7200,
-      monthlyGain: 920,
-      referralTreeSize: 42,
+      id: 'silver_weekly',
+      name: 'Silver Plan',
+      planType: 'silver',
+      planColor: '#6B7280',
+      purchaseDate: '2024-02-01',
+      daysRemaining: 722,
+      totalEarnings: 8950,
+      monthlyGain: 945,
+      referralTreeSize: 28,
       directReferrals: 7,
       currentLevel: 4,
-      maxLevels: 12,
-      referralLink: 'DMD789GHI',
+      maxLevels: 8,
+      referralLink: 'SLV456DEF',
       isActive: true,
-      dailyEarning: 200
+      dailyEarning: 135
     }
   ];
 
@@ -137,6 +120,11 @@ export default function HomeScreen() {
     // Navigate to referral tree view
     console.log('Viewing referral tree for subscription:', subscriptionId);
     // In real app, navigate to tree view page
+  };
+
+  const handleViewPlanDetails = (subscriptionId: string) => {
+    // Navigate to plan details page
+    router.push(`/plan-details?planId=${subscriptionId}`);
   };
 
   return (
@@ -286,11 +274,11 @@ export default function HomeScreen() {
                     </TouchableOpacity>
                     
                     <TouchableOpacity 
-                      style={styles.treeButton} 
-                      onPress={() => handleViewReferralTree(subscription.id)}
+                      style={styles.detailsButton} 
+                      onPress={() => handleViewPlanDetails(subscription.id)}
                     >
-                      <Ionicons name="git-network" size={16} color={Colors.secondary} />
-                      <Text style={styles.treeButtonText}>View Tree</Text>
+                      <Ionicons name="information-circle" size={16} color={Colors.secondary} />
+                      <Text style={styles.detailsButtonText}>Details</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -840,6 +828,21 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   treeButtonText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.secondary,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  detailsButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: BorderRadius.lg,
+    paddingVertical: Spacing.lg,
+    gap: Spacing.xs,
+  },
+  detailsButtonText: {
     fontSize: Typography.fontSize.sm,
     color: Colors.secondary,
     fontWeight: Typography.fontWeight.semibold,
