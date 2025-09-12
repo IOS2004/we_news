@@ -29,6 +29,9 @@ interface AuthContextType {
   resetPassword: (token: string, password: string) => Promise<boolean>;
   clearError: () => void;
   refreshUser: () => Promise<void>;
+  
+  // Developer methods
+  developerSignIn: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -273,6 +276,61 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const developerSignIn = async (): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Create dummy user data for development
+      const dummyUser: User = {
+        id: 'dev-user-123',
+        username: 'developer',
+        firstName: 'Developer',
+        lastName: 'User',
+        email: 'developer@wenews.com',
+        profilePicture: undefined,
+        role: 'user',
+        preferences: {
+          categories: ['technology', 'business', 'entertainment'],
+          language: 'en',
+          notifications: true,
+        },
+        referralCode: 'DEV123',
+        totalReferrals: 12,
+        referralEarnings: 500,
+        isActive: true,
+        lastLogin: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+      };
+
+      // Create dummy auth data
+      const dummyAuthData: AuthData = {
+        token: 'dev-token-123',
+        user: dummyUser,
+      };
+
+      // Save to storage for persistence
+      await storage.saveAuthData(dummyAuthData);
+      setUser(dummyUser);
+      
+      showToast.success({
+        title: 'Developer Access',
+        message: 'Signed in with dummy data for development',
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Developer sign-in error:', error);
+      showToast.error({
+        title: 'Developer Sign-in Failed',
+        message: 'Failed to sign in with developer data',
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const contextValue: AuthContextType = {
     user,
     isAuthenticated,
@@ -287,6 +345,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     resetPassword,
     clearError,
     refreshUser,
+    developerSignIn,
   };
 
   return (

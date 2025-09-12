@@ -15,7 +15,7 @@ export default function SignInScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const passwordRef = useRef<TextInput>(null);
   
-  const { signIn, isLoading, error } = useAuth();
+  const { signIn, isLoading, error, developerSignIn } = useAuth();
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
@@ -32,6 +32,14 @@ export default function SignInScreen() {
       router.replace('/(tabs)/home');
     }
     // Error handling is now done through toast notifications in AuthContext
+  };
+
+  const handleDeveloperSignIn = async () => {
+    const success = await developerSignIn();
+    
+    if (success) {
+      router.replace('/(tabs)/home');
+    }
   };
 
   const handleSignUpNavigation = () => {
@@ -126,6 +134,38 @@ export default function SignInScreen() {
                   <Text style={styles.signUpLink}>Sign Up</Text>
                 </TouchableOpacity>
               </View>
+
+              {/* Developer Access Button */}
+              {__DEV__ && (
+                <View style={styles.developerSection}>
+                  <View style={styles.divider}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>Developer Mode</Text>
+                    <View style={styles.dividerLine} />
+                  </View>
+                  <TouchableOpacity 
+                    style={styles.developerButton}
+                    onPress={handleDeveloperSignIn}
+                    disabled={isLoading}
+                  >
+                    <LinearGradient
+                      colors={['#FF6B6B', '#FF8E8E']}
+                      style={styles.developerGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                    >
+                      <Ionicons name="code-outline" size={20} color={Colors.white} />
+                      <Text style={styles.developerButtonText}>Developer Access</Text>
+                      <View style={styles.developerBadge}>
+                        <Text style={styles.developerBadgeText}>DEV</Text>
+                      </View>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                  <Text style={styles.developerNote}>
+                    Sign in with dummy data for testing (Development only)
+                  </Text>
+                </View>
+              )}
             </View>
           </KeyboardAwareScrollView>
         </LinearGradient>
@@ -225,6 +265,69 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: Typography.fontWeight.semibold,
   },
+  
+  // Developer section styles
+  developerSection: {
+    marginTop: 32,
+    paddingTop: 24,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.borderLight,
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontWeight: Typography.fontWeight.medium,
+    textTransform: 'uppercase',
+  },
+  developerButton: {
+    borderRadius: BorderRadius.base,
+    overflow: 'hidden',
+    marginBottom: 12,
+    ...Shadows.md,
+  },
+  developerGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    position: 'relative',
+  },
+  developerButtonText: {
+    fontSize: 16,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.white,
+    marginLeft: 8,
+  },
+  developerBadge: {
+    position: 'absolute',
+    right: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.sm,
+  },
+  developerBadgeText: {
+    fontSize: 10,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.white,
+  },
+  developerNote: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  
   // Legacy styles for backward compatibility
   container: {
     flex: 1,

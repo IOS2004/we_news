@@ -18,7 +18,7 @@ const AdPlaceholder: React.FC<AdPlaceholderProps> = ({ onAdPress }) => {
         activeOpacity={0.9}
       >
         <LinearGradient
-          colors={['#ffffff', '#f8f9fa']}
+          colors={['#f8f9fa', '#e8f4fd']}
           style={styles.gradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -26,18 +26,18 @@ const AdPlaceholder: React.FC<AdPlaceholderProps> = ({ onAdPress }) => {
           {/* Ad Banner Content */}
           <View style={styles.bannerContent}>
             <View style={styles.adTextContainer}>
-              <Text style={styles.adLabel}>Advertisement</Text>
-              <Text style={styles.bannerTitle}>Your Ad Here</Text>
-              <Text style={styles.bannerSubtitle}>Sponsored Content Banner</Text>
+              <Text style={styles.adLabel}>Sponsored Content</Text>
+              <Text style={styles.bannerTitle}>Advertisement Space</Text>
+              <Text style={styles.bannerSubtitle}>Premium banner placement for brand visibility</Text>
             </View>
             
             {/* Mock Banner Image/Logo Area */}
             <View style={styles.bannerImageContainer}>
               <LinearGradient
-                colors={['#e3f2fd', '#bbdefb']}
+                colors={[Colors.primary + '20', Colors.primaryLight + '30']}
                 style={styles.mockImage}
               >
-                <Ionicons name="image-outline" size={24} color={Colors.primary} />
+                <Ionicons name="business-outline" size={28} color={Colors.primary} />
               </LinearGradient>
             </View>
           </View>
@@ -71,9 +71,11 @@ const styles = StyleSheet.create({
   },
   gradient: {
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
-    minHeight: 120,
+    paddingVertical: Spacing.xl,
+    minHeight: 140,
     position: 'relative',
+    borderWidth: 1,
+    borderColor: Colors.primary + '20',
   },
   bannerContent: {
     flexDirection: 'row',
@@ -104,8 +106,8 @@ const styles = StyleSheet.create({
     lineHeight: Typography.fontSize.sm * 1.4,
   },
   bannerImageContainer: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     justifyContent: 'center',
     alignItems: 'center',
   },

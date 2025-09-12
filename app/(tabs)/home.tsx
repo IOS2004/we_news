@@ -104,6 +104,9 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Enhanced Earnings Summary */}
+        <EarningsSummary today={50} week={350} month={1500} />
+
         {/* Dashboard Card - Exact Match to Design */}
         <View style={styles.overviewSection}>
           <View style={styles.dashboardCard}>
@@ -150,9 +153,6 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-
-        {/* Enhanced Earnings Summary */}
-        <EarningsSummary today={50} week={350} month={1500} />
 
         {/* Enhanced Quick Actions */}
         <QuickActions
@@ -335,13 +335,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.error,
   },
   container: {
+    paddingTop: Spacing.md,
     paddingBottom: Spacing.xl * 2,
   },
   
   // Enhanced Quick Access Section
   quickAccessSection: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+    paddingTop: Spacing.lg,
     marginBottom: Spacing.xl,
   },
   quickAccessTitle: {
