@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, StyleSheet, Dimensions, Share, Clipboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -8,6 +8,7 @@ import ScreenWrapper from '../components/common/ScreenWrapper';
 import Header from '../components/common/Header';
 import Card from '../components/common/Card';
 import { Colors } from '../constants/theme';
+import { showToast } from '../utils/toast';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -129,20 +130,38 @@ export default function PlanDetailsScreen() {
     }, 500);
   }, [planId]);
 
-  const handleMakeContribution = () => {
-    Alert.alert(
-      'Make Contribution',
-      `Make your ${planDetails.frequency.toLowerCase()} contribution of ₹${planDetails.contributionAmount}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Contribute', 
-          onPress: () => {
-            Alert.alert('Success', 'Contribution made successfully!');
-          }
-        }
-      ]
-    );
+  const handleReferAndEarn = async () => {
+    const referralCode = 'WE123ABC'; // This would come from user data
+    const referralLink = `https://wenews.app/refer/${referralCode}`;
+    const shareMessage = `🚀 *Join WeNews & Start Earning Today!*\n\n💰 *What You Get:*\n✅ Guaranteed daily returns from news reading\n✅ Multiple growth plans (Daily/Weekly/Monthly)\n✅ Build your team & earn unlimited commissions\n✅ 13-level MLM earning structure\n\n🎯 *My Results:*\n• Currently earning ₹${planDetails.monthlyEarnings}/month\n• Built a team of 47 members\n• Multiple passive income streams\n\n🔥 *Special Offer:*\nUse my referral code: *${referralCode}*\nGet bonus rewards on signup!\n\n📲 *Download Now:*\n${referralLink}\n\n#WeNews #PassiveIncome #MLMSuccess #EarnFromNews`;
+
+    try {
+      const result = await Share.share({
+        message: shareMessage,
+        title: 'Join WeNews - Transform News into Wealth!',
+      });
+
+      if (result.action === Share.sharedAction) {
+        showToast.success({
+          title: '🎉 Shared Successfully!',
+          message: 'Your referral link has been shared. Earn commissions when friends join using your code!'
+        });
+      }
+    } catch (error) {
+      showToast.error({
+        title: 'Sharing Failed',
+        message: 'Unable to share referral link. You can manually copy your referral code: ' + referralCode
+      });
+    }
+  };
+
+  const handleCopyReferralCode = () => {
+    const referralCode = 'WE123ABC';
+    Clipboard.setString(referralCode);
+    showToast.success({
+      title: 'Copied!',
+      message: `Referral code "${referralCode}" copied to clipboard.`
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -226,9 +245,9 @@ export default function PlanDetailsScreen() {
         <View style={styles.quickActionsSection}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActionsGrid}>
-            <TouchableOpacity style={styles.actionButton} onPress={handleMakeContribution}>
-              <Ionicons name="add-circle" size={24} color={Colors.primary} />
-              <Text style={styles.actionButtonText}>Make Contribution</Text>
+            <TouchableOpacity style={styles.actionButton} onPress={handleReferAndEarn}>
+              <Ionicons name="share-social" size={24} color={Colors.primary} />
+              <Text style={styles.actionButtonText}>Refer & Earn</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.actionButton}
@@ -250,6 +269,36 @@ export default function PlanDetailsScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Referral Stats */}
+        <Card style={styles.referralCard}>
+          <View style={styles.referralHeader}>
+            <Text style={styles.cardTitle}>Referral Performance</Text>
+            <TouchableOpacity style={styles.referralCodeContainer} onPress={handleCopyReferralCode}>
+              <Text style={styles.referralCodeLabel}>Your Code:</Text>
+              <Text style={styles.referralCode}>WE123ABC</Text>
+              <Ionicons name="copy" size={14} color={Colors.primary} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.referralStatsRow}>
+            <View style={styles.referralStat}>
+              <Text style={styles.referralStatValue}>12</Text>
+              <Text style={styles.referralStatLabel}>Direct Referrals</Text>
+            </View>
+            <View style={styles.referralStat}>
+              <Text style={styles.referralStatValue}>₹3,600</Text>
+              <Text style={styles.referralStatLabel}>Referral Earnings</Text>
+            </View>
+            <View style={styles.referralStat}>
+              <Text style={styles.referralStatValue}>47</Text>
+              <Text style={styles.referralStatLabel}>Team Size</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.inviteMoreButton} onPress={handleReferAndEarn}>
+            <Ionicons name="add-circle" size={20} color="#ffffff" />
+            <Text style={styles.inviteMoreText}>Invite More Friends</Text>
+          </TouchableOpacity>
+        </Card>
 
         {/* Plan Information */}
         <Card style={styles.infoCard}>
@@ -604,5 +653,71 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     flex: 1,
+  },
+  referralCard: {
+    marginBottom: 16,
+  },
+  referralHeader: {
+    flexDirection: 'column',
+    gap: 12,
+    marginBottom: 16,
+  },
+  referralCodeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.border,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    gap: 8,
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
+  },
+  referralCodeLabel: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+  },
+  referralCode: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
+    flexShrink: 1,
+  },
+  referralStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  referralStat: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  referralStatValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.primary,
+    marginBottom: 4,
+  },
+  referralStatLabel: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  inviteMoreButton: {
+    backgroundColor: Colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    gap: 8,
+  },
+  inviteMoreText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

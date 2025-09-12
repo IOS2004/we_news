@@ -7,6 +7,7 @@ import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Card from '../../components/common/Card';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { showToast } from '../../utils/toast';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -182,7 +183,10 @@ export default function PlansScreen() {
           text: 'Purchase', 
           onPress: () => {
             // Handle plan purchase - integrate with backend later
-            Alert.alert('Success', `${plan.name} (${selectedFrequency}) purchased successfully!`);
+            showToast.success({
+              title: 'Purchase Successful!',
+              message: `${plan.name} (${selectedFrequency}) purchased successfully!`
+            });
           }
         }
       ]
