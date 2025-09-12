@@ -166,38 +166,6 @@ export default function HomeScreen() {
         {/* Banner Ad Placeholder - Replacing News Highlight */}
         <AdPlaceholder onAdPress={() => console.log('Ad clicked')} />
 
-        {/* Enhanced Quick Access Section */}
-        <View style={styles.quickAccessSection}>
-          <Text style={styles.quickAccessTitle}>What would you like to do?</Text>
-          <View style={styles.quickAccessGrid}>
-            <TouchableOpacity style={styles.quickAccessCard} onPress={() => handleNavigation('/(tabs)/earnings')}>
-              <LinearGradient
-                colors={[Colors.primary, Colors.primaryLight]}
-                style={styles.quickAccessGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Ionicons name="trending-up" size={32} color={Colors.textOnDark} />
-              </LinearGradient>
-              <Text style={styles.quickAccessLabel}>Earnings</Text>
-              <Text style={styles.quickAccessSubLabel}>Track your progress</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.quickAccessCard} onPress={() => handleNavigation('/(tabs)/plans')}>
-              <LinearGradient
-                colors={[Colors.secondary, Colors.secondaryLight]}
-                style={styles.quickAccessGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Ionicons name="diamond" size={32} color={Colors.textOnDark} />
-              </LinearGradient>
-              <Text style={styles.quickAccessLabel}>Plans</Text>
-              <Text style={styles.quickAccessSubLabel}>Upgrade your plan</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {/* Enhanced Earnings Summary */}
         <EarningsSummary today={50} week={350} month={1500} />
 
@@ -362,6 +330,38 @@ export default function HomeScreen() {
 
         {/* Enhanced Notifications */}
         <DashboardNotifications notifications={notifications} />
+
+        {/* Enhanced Quick Access Section */}
+        <View style={styles.quickAccessSection}>
+          <Text style={styles.quickAccessTitle}>What would you like to do?</Text>
+          <View style={styles.quickAccessGrid}>
+            <TouchableOpacity style={styles.quickAccessCard} onPress={() => handleNavigation('/(tabs)/earnings')}>
+              <LinearGradient
+                colors={[Colors.primary, Colors.primaryLight]}
+                style={styles.quickAccessGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="trending-up" size={32} color={Colors.textOnDark} />
+              </LinearGradient>
+              <Text style={styles.quickAccessLabel}>Earnings</Text>
+              <Text style={styles.quickAccessSubLabel}>Track your progress</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.quickAccessCard} onPress={() => handleNavigation('/(tabs)/plans')}>
+              <LinearGradient
+                colors={[Colors.secondary, Colors.secondaryLight]}
+                style={styles.quickAccessGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="diamond" size={32} color={Colors.textOnDark} />
+              </LinearGradient>
+              <Text style={styles.quickAccessLabel}>Plans</Text>
+              <Text style={styles.quickAccessSubLabel}>Upgrade your plan</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
     </ScreenWrapper>
   );
@@ -693,14 +693,14 @@ const styles = StyleSheet.create({
   subscriptionCard: {
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.xl,
-    marginHorizontal: Spacing.md,
+    marginHorizontal: Spacing.lg,
     ...Shadows.sm, // Reduced shadow for cleaner look
   },
   subscriptionScrollView: {
     marginBottom: Spacing.md,
   },
   subscriptionSlider: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: 0,
   },
   subscriptionHeader: {
     padding: Spacing.lg,
