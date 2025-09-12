@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, ScreenWrapper } from '../../components/common';
 import { EarningsSummary, OverviewCard } from '../../components/dashboard';
-import { DashboardNotifications, QuickActions } from '../../components/dashboard';
+import { DashboardNotifications, QuickActions, RecentTransactions } from '../../components/dashboard';
 import { AdPlaceholder } from '../../components/ads';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import { useAuth } from '../../contexts/AuthContext';
@@ -43,6 +43,10 @@ export default function HomeScreen() {
 
   const handleProfilePress = () => {
     router.push('/(tabs)/profile');
+  };
+
+  const handleViewAllTransactions = () => {
+    router.push('/(tabs)/wallet');
   };
 
   return (
@@ -162,87 +166,11 @@ export default function HomeScreen() {
           onViewLabels={() => handleNavigation('/labels')}
         />
 
-        {/* Enhanced Contribution Status */}
-        <View style={styles.contributionSection}>
-          <View style={styles.contributionCard}>
-            <LinearGradient
-              colors={[Colors.surface, '#f8f9fa']}
-              style={styles.contributionGradient}
-            >
-              <Text style={styles.cardTitle}>Today's Contribution</Text>
-              <View style={styles.contributionHeader}>
-                <LinearGradient
-                  colors={['rgba(39, 174, 96, 0.1)', 'rgba(39, 174, 96, 0.05)']}
-                  style={styles.contributionIcon}
-                >
-                  <Ionicons name="trending-up" size={28} color={Colors.success} />
-                </LinearGradient>
-                <View style={styles.contributionDetails}>
-                  <Text style={styles.contributionPlan}>Silver Plan</Text>
-                  <Text style={styles.contributionAmount}>₹500 contributed</Text>
-                </View>
-                <View style={styles.statusBadge}>
-                  <Text style={styles.statusText}>Active</Text>
-                </View>
-              </View>
-              
-              <View style={styles.divider} />
-              
-              <View style={styles.returnInfo}>
-                <View style={styles.returnItem}>
-                  <Text style={styles.returnLabel}>Daily Return</Text>
-                  <Text style={styles.returnValue}>₹4.00</Text>
-                </View>
-                <View style={styles.returnDivider} />
-                <View style={styles.returnItem}>
-                  <Text style={styles.returnLabel}>Return Rate</Text>
-                  <Text style={styles.returnRate}>0.8%</Text>
-                </View>
-              </View>
-            </LinearGradient>
-          </View>
-        </View>
-
-        {/* Enhanced Level Progress */}
-        <View style={styles.levelSection}>
-          <View style={styles.levelCard}>
-            <LinearGradient
-              colors={[Colors.surface, '#f8f9fa']}
-              style={styles.levelGradient}
-            >
-              <Text style={styles.cardTitle}>Level Progress</Text>
-              <View style={styles.levelHeader}>
-                <LinearGradient
-                  colors={[Colors.primary, Colors.primaryDark]}
-                  style={styles.levelBadge}
-                >
-                  <Text style={styles.levelNumber}>L3</Text>
-                </LinearGradient>
-                <View style={styles.levelInfo}>
-                  <Text style={styles.levelTier}>Silver Tier</Text>
-                  <Text style={styles.levelProgress}>8 more referrals to Level 4</Text>
-                </View>
-              </View>
-              
-              <View style={styles.progressContainer}>
-                <View style={styles.progressHeader}>
-                  <Text style={styles.progressLabel}>Progress to Level 4</Text>
-                  <Text style={styles.progressPercentage}>60%</Text>
-                </View>
-                <View style={styles.progressBar}>
-                  <LinearGradient
-                    colors={[Colors.secondary, Colors.secondaryLight]}
-                    style={[styles.progressFill, { width: '60%' }]}
-                  />
-                </View>
-                <View style={styles.progressFooter}>
-                  <Text style={styles.progressText}>12 referrals</Text>
-                  <Text style={styles.progressText}>20 referrals</Text>
-                </View>
-              </View>
-            </LinearGradient>
-          </View>
-        </View>
+        {/* Recent Transactions */}
+        <RecentTransactions 
+          onViewMore={handleViewAllTransactions}
+          maxItems={4}
+        />
 
         {/* Enhanced Notifications */}
         <DashboardNotifications notifications={notifications} />
@@ -517,170 +445,5 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   
-  // Enhanced Contribution Section
-  contributionSection: {
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.xl,
-  },
-  contributionCard: {
-    borderRadius: BorderRadius.xl,
-    overflow: 'hidden',
-    ...Shadows.md,
-  },
-  contributionGradient: {
-    padding: Spacing.xl,
-  },
-  contributionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  contributionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: Spacing.md,
-  },
-  contributionDetails: {
-    flex: 1,
-  },
-  contributionPlan: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.text,
-    marginBottom: Spacing.xs,
-  },
-  contributionAmount: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.textSecondary,
-  },
-  statusBadge: {
-    backgroundColor: 'rgba(39, 174, 96, 0.1)',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.lg,
-  },
-  statusText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.success,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-    marginVertical: Spacing.md,
-  },
-  returnInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  returnItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  returnDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: Colors.border,
-    marginHorizontal: Spacing.md,
-  },
-  returnLabel: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  returnValue: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.text,
-  },
-  returnRate: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.success,
-  },
-  
-  // Enhanced Level Section
-  levelSection: {
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.xl,
-  },
-  levelCard: {
-    borderRadius: BorderRadius.xl,
-    overflow: 'hidden',
-    ...Shadows.md,
-  },
-  levelGradient: {
-    padding: Spacing.xl,
-  },
-  levelHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  levelBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: Spacing.lg,
-  },
-  levelNumber: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.textOnPrimary,
-  },
-  levelInfo: {
-    flex: 1,
-  },
-  levelTier: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.text,
-    marginBottom: Spacing.xs,
-  },
-  levelProgress: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.textSecondary,
-  },
-  progressContainer: {
-    marginTop: Spacing.md,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  progressLabel: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.textSecondary,
-  },
-  progressPercentage: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.success,
-  },
-  progressBar: {
-    height: 12,
-    backgroundColor: Colors.border,
-    borderRadius: BorderRadius.md,
-    overflow: 'hidden',
-    marginBottom: Spacing.sm,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: BorderRadius.md,
-  },
-  progressFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  progressText: {
-    fontSize: Typography.fontSize.xs,
-    color: Colors.textSecondary,
-  },
+  // Enhanced Notifications Styles
 });
