@@ -13,6 +13,7 @@ export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isDeveloperLoading, setIsDeveloperLoading] = useState(false);
   const passwordRef = useRef<TextInput>(null);
   
   const { signIn, isLoading, error, developerSignIn } = useAuth();
@@ -35,11 +36,13 @@ export default function SignInScreen() {
   };
 
   const handleDeveloperSignIn = async () => {
+    setIsDeveloperLoading(true);
     const success = await developerSignIn();
     
     if (success) {
       router.replace('/(tabs)/home');
     }
+    setIsDeveloperLoading(false);
   };
 
   const handleSignUpNavigation = () => {
@@ -146,7 +149,7 @@ export default function SignInScreen() {
                   <TouchableOpacity 
                     style={styles.developerButton}
                     onPress={handleDeveloperSignIn}
-                    disabled={isLoading}
+                    disabled={isDeveloperLoading}
                   >
                     <LinearGradient
                       colors={['#FF6B6B', '#FF8E8E']}
@@ -155,7 +158,9 @@ export default function SignInScreen() {
                       end={{ x: 1, y: 0 }}
                     >
                       <Ionicons name="code-outline" size={20} color={Colors.white} />
-                      <Text style={styles.developerButtonText}>Developer Access</Text>
+                      <Text style={styles.developerButtonText}>
+                        {isDeveloperLoading ? 'Signing in...' : 'Developer Access'}
+                      </Text>
                       <View style={styles.developerBadge}>
                         <Text style={styles.developerBadgeText}>DEV</Text>
                       </View>

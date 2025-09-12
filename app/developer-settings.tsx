@@ -65,19 +65,19 @@ export default function DeveloperSettingsScreen() {
             </View>
           </View>
           <Text style={styles.currentTierDescription}>
-            Currently simulating {getActiveTierNames()} investment plan(s)
+            Currently simulating {getActiveTierNames()} contribution plan(s)
           </Text>
         </Card>
 
         {/* Tier Subscriptions */}
         <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Investment Plans</Text>
+          <Text style={styles.sectionTitle}>Contribution Plans</Text>
           <Text style={styles.sectionDescription}>
-            Simulate multiple investment plans (multiple plans can be active simultaneously)
+            Simulate multiple contribution plans (multiple plans can be active simultaneously)
           </Text>
           
           <SettingItem
-            title="Bronze Investment Plan"
+            title="Bronze Contribution Plan"
             description="₹99/month • Basic growth rate"
             icon="medal"
             iconColor="#CD7F32"
@@ -86,7 +86,7 @@ export default function DeveloperSettingsScreen() {
           />
           
           <SettingItem
-            title="Silver Investment Plan"
+            title="Silver Contribution Plan"
             description="₹299/month • Enhanced growth rate"
             icon="trophy"
             iconColor="#C0C0C0"
@@ -95,7 +95,7 @@ export default function DeveloperSettingsScreen() {
           />
           
           <SettingItem
-            title="Gold Investment Plan"
+            title="Gold Contribution Plan"
             description="₹599/month • Premium growth rate"
             icon="star"
             iconColor="#FFD700"
@@ -104,7 +104,7 @@ export default function DeveloperSettingsScreen() {
           />
           
           <SettingItem
-            title="Platinum Investment Plan"
+            title="Platinum Contribution Plan"
             description="₹999/month • Ultimate growth rate"
             icon="diamond"
             iconColor="#E5E4E2"

@@ -7,24 +7,24 @@ interface DailyEarningsCardProps {
   todayEarnings: number;
   weeklyTarget: number;
   monthlyTarget: number;
-  dailyInvestment: number;
+  dailyContribution: number;
 }
 
 const DailyEarningsCard: React.FC<DailyEarningsCardProps> = ({ 
   todayEarnings, 
   weeklyTarget, 
   monthlyTarget, 
-  dailyInvestment 
+  dailyContribution 
 }) => {
   const weeklyProgress = (todayEarnings * 7) / weeklyTarget;
   const monthlyProgress = (todayEarnings * 30) / monthlyTarget;
 
   return (
     <Card>
-      <Text style={styles.title}>Daily Investment Returns</Text>
-      <View style={styles.investmentRow}>
-        <Text style={styles.label}>Daily Investment:</Text>
-        <Text style={styles.value}>₹{dailyInvestment}</Text>
+      <Text style={styles.title}>Daily Contribution Returns</Text>
+      <View style={styles.contributionRow}>
+        <Text style={styles.label}>Daily Contribution:</Text>
+        <Text style={styles.value}>₹{dailyContribution}</Text>
       </View>
       <View style={styles.earningsRow}>
         <Text style={styles.label}>Today's Earnings:</Text>
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: 'center',
   },
-  investmentRow: {
+  contributionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 8,

@@ -96,9 +96,9 @@ export const TierSlider: React.FC<TierSliderProps> = ({ activeTiers }) => {
     return (
       <View style={styles.noTierContainer}>
         <Ionicons name="trending-up-outline" size={32} color={Colors.textSecondary} />
-        <Text style={styles.noTierTitle}>No Active Investment Plans</Text>
+        <Text style={styles.noTierTitle}>No Active Contribution Plans</Text>
         <Text style={styles.noTierDescription}>
-          Visit the profile settings to enable investment plans for testing
+          Visit the profile settings to enable contribution plans for testing
         </Text>
       </View>
     );
@@ -118,9 +118,9 @@ export const TierSlider: React.FC<TierSliderProps> = ({ activeTiers }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Your Investment Plans</Text>
+        <Text style={styles.headerTitle}>Your Contribution Plans</Text>
         <Text style={styles.headerSubtitle}>
-          {currentIndex + 1} of {activeTierData.length} active investment plans
+          {currentIndex + 1} of {activeTierData.length} active contribution plans
         </Text>
       </View>
 
@@ -195,7 +195,7 @@ const TierCard: React.FC<TierCardProps> = ({ tier, isActive, isSingle = false })
       <View style={styles.activeStatusBar}>
         <View style={styles.activeIndicator}>
           <Ionicons name="trending-up" size={16} color={Colors.success} />
-          <Text style={styles.activeText}>Investment Active</Text>
+          <Text style={styles.activeText}>Contribution Active</Text>
         </View>
       </View>
 
@@ -218,9 +218,9 @@ const TierCard: React.FC<TierCardProps> = ({ tier, isActive, isSingle = false })
         </View>
       </View>
 
-      {/* Daily Investment */}
+      {/* Daily Contribution */}
       <View style={styles.investmentSection}>
-        <Text style={styles.sectionTitle}>Daily Investment Details</Text>
+        <Text style={styles.sectionTitle}>Daily Contribution Details</Text>
         <View style={styles.investmentGrid}>
           <View style={styles.investmentItem}>
             <Text style={styles.investmentLabel}>Daily Amount</Text>
@@ -229,7 +229,7 @@ const TierCard: React.FC<TierCardProps> = ({ tier, isActive, isSingle = false })
             </Text>
           </View>
           <View style={styles.investmentItem}>
-            <Text style={styles.investmentLabel}>Investment Limit</Text>
+            <Text style={styles.investmentLabel}>Contribution Limit</Text>
             <Text style={[styles.investmentValue, { color: tier.color }]}>
               {tier.dailyInvestment.dailyLimit}
             </Text>
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  // Investment Section
+  // Contribution Section
   investmentSection: {
     padding: Spacing.lg,
     borderBottomWidth: 1,

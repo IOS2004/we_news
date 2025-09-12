@@ -16,7 +16,7 @@ const plans = {
       'Level 1-2 rewards'
     ],
     dailyReturn: 0.5,
-    investment: 100
+    contribution: 100
   },
   Silver: { 
     price: 500, 
@@ -29,7 +29,7 @@ const plans = {
       'Extra earning opportunities'
     ],
     dailyReturn: 0.8,
-    investment: 500
+    contribution: 500
   },
   Gold: { 
     price: 1000, 
@@ -43,7 +43,7 @@ const plans = {
       'Referral bonuses'
     ],
     dailyReturn: 1.2,
-    investment: 1000
+    contribution: 1000
   },
   Diamond: { 
     price: 5000, 
@@ -58,7 +58,7 @@ const plans = {
       'Priority withdrawals'
     ],
     dailyReturn: 1.8,
-    investment: 5000
+    contribution: 5000
   },
 };
 
@@ -72,11 +72,11 @@ export default function PlansScreen() {
   const selectedPlanData = plans[selectedPlan as keyof typeof plans];
 
   const calculateDailyEarnings = (plan: typeof selectedPlanData) => {
-    return (plan.investment * plan.dailyReturn / 100).toFixed(2);
+    return (plan.contribution * plan.dailyReturn / 100).toFixed(2);
   };
 
   const calculateMonthlyEarnings = (plan: typeof selectedPlanData) => {
-    return (plan.investment * plan.dailyReturn / 100 * 30).toFixed(2);
+    return (plan.contribution * plan.dailyReturn / 100 * 30).toFixed(2);
   };
 
   return (
@@ -84,9 +84,9 @@ export default function PlansScreen() {
       <Header title="Plans & Subscriptions" canGoBack />
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerSection}>
-          <Text style={styles.title}>Choose Your Investment Plan</Text>
+          <Text style={styles.title}>Choose Your Contribution Plan</Text>
           <Text style={styles.subtitle}>
-            Select a plan that matches your investment goals
+            Select a plan that matches your contribution goals
           </Text>
         </View>
 
@@ -126,7 +126,7 @@ export default function PlansScreen() {
           <Text style={styles.benefitsTitle}>Why Choose Our Plans?</Text>
           <Text style={styles.benefitItem}>• Guaranteed daily returns</Text>
           <Text style={styles.benefitItem}>• No hidden charges</Text>
-          <Text style={styles.benefitItem}>• Secure investments</Text>
+          <Text style={styles.benefitItem}>• Secure contributions</Text>
           <Text style={styles.benefitItem}>• 24/7 support</Text>
           <Text style={styles.benefitItem}>• Easy withdrawals</Text>
         </View>

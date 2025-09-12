@@ -162,24 +162,24 @@ export default function HomeScreen() {
           onViewLabels={() => handleNavigation('/labels')}
         />
 
-        {/* Enhanced Investment Status */}
-        <View style={styles.investmentSection}>
-          <View style={styles.investmentCard}>
+        {/* Enhanced Contribution Status */}
+        <View style={styles.contributionSection}>
+          <View style={styles.contributionCard}>
             <LinearGradient
               colors={[Colors.surface, '#f8f9fa']}
-              style={styles.investmentGradient}
+              style={styles.contributionGradient}
             >
-              <Text style={styles.cardTitle}>Today's Investment</Text>
-              <View style={styles.investmentHeader}>
+              <Text style={styles.cardTitle}>Today's Contribution</Text>
+              <View style={styles.contributionHeader}>
                 <LinearGradient
                   colors={['rgba(39, 174, 96, 0.1)', 'rgba(39, 174, 96, 0.05)']}
-                  style={styles.investmentIcon}
+                  style={styles.contributionIcon}
                 >
                   <Ionicons name="trending-up" size={28} color={Colors.success} />
                 </LinearGradient>
-                <View style={styles.investmentDetails}>
-                  <Text style={styles.investmentPlan}>Silver Plan</Text>
-                  <Text style={styles.investmentAmount}>₹500 invested</Text>
+                <View style={styles.contributionDetails}>
+                  <Text style={styles.contributionPlan}>Silver Plan</Text>
+                  <Text style={styles.contributionAmount}>₹500 contributed</Text>
                 </View>
                 <View style={styles.statusBadge}>
                   <Text style={styles.statusText}>Active</Text>
@@ -517,25 +517,25 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   
-  // Enhanced Investment Section
-  investmentSection: {
+  // Enhanced Contribution Section
+  contributionSection: {
     paddingHorizontal: Spacing.lg,
     marginBottom: Spacing.xl,
   },
-  investmentCard: {
+  contributionCard: {
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     ...Shadows.md,
   },
-  investmentGradient: {
+  contributionGradient: {
     padding: Spacing.xl,
   },
-  investmentHeader: {
+  contributionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Spacing.lg,
   },
-  investmentIcon: {
+  contributionIcon: {
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -543,16 +543,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: Spacing.md,
   },
-  investmentDetails: {
+  contributionDetails: {
     flex: 1,
   },
-  investmentPlan: {
+  contributionPlan: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text,
     marginBottom: Spacing.xs,
   },
-  investmentAmount: {
+  contributionAmount: {
     fontSize: Typography.fontSize.sm,
     color: Colors.textSecondary,
   },

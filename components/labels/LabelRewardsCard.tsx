@@ -17,9 +17,9 @@ const LabelRewardsCard: React.FC = () => {
   const labelRewards: LabelReward[] = [
     {
       id: '1',
-      name: 'First Investment',
-      description: 'Complete your first daily investment',
-      unlockCondition: 'Make 1 investment',
+      name: 'First Contribution',
+      description: 'Complete your first daily contribution',
+      unlockCondition: 'Make 1 contribution',
       reward: 50,
       isUnlocked: true,
       icon: '💰',
@@ -27,8 +27,8 @@ const LabelRewardsCard: React.FC = () => {
     {
       id: '2',
       name: 'Week Warrior',
-      description: 'Complete 7 consecutive days of investment',
-      unlockCondition: 'Invest for 7 days straight',
+      description: 'Complete 7 consecutive days of contribution',
+      unlockCondition: 'Contribute for 7 days straight',
       reward: 200,
       isUnlocked: true,
       icon: '🏆',
@@ -62,9 +62,9 @@ const LabelRewardsCard: React.FC = () => {
     },
     {
       id: '6',
-      name: 'Monthly Investor',
-      description: 'Complete 30 days of investment',
-      unlockCondition: 'Invest for 30 days',
+      name: 'Monthly Contributor',
+      description: 'Complete 30 days of contribution',
+      unlockCondition: 'Contribute for 30 days',
       reward: 500,
       isUnlocked: false,
       icon: '📅',
