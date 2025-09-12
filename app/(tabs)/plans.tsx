@@ -69,7 +69,7 @@ export default function PlansScreen() {
 
   return (
     <ScreenWrapper style={styles.container}>
-      <Header title="Plans & Subscriptions" canGoBack={true} />
+      <Header title="Plans & Subscriptions" canGoBack={false} />
       
       <ScrollView 
         contentContainerStyle={styles.scrollContainer}

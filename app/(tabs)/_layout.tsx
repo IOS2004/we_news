@@ -38,23 +38,23 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen 
-        name="news" 
+        name="plans" 
         options={{
-          title: 'News',
+          title: 'Plans',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="newspaper" size={size} color={color} />
+            <Ionicons name="diamond" size={size} color={color} />
           ),
         }}
       />
       {/* Hidden tabs - accessible via navigation but not in tab bar */}
       <Tabs.Screen 
-        name="profile" 
+        name="news" 
         options={{
           href: null, // This hides the tab from the tab bar
         }}
       />
       <Tabs.Screen 
-        name="plans" 
+        name="profile" 
         options={{
           href: null, // This hides the tab from the tab bar
         }}
