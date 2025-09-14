@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, Alert, StyleSheet, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, Text, View, TouchableOpacity, Alert, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -8,171 +8,52 @@ import Header from '../../../components/common/Header';
 import Card from '../../../components/common/Card';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
 import { showToast } from '../../../utils/toast';
+import { investmentAPI, mapBackendPlansToGrowthPlans, GrowthPlan } from '../../../services/api';
 
 const { width: screenWidth } = Dimensions.get('window');
-
-const growthPlans = [
-  {
-    id: 'base',
-    name: 'Base Plan',
-    description: 'Start your growth journey',
-    plans: {
-      daily: { initialPayment: 1499, contributionAmount: 25 },
-      weekly: { initialPayment: 1299, contributionAmount: 150 },
-      monthly: { initialPayment: 999, contributionAmount: 600 }
-    },
-    planValidity: 750, // days
-    earnings: {
-      daily: 45,
-      weekly: 315,
-      monthly: 1350
-    },
-    features: [
-      'Daily contribution tracking',
-      'Growth rewards system',
-      'Portfolio analytics',
-      'Performance insights'
-    ],
-    color: '#3B82F6',
-    gradient: ['#3B82F6', '#1D4ED8'],
-    popular: false
-  },
-  {
-    id: 'silver',
-    name: 'Silver Plan',
-    description: 'Enhanced growth opportunities',
-    plans: {
-      daily: { initialPayment: 2499, contributionAmount: 75 },
-      weekly: { initialPayment: 2199, contributionAmount: 450 },
-      monthly: { initialPayment: 1899, contributionAmount: 1800 }
-    },
-    planValidity: 750,
-    earnings: {
-      daily: 135,
-      weekly: 945,
-      monthly: 4050
-    },
-    features: [
-      'Everything in Base Plan',
-      'Higher growth rewards',
-      'Priority support',
-      'Advanced analytics'
-    ],
-    color: '#6B7280',
-    gradient: ['#6B7280', '#4B5563'],
-    popular: true
-  },
-  {
-    id: 'gold',
-    name: 'Gold Plan',
-    description: 'Premium growth experience',
-    plans: {
-      daily: { initialPayment: 3499, contributionAmount: 125 },
-      weekly: { initialPayment: 3099, contributionAmount: 750 },
-      monthly: { initialPayment: 2699, contributionAmount: 3000 }
-    },
-    planValidity: 750,
-    earnings: {
-      daily: 225,
-      weekly: 1575,
-      monthly: 6750
-    },
-    features: [
-      'Everything in Silver Plan',
-      'Premium growth rates',
-      'Exclusive insights',
-      'Personal account manager'
-    ],
-    color: '#F59E0B',
-    gradient: ['#F59E0B', '#D97706'],
-    popular: false
-  },
-  {
-    id: 'diamond',
-    name: 'Diamond Plan',
-    description: 'Elite growth tier',
-    plans: {
-      daily: { initialPayment: 4499, contributionAmount: 225 },
-      weekly: { initialPayment: 3999, contributionAmount: 1350 },
-      monthly: { initialPayment: 3499, contributionAmount: 5400 }
-    },
-    planValidity: 750,
-    earnings: {
-      daily: 405,
-      weekly: 2835,
-      monthly: 12150
-    },
-    features: [
-      'Everything in Gold Plan',
-      'Maximum earning potential',
-      'VIP customer support',
-      'Early access to new plans'
-    ],
-    color: '#8B5CF6',
-    gradient: ['#8B5CF6', '#7C3AED'],
-    popular: false
-  },
-  {
-    id: 'platinum',
-    name: 'Platinum Plan',
-    description: 'Ultimate growth package',
-    plans: {
-      daily: { initialPayment: 5499, contributionAmount: 350 },
-      weekly: { initialPayment: 4899, contributionAmount: 2100 },
-      monthly: { initialPayment: 4299, contributionAmount: 8400 }
-    },
-    planValidity: 750,
-    earnings: {
-      daily: 630,
-      weekly: 4410,
-      monthly: 18900
-    },
-    features: [
-      'Everything in Diamond Plan',
-      'Highest growth rewards',
-      'Dedicated relationship manager',
-      'Exclusive growth opportunities'
-    ],
-    color: '#10B981',
-    gradient: ['#10B981', '#059669'],
-    popular: false
-  },
-  {
-    id: 'elite',
-    name: 'Elite Plan',
-    description: 'The pinnacle of growth',
-    plans: {
-      daily: { initialPayment: 6999, contributionAmount: 500 },
-      weekly: { initialPayment: 6199, contributionAmount: 3000 },
-      monthly: { initialPayment: 5399, contributionAmount: 12000 }
-    },
-    planValidity: 750,
-    earnings: {
-      daily: 900,
-      weekly: 6300,
-      monthly: 27000
-    },
-    features: [
-      'Everything in Platinum Plan',
-      'Maximum daily contributions',
-      'Elite status benefits',
-      'Personalized growth strategy'
-    ],
-    color: '#DC2626',
-    gradient: ['#DC2626', '#B91C1C'],
-    popular: false
-  }
-];
 
 export default function PlansScreen() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedFrequency, setSelectedFrequency] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [growthPlans, setGrowthPlans] = useState<GrowthPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load growth plans from backend
+  useEffect(() => {
+    loadGrowthPlans();
+  }, []);
+
+  const loadGrowthPlans = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await investmentAPI.getInvestmentPlans();
+      
+      if (response.success && response.data) {
+        const mappedPlans = mapBackendPlansToGrowthPlans(response.data);
+        setGrowthPlans(mappedPlans);
+      } else {
+        throw new Error(response.message || 'Failed to load growth plans');
+      }
+    } catch (error: any) {
+      console.error('Error loading growth plans:', error);
+      setError('Failed to load growth plans. Please try again.');
+      showToast.error({
+        title: 'Error',
+        message: 'Unable to load growth plans. Please check your connection.'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
   };
 
-  const handlePurchasePlan = (plan: any) => {
+  const handlePurchasePlan = async (plan: GrowthPlan) => {
     const currentPlan = plan.plans[selectedFrequency];
     Alert.alert(
       'Confirm Purchase',
@@ -181,19 +62,37 @@ export default function PlansScreen() {
         { text: 'Cancel', style: 'cancel' },
         { 
           text: 'Purchase', 
-          onPress: () => {
-            // Handle plan purchase - integrate with backend later
-            showToast.success({
-              title: 'Purchase Successful!',
-              message: `${plan.name} (${selectedFrequency}) purchased successfully!`
-            });
+          onPress: async () => {
+            try {
+              showToast.info({
+                title: 'Processing Purchase',
+                message: 'Please wait while we process your purchase...'
+              });
+
+              const response = await investmentAPI.purchaseInvestmentPlan(plan.id);
+              
+              if (response.success) {
+                showToast.success({
+                  title: 'Purchase Successful!',
+                  message: `${plan.name} (${selectedFrequency}) purchased successfully!`
+                });
+              } else {
+                throw new Error(response.message || 'Purchase failed');
+              }
+            } catch (error: any) {
+              console.error('Error purchasing plan:', error);
+              showToast.error({
+                title: 'Purchase Failed',
+                message: error.message || 'Unable to complete purchase. Please try again.'
+              });
+            }
           }
         }
       ]
     );
   };
 
-  const PlanCard = ({ plan }: { plan: any }) => {
+  const PlanCard = ({ plan }: { plan: GrowthPlan }) => {
     const currentPlan = plan.plans[selectedFrequency];
     
     return (
@@ -292,66 +191,82 @@ export default function PlansScreen() {
     <ScreenWrapper>
       <Header title="Growth Plans" />
       
-      <ScrollView 
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.headerSection}>
-          <Text style={styles.headerTitle}>Choose Your Growth Plan</Text>
-          <Text style={styles.headerSubtitle}>
-            Accelerate your financial growth with our flexible contribution plans designed for consistent returns.
-          </Text>
+      {loading ? (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading growth plans...</Text>
         </View>
-
-        {/* Frequency Toggle */}
-        <View style={styles.frequencyToggle}>
-          <TouchableOpacity
-            style={[styles.frequencyButton, selectedFrequency === 'daily' && styles.activeFrequency]}
-            onPress={() => setSelectedFrequency('daily')}
-          >
-            <Text style={[styles.frequencyText, selectedFrequency === 'daily' && styles.activeFrequencyText]}>
-              Daily
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.frequencyButton, selectedFrequency === 'weekly' && styles.activeFrequency]}
-            onPress={() => setSelectedFrequency('weekly')}
-          >
-            <Text style={[styles.frequencyText, selectedFrequency === 'weekly' && styles.activeFrequencyText]}>
-              Weekly
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.frequencyButton, selectedFrequency === 'monthly' && styles.activeFrequency]}
-            onPress={() => setSelectedFrequency('monthly')}
-          >
-            <Text style={[styles.frequencyText, selectedFrequency === 'monthly' && styles.activeFrequencyText]}>
-              Monthly
-            </Text>
+      ) : error ? (
+        <View style={styles.centerContainer}>
+          <Ionicons name="alert-circle" size={64} color={Colors.error} />
+          <Text style={styles.errorTitle}>Unable to Load Plans</Text>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadGrowthPlans}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
         </View>
+      ) : (
+        <ScrollView 
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.headerSection}>
+            <Text style={styles.headerTitle}>Choose Your Growth Plan</Text>
+            <Text style={styles.headerSubtitle}>
+              Accelerate your financial growth with our flexible contribution plans designed for consistent returns.
+            </Text>
+          </View>
 
-        <View style={styles.plansContainer}>
-          {growthPlans.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} />
-          ))}
-        </View>
-
-        <View style={styles.infoSection}>
-          <View style={styles.infoCard}>
-            <Ionicons name="information-circle" size={24} color={Colors.primary} />
-            <View style={styles.infoContent}>
-              <Text style={styles.infoTitle}>Important Information</Text>
-              <Text style={styles.infoText}>
-                • Contributions must be made regularly to maintain growth eligibility{'\n'}
-                • Missing contributions may affect your growth rewards{'\n'}
-                • Plans are valid for the specified duration{'\n'}
-                • Growth rewards are calculated based on your contribution consistency
+          {/* Frequency Toggle */}
+          <View style={styles.frequencyToggle}>
+            <TouchableOpacity
+              style={[styles.frequencyButton, selectedFrequency === 'daily' && styles.activeFrequency]}
+              onPress={() => setSelectedFrequency('daily')}
+            >
+              <Text style={[styles.frequencyText, selectedFrequency === 'daily' && styles.activeFrequencyText]}>
+                Daily
               </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.frequencyButton, selectedFrequency === 'weekly' && styles.activeFrequency]}
+              onPress={() => setSelectedFrequency('weekly')}
+            >
+              <Text style={[styles.frequencyText, selectedFrequency === 'weekly' && styles.activeFrequencyText]}>
+                Weekly
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.frequencyButton, selectedFrequency === 'monthly' && styles.activeFrequency]}
+              onPress={() => setSelectedFrequency('monthly')}
+            >
+              <Text style={[styles.frequencyText, selectedFrequency === 'monthly' && styles.activeFrequencyText]}>
+                Monthly
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.plansContainer}>
+            {growthPlans.map((plan) => (
+              <PlanCard key={plan.id} plan={plan} />
+            ))}
+          </View>
+
+          <View style={styles.infoSection}>
+            <View style={styles.infoCard}>
+              <Ionicons name="information-circle" size={24} color={Colors.primary} />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoTitle}>Important Information</Text>
+                <Text style={styles.infoText}>
+                  • Contributions must be made regularly to maintain growth eligibility{'\n'}
+                  • Missing contributions may affect your growth rewards{'\n'}
+                  • Plans are valid for the specified duration{'\n'}
+                  • Growth rewards are calculated based on your contribution consistency
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </ScreenWrapper>
   );
 }
@@ -565,5 +480,42 @@ const styles = StyleSheet.create({
   },
   activeFrequencyText: {
     color: '#ffffff',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+    marginTop: 12,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.error,
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  retryButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
