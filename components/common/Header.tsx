@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useRootNavigationState } from 'expo-router';
+import { router } from 'expo-router';
 import { Colors, Typography, Spacing } from '../../constants/theme';
 
 interface HeaderProps {
@@ -10,11 +10,9 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title, canGoBack = false }) => {
-  const navigationState = useRootNavigationState();
-
   const handleBackPress = () => {
-    // Check if there's a previous screen in the navigation history
-    if (navigationState?.routes && navigationState.routes.length > 1) {
+    // Always try to go back first
+    if (router.canGoBack()) {
       router.back();
     } else {
       // If no previous screen, go to home/dashboard
