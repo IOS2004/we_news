@@ -1,41 +1,19 @@
-import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/theme';
-import React from 'react';
+import { Stack } from "expo-router";
 
-export default function TabsLayout() {
-  return (
-    <Tabs screenOptions={{ 
-      headerShown: false,
-      tabBarActiveTintColor: Colors.primary,
-      tabBarInactiveTintColor: Colors.textLight,
-    }}>
-      <Tabs.Screen 
-        name="(home)" 
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen 
-        name="(news)" 
-        options={{
-          title: 'News',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="newspaper" size={size} color={color} />
-          ),
-        }}
-      />
-      
-      {/* Legacy routes - hidden but accessible for navigation */}
-      <Tabs.Screen name="home" options={{ href: null }} />
-      <Tabs.Screen name="earnings" options={{ href: null }} />
-      <Tabs.Screen name="wallet" options={{ href: null }} />
-      <Tabs.Screen name="plans" options={{ href: null }} />
-      <Tabs.Screen name="news" options={{ href: null }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
-    </Tabs>
-  );
+const appMode = "home"; // or "news"
+
+export default function RootLayout() {
+  if (appMode === "home") {
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(home)" />
+      </Stack>
+    );
+  } else {
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(news)" />
+      </Stack>
+    );
+  }
 }

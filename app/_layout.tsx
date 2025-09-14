@@ -15,7 +15,7 @@ export default function RootLayout() {
           <Stack.Screen name="developer-settings" />
           <Stack.Screen name="settings" />
           <Stack.Screen name="edit-profile" />
-          <Stack.Screen name="plans" />
+          <Stack.Screen name="profile" />
           <Stack.Screen name="labels" />
           <Stack.Screen name="withdrawals" />
           <Stack.Screen name="withdrawal-request" />

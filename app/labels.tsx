@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Header, ScreenWrapper, Card } from '../components/common';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { router } from 'expo-router';
 
 export default function LabelsScreen() {
   const [activeTab, setActiveTab] = useState<'rewards' | 'achievements'>('rewards');
@@ -120,8 +121,15 @@ export default function LabelsScreen() {
 
   return (
     <ScreenWrapper style={styles.container}>
-      <Header title="Rewards & Achievements" canGoBack />
-      
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={Colors.textOnPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Labels</Text>
+        <TouchableOpacity style={styles.helpButton}>
+          <Ionicons name="help-circle-outline" size={24} color={Colors.textOnPrimary} />
+        </TouchableOpacity>
+      </View>      
       <ScrollView 
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
@@ -289,6 +297,31 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: 0
   },
+    header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.base,
+    backgroundColor: Colors.primary,
+    ...Shadows.md,
+  },
+  backButton: {
+    padding: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.whiteTransparent,
+  },
+  headerTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.textOnPrimary,
+  },
+  helpButton: {
+    padding: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.whiteTransparent,
+  },
+
   scrollContainer: {
     padding: Spacing.md,
     paddingBottom: Spacing.xl,

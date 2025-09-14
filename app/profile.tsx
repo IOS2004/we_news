@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { ScreenWrapper } from '../../components/common';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
-import { useAuth } from '../../contexts/AuthContext';
-import { showToast } from '../../utils/toast';
+import { ScreenWrapper } from '../components/common';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { useAuth } from '../contexts/AuthContext';
+import { showToast } from '../utils/toast';
 
 export default function ProfileScreen() {
   const { user, signOut, isAuthenticated } = useAuth();
@@ -98,22 +98,22 @@ export default function ProfileScreen() {
           <MenuItem 
             title="My Wallet" 
             icon="wallet-outline" 
-            onPress={() => handleNavigation('/(tabs)/wallet')} 
+            onPress={() => handleNavigation('/(tabs)/(home)/wallet')} 
           />
           <MenuItem 
             title="My Earnings" 
             icon="trending-up-outline" 
-            onPress={() => handleNavigation('/(tabs)/earnings')} 
+            onPress={() => handleNavigation('/(tabs)/(home)/earnings')} 
           />
           <MenuItem 
             title="My Plans" 
             icon="card-outline" 
-            onPress={() => handleNavigation('/plans')} 
+            onPress={() => handleNavigation('/(tabs)/(home)/plans')} 
           />
           <MenuItem 
             title="My Withdrawals" 
             icon="arrow-down-circle-outline" 
-            onPress={() => handleNavigation('/withdrawals')} 
+            onPress={() => handleNavigation('/withdrawal-history')} 
           />
         </View>
 

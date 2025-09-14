@@ -94,11 +94,11 @@ export default function HomeScreen() {
   };
 
   const handleUpgradePlan = () => {
-    handleNavigation('/plans');
+    handleNavigation('/(tabs)/(home)/plans');
   };
 
   const handleProfilePress = () => {
-    router.push('/(tabs)/(home)/profile');
+    router.push('/profile');
   };
 
   const handleViewAllTransactions = () => {
@@ -222,6 +222,7 @@ export default function HomeScreen() {
                 {/* Earnings and Progress */}
                 <View style={styles.subscriptionContent}>
                   <View style={styles.earningsSection}>
+
                     <Text style={styles.earningsLabel}>Total Earnings</Text>
                     <View style={styles.earningsRow}>
                       <Text style={styles.earningsAmount}>₹{subscription.totalEarnings.toLocaleString()}</Text>

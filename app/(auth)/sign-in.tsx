@@ -30,7 +30,7 @@ export default function SignInScreen() {
     const success = await signIn({ email: email.trim(), password });
     
     if (success) {
-      router.replace('/(tabs)/home');
+      router.replace('/(tabs)/(home)/dashboard');
     }
     // Error handling is now done through toast notifications in AuthContext
   };
@@ -40,7 +40,7 @@ export default function SignInScreen() {
     const success = await developerSignIn();
     
     if (success) {
-      router.replace('/(tabs)/home');
+      router.replace('/(tabs)/(home)/dashboard');
     }
     setIsDeveloperLoading(false);
   };

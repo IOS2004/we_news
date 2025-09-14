@@ -16,7 +16,7 @@ export default function NewsTabsLayout() {
           <View style={styles.toggleButton}>
             <TouchableOpacity
               style={styles.toggleOption}
-              onPress={() => router.replace('/(tabs)/(home)')}
+              onPress={() => router.replace('/(tabs)/(home)/dashboard')}
             >
               <Text style={styles.toggleText}>
                 HOME

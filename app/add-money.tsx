@@ -114,7 +114,16 @@ export default function AddMoneyScreen() {
 
   return (
     <ScreenWrapper style={styles.container}>
-      <Header title="Add Money" canGoBack />
+
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={Colors.textOnPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Add Money</Text>
+        <TouchableOpacity style={styles.helpButton}>
+          <Ionicons name="help-circle-outline" size={24} color={Colors.textOnPrimary} />
+        </TouchableOpacity>
+      </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Amount Input Section */}
@@ -238,6 +247,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.base,
+    backgroundColor: Colors.primary,
+    ...Shadows.md,
+  },
+  backButton: {
+    padding: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.whiteTransparent,
+  },
+  headerTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.textOnPrimary,
+  },
+  helpButton: {
+    padding: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.whiteTransparent,
   },
   scrollView: {
     flex: 1,
