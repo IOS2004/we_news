@@ -418,6 +418,75 @@ export const investmentAPI = {
   },
 };
 
+// Referral System interfaces
+export interface BackendReferralInfo {
+  userReferralCode: string;
+  referralStats: {
+    directReferrals: number;
+    totalReferrals: number;
+    commissionEarnings: number;
+    level: number;
+  };
+  directReferrals: Array<{
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+    createdAt: string;
+  }>;
+  uplineChain: Array<{
+    user: {
+      id: string;
+      username: string;
+      firstName: string;
+      lastName: string;
+    };
+    level: number;
+  }>;
+  referralLink: string;
+}
+
+export interface BackendEarningsData {
+  totalEarnings: number;
+  dailyEarnings: number;
+  referralEarnings: number;
+  investmentEarnings: number;
+  todayEarnings?: number;
+  breakdown: {
+    referral: number;
+    investment: number;
+    daily: number;
+    other: number;
+  };
+}
+
+// Referral API
+export const referralAPI = {
+  // Get referral information
+  getReferralInfo: async (): Promise<ApiResponse<BackendReferralInfo>> => {
+    try {
+      const response: AxiosResponse<ApiResponse<BackendReferralInfo>> =
+        await api.get("/referrals/info");
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching referral info:", error);
+      throw error;
+    }
+  },
+
+  // Get earnings breakdown
+  getEarnings: async (): Promise<ApiResponse<BackendEarningsData>> => {
+    try {
+      const response: AxiosResponse<ApiResponse<BackendEarningsData>> =
+        await api.get("/wallet/earnings");
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching earnings:", error);
+      throw error;
+    }
+  },
+};
+
 // Utility function to map backend investment plans to frontend growth plans structure
 export const mapBackendPlansToGrowthPlans = (
   backendPlans: BackendInvestmentPlan[]
@@ -537,6 +606,120 @@ export const mapBackendPlansToGrowthPlans = (
       popular: index === 1, // Make Silver plan popular (second plan)
     };
   });
+};
+
+// Utility function to map backend referral data to dashboard subscription structure
+export const mapReferralDataToSubscriptions = (
+  referralInfo: BackendReferralInfo,
+  earningsData: BackendEarningsData,
+  userInvestment?: any
+): any[] => {
+  // If user has active investment, create subscription based on real data
+  if (userInvestment && userInvestment.investment) {
+    const investment = userInvestment.investment;
+
+    // Map backend plan names to frontend plan types
+    const planTypeMapping: { [key: string]: string } = {
+      bass: "base",
+      silver: "silver",
+      gold: "gold",
+      diamond: "diamond",
+      platinum: "platinum",
+      eight: "elite",
+    };
+
+    const planColorMapping: { [key: string]: string } = {
+      bass: "#3B82F6",
+      silver: "#6B7280",
+      gold: "#F59E0B",
+      diamond: "#8B5CF6",
+      platinum: "#10B981",
+      eight: "#DC2626",
+    };
+
+    const planKey = investment.planName?.toLowerCase() || "bass";
+    const planType = planTypeMapping[planKey] || "base";
+    const planColor = planColorMapping[planKey] || "#3B82F6";
+
+    // Calculate days remaining from expiry date
+    let daysRemaining = 750; // default
+    if (investment.expiryDate) {
+      const expiryDate = investment.expiryDate._seconds
+        ? new Date(investment.expiryDate._seconds * 1000)
+        : new Date(investment.expiryDate);
+      const now = new Date();
+      daysRemaining = Math.max(
+        0,
+        Math.ceil(
+          (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        )
+      );
+    }
+
+    // Format purchase date
+    let purchaseDate = new Date().toISOString().split("T")[0];
+    if (investment.startDate) {
+      const startDate = investment.startDate._seconds
+        ? new Date(investment.startDate._seconds * 1000)
+        : new Date(investment.startDate);
+      purchaseDate = startDate.toISOString().split("T")[0];
+    }
+
+    return [
+      {
+        id: investment.id || "investment_1",
+        name: `${investment.planName || "Bass"} Plan`,
+        planType,
+        planColor,
+        purchaseDate,
+        daysRemaining,
+        totalEarnings: investment.totalEarnings || 0,
+        monthlyGain: Math.round((earningsData.investmentEarnings || 0) / 12), // Approximate monthly gain
+        referralTreeSize: referralInfo.referralStats.totalReferrals || 0,
+        directReferrals: referralInfo.referralStats.directReferrals || 0,
+        currentLevel: investment.currentLevel || 1,
+        maxLevels: 13, // Based on backend plan structure
+        referralLink: referralInfo.userReferralCode || "NO_CODE",
+        isActive: investment.isActive || true,
+        dailyEarning: earningsData.dailyEarnings || 0,
+      },
+    ];
+  }
+
+  // Fallback: Create mock subscription with real referral data
+  return [
+    {
+      id: "base_daily",
+      name: "Base Plan",
+      planType: "base",
+      planColor: "#3B82F6",
+      purchaseDate: new Date().toISOString().split("T")[0],
+      daysRemaining: 750,
+      totalEarnings: earningsData.totalEarnings || 0,
+      monthlyGain: Math.round((earningsData.totalEarnings || 0) / 12),
+      referralTreeSize: referralInfo.referralStats.totalReferrals || 0,
+      directReferrals: referralInfo.referralStats.directReferrals || 0,
+      currentLevel: referralInfo.referralStats.level || 1,
+      maxLevels: 5,
+      referralLink: referralInfo.userReferralCode || "NO_CODE",
+      isActive: true,
+      dailyEarning: earningsData.dailyEarnings || 0,
+    },
+  ];
+};
+
+// Utility function to update user data with real referral information
+export const updateUserWithReferralData = (
+  currentUser: User,
+  referralInfo: BackendReferralInfo,
+  earningsData: BackendEarningsData
+): User => {
+  return {
+    ...currentUser,
+    referralCode: referralInfo.userReferralCode,
+    totalReferrals: referralInfo.referralStats.totalReferrals,
+    referralEarnings: referralInfo.referralStats.commissionEarnings,
+  };
 };
 
 export default api;

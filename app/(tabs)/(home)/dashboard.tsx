@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { ScrollView, StyleSheet, View, Text, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { ScrollView, StyleSheet, View, Text, TouchableOpacity, StatusBar, Dimensions, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,8 @@ import { DashboardNotifications, QuickActions, RecentTransactions } from '../../
 import { AdPlaceholder } from '../../../components/ads';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
 import { useAuth } from '../../../contexts/AuthContext';
+import { referralAPI, investmentAPI, mapReferralDataToSubscriptions, updateUserWithReferralData } from '../../../services/api';
+import { showToast } from '../../../utils/toast';
 
 const notifications = [
   { id: '1', title: 'Daily earnings credited', message: '₹50 has been added to your wallet', time: '2 hours ago' },
@@ -21,9 +23,66 @@ export default function HomeScreen() {
   const [selectedSubscription, setSelectedSubscription] = useState(0);
   const subscriptionScrollRef = useRef<ScrollView>(null);
   const { width: screenWidth } = Dimensions.get('window');
+  
+  // Real data state
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock subscriptions data - Mixed plan types
-  const subscriptions = [
+  // Load real referral data
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch referral info and earnings in parallel
+      const [referralResponse, earningsResponse] = await Promise.all([
+        referralAPI.getReferralInfo(),
+        referralAPI.getEarnings()
+      ]);
+
+      // Try to get user investment data
+      let investmentResponse = null;
+      try {
+        investmentResponse = await investmentAPI.getMyInvestment();
+      } catch (investmentError) {
+        // User might not have an investment yet, which is fine
+        console.log('No active investment found');
+      }
+
+      if (referralResponse.success && earningsResponse.success) {
+        // Map backend data to frontend structure
+        const mappedSubscriptions = mapReferralDataToSubscriptions(
+          referralResponse.data!,
+          earningsResponse.data!,
+          investmentResponse?.data
+        );
+        
+        setSubscriptions(mappedSubscriptions);
+      } else {
+        throw new Error('Failed to load dashboard data');
+      }
+    } catch (error: any) {
+      console.error('Error loading dashboard data:', error);
+      setError('Failed to load dashboard data');
+      // Use fallback mock data
+      setSubscriptions(getFallbackSubscriptions());
+      
+      showToast.error({
+        title: 'Dashboard Error',
+        message: 'Unable to load real-time data. Showing cached information.'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fallback mock data (same as before)
+  const getFallbackSubscriptions = () => [
     {
       id: 'base_daily',
       name: 'Base Plan',
@@ -188,16 +247,41 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           
-          {/* Horizontal Subscription Slider */}
-          <ScrollView
-            ref={subscriptionScrollRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={handleSubscriptionScroll}
-            contentContainerStyle={styles.subscriptionSlider}
-            style={styles.subscriptionScrollView}
-          >
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={Colors.primary} />
+              <Text style={styles.loadingText}>Loading your subscriptions...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={48} color={Colors.error} />
+              <Text style={styles.errorTitle}>Unable to Load Data</Text>
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity style={styles.retryButton} onPress={loadDashboardData}>
+                <Text style={styles.retryButtonText}>Try Again</Text>
+              </TouchableOpacity>
+            </View>
+          ) : subscriptions.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="trending-up" size={48} color={Colors.textSecondary} />
+              <Text style={styles.emptyTitle}>No Subscriptions Yet</Text>
+              <Text style={styles.emptyText}>Start your growth journey by choosing a plan</Text>
+              <TouchableOpacity style={styles.startButton} onPress={handleAddSubscription}>
+                <Text style={styles.startButtonText}>Browse Plans</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              {/* Horizontal Subscription Slider */}
+              <ScrollView
+                ref={subscriptionScrollRef}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={handleSubscriptionScroll}
+                contentContainerStyle={styles.subscriptionSlider}
+                style={styles.subscriptionScrollView}
+              >
             {subscriptions.map((subscription, index) => (
               <View key={subscription.id} style={[styles.subscriptionCard, { width: screenWidth - (Spacing.lg * 2) }]}>
                 {/* Subscription Header */}
@@ -301,6 +385,8 @@ export default function HomeScreen() {
               />
             ))}
           </View>
+            </>
+          )}
         </View>
 
         {/* Enhanced Quick Actions */}
@@ -861,6 +947,79 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     padding: Spacing.sm, // Touch area
+  },
+  
+  // Loading and Error States
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: Colors.text,
+    marginTop: 10,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  retryButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  startButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  startButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   
   // Enhanced Notifications Styles
