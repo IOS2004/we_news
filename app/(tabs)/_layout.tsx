@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/theme';
+import React from 'react';
 
 export default function TabsLayout() {
   return (
@@ -11,54 +11,31 @@ export default function TabsLayout() {
       tabBarInactiveTintColor: Colors.textLight,
     }}>
       <Tabs.Screen 
-        name="home" 
+        name="(home)" 
         options={{
-          title: 'Dashboard',
+          title: 'Home',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen 
-        name="earnings" 
+        name="(news)" 
         options={{
-          title: 'Earnings',
+          title: 'News',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="trending-up" size={size} color={color} />
+            <Ionicons name="newspaper" size={size} color={color} />
           ),
         }}
       />
-      <Tabs.Screen 
-        name="wallet" 
-        options={{
-          title: 'Wallet',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="wallet" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen 
-        name="plans" 
-        options={{
-          title: 'Plans',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="diamond" size={size} color={color} />
-          ),
-        }}
-      />
-      {/* Hidden tabs - accessible via navigation but not in tab bar */}
-      <Tabs.Screen 
-        name="news" 
-        options={{
-          href: null, // This hides the tab from the tab bar
-        }}
-      />
-      <Tabs.Screen 
-        name="profile" 
-        options={{
-          href: null, // This hides the tab from the tab bar
-        }}
-      />
+      
+      {/* Legacy routes - hidden but accessible for navigation */}
+      <Tabs.Screen name="home" options={{ href: null }} />
+      <Tabs.Screen name="earnings" options={{ href: null }} />
+      <Tabs.Screen name="wallet" options={{ href: null }} />
+      <Tabs.Screen name="plans" options={{ href: null }} />
+      <Tabs.Screen name="news" options={{ href: null }} />
+      <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>
   );
 }
