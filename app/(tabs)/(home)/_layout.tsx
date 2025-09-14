@@ -62,12 +62,12 @@ export default function HomeTabsLayout() {
               >
                 {options.tabBarIcon && options.tabBarIcon({
                   focused: isFocused,
-                  color: isFocused ? Colors.primary : '#666',
+                  color: isFocused ? Colors.primary : '#8e8e93',
                   size: 20,
                 })}
                 <Text style={[
                   styles.tabLabel,
-                  { color: isFocused ? Colors.primary : '#666' }
+                  { color: isFocused ? Colors.primary : '#8e8e93' }
                 ]}>
                   {typeof label === 'string' ? label : route.name}
                 </Text>
@@ -136,58 +136,58 @@ const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row',
     backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    paddingBottom: 20,
-    paddingTop: 10,
-    paddingHorizontal: 16,
+    borderTopWidth: 0.5,
+    borderTopColor: '#e5e5e5',
+    paddingBottom: 8,
+    paddingTop: 8,
+    paddingHorizontal: 8,
     alignItems: 'center',
+    height: 60,
   },
   toggleSection: {
-    marginRight: 20,
+    marginRight: 8,
   },
   toggleButton: {
     flexDirection: 'row',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 25,
-    padding: 3,
+    backgroundColor: '#f1f3f4',
+    borderRadius: 16,
+    padding: 2,
   },
   toggleOption: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 22,
-    minWidth: 65,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 14,
+    minWidth: 50,
     alignItems: 'center',
   },
   activeToggle: {
     backgroundColor: Colors.primary,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
   },
   toggleText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '600',
-    color: '#666',
+    color: '#8e8e93',
   },
   activeToggleText: {
     color: 'white',
+    fontWeight: '700',
   },
   tabsSection: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
+    paddingHorizontal: 2,
   },
   tabButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 2,
+    paddingHorizontal: 1,
   },
   tabLabel: {
     fontSize: 10,
     marginTop: 2,
-    fontWeight: '500',
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
