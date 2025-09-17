@@ -3,31 +3,15 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/theme';
-import { useRouter } from 'expo-router';
+import { DoubleTapAppSwitcher } from '../../../components/common';
 
 export default function NewsTabsLayout() {
-  const router = useRouter();
-
   const CustomTabBar = (props: any) => {
     return (
       <View style={styles.tabBarContainer}>
-        {/* Oval Toggle Button */}
-        <View style={styles.toggleSection}>
-          <View style={styles.toggleButton}>
-            <TouchableOpacity
-              style={styles.toggleOption}
-              onPress={() => router.replace('/(tabs)/(home)/dashboard')}
-            >
-              <Text style={styles.toggleText}>
-                HOME
-              </Text>
-            </TouchableOpacity>
-            <View style={[styles.toggleOption, styles.activeToggle]}>
-              <Text style={[styles.toggleText, styles.activeToggleText]}>
-                NEWS
-              </Text>
-            </View>
-          </View>
+        {/* Double-Tap App Mode Switcher */}
+        <View style={styles.switcherSection}>
+          <DoubleTapAppSwitcher />
         </View>
 
         {/* News Tabs */}
@@ -135,33 +119,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 60,
   },
-  toggleSection: {
+  switcherSection: {
     marginRight: 8,
-  },
-  toggleButton: {
-    flexDirection: 'row',
-    backgroundColor: '#f1f3f4',
-    borderRadius: 16,
-    padding: 2,
-  },
-  toggleOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 14,
-    minWidth: 50,
-    alignItems: 'center',
-  },
-  activeToggle: {
-    backgroundColor: Colors.primary,
-  },
-  toggleText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#8e8e93',
-  },
-  activeToggleText: {
-    color: 'white',
-    fontWeight: '700',
   },
   tabsSection: {
     flex: 1,
