@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ScreenWrapper } from "../../../components/common";
+import { Colors, Typography, Spacing, BorderRadius } from "../../../constants/theme";
 
 interface Trade {
   id: string;
@@ -122,16 +123,16 @@ export default function MyTrades() {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Trade List</Text>
+          <Text style={styles.title}>My Trades</Text>
           <TouchableOpacity style={styles.addButton}>
-            <Ionicons name="add-circle-outline" size={24} color="#4A90E2" />
+            <Ionicons name="add-circle-outline" size={24} color={Colors.primary} />
           </TouchableOpacity>
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {trades.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="list-outline" size={64} color="#CCCCCC" />
+              <Ionicons name="list-outline" size={64} color={Colors.textLight} />
               <Text style={styles.emptyText}>No trades added yet</Text>
               <Text style={styles.emptySubtext}>Add some trades to get started</Text>
             </View>
@@ -152,6 +153,7 @@ export default function MyTrades() {
               style={styles.placeOrderButton}
               onPress={handlePlaceOrder}
             >
+              <Ionicons name="checkmark-circle" size={20} color={Colors.white} style={{ marginRight: Spacing.xs }} />
               <Text style={styles.placeOrderText}>Place Order</Text>
             </TouchableOpacity>
           </View>
@@ -164,99 +166,101 @@ export default function MyTrades() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1A1A1A",
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#1A1A1A",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.base,
+    backgroundColor: Colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#333333",
+    borderBottomColor: Colors.border,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "white",
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
   },
   addButton: {
-    padding: 4,
+    padding: Spacing.xs,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.base,
   },
   tradeCard: {
-    backgroundColor: "#2A2A2A",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.base,
+    marginBottom: Spacing.base,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   tradeHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: Spacing.base,
   },
   planBadge: {
-    backgroundColor: "#4A90E2",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.lg,
   },
   planText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
+    color: Colors.white,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
   },
   deleteButton: {
-    padding: 4,
+    padding: Spacing.xs,
   },
   tradeContent: {
-    marginBottom: 16,
+    marginBottom: Spacing.base,
   },
   numbersLabel: {
-    color: "#AAAAAA",
-    fontSize: 14,
-    marginBottom: 8,
+    color: Colors.textSecondary,
+    fontSize: Typography.fontSize.sm,
+    marginBottom: Spacing.sm,
   },
   numbersContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: Spacing.sm,
   },
   numberChip: {
-    backgroundColor: "#3A3A3A",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    backgroundColor: Colors.buttonSecondary,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.lg,
     minWidth: 32,
     alignItems: "center",
   },
   numberText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
+    color: Colors.text,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
   },
   tradeFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 12,
+    paddingTop: Spacing.md,
     borderTopWidth: 1,
-    borderTopColor: "#3A3A3A",
+    borderTopColor: Colors.border,
   },
   tradeAmountLabel: {
-    color: "#AAAAAA",
-    fontSize: 14,
+    color: Colors.textSecondary,
+    fontSize: Typography.fontSize.sm,
   },
   tradeAmount: {
-    color: "#22C55E",
-    fontSize: 16,
-    fontWeight: "600",
+    color: Colors.success,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
   },
   emptyState: {
     flex: 1,
@@ -265,48 +269,52 @@ const styles = StyleSheet.create({
     paddingVertical: 80,
   },
   emptyText: {
-    color: "#AAAAAA",
-    fontSize: 18,
-    fontWeight: "500",
-    marginTop: 16,
+    color: Colors.textSecondary,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.medium,
+    marginTop: Spacing.base,
   },
   emptySubtext: {
-    color: "#666666",
-    fontSize: 14,
-    marginTop: 8,
+    color: Colors.textLight,
+    fontSize: Typography.fontSize.sm,
+    marginTop: Spacing.sm,
   },
   bottomSection: {
-    backgroundColor: "#2A2A2A",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
+    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
   },
   grandTotalContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
-    paddingHorizontal: 4,
+    marginBottom: Spacing.base,
+    paddingHorizontal: Spacing.xs,
   },
   grandTotalLabel: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "600",
+    color: Colors.text,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
   },
   grandTotalAmount: {
-    color: "#22C55E",
-    fontSize: 20,
-    fontWeight: "700",
+    color: Colors.success,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
   },
   placeOrderButton: {
-    backgroundColor: "#4A90E2",
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.base,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   placeOrderText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
+    color: Colors.white,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
   },
 });

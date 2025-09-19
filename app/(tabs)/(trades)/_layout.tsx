@@ -2,62 +2,63 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { DoubleTapAppSwitcher } from '../../../components/common';
+import { Colors, Spacing, BorderRadius, Typography } from '../../../constants/theme';
 
 export default function TradingTabsLayout() {
   const CustomTabBar = (props: any) => {
     return (
       <View style={styles.tabBarContainer}>
-        {/* Trading Tabs */}
-        <View style={styles.tabsSection}>
-          {props.state.routes.map((route: any, index: number) => {
-            const { options } = props.descriptors[route.key];
-            const label = options.tabBarLabel || options.title || route.name;
-            const isFocused = props.state.index === index;
+        <View style={styles.tabBarContent}>
+          {/* TRADES Button on Left */}
+          <DoubleTapAppSwitcher style={styles.tradesButton} />
 
-            // Skip index route from tabs
-            if (route.name === 'index') {
-              return null;
-            }
+          {/* Trading Tabs on Right */}
+          <View style={styles.tabsSection}>
+            {props.state.routes.map((route: any, index: number) => {
+              const { options } = props.descriptors[route.key];
+              const label = options.tabBarLabel || options.title || route.name;
+              const isFocused = props.state.index === index;
 
-            const onPress = () => {
-              const event = props.navigation.emit({
-                type: 'tabPress',
-                target: route.key,
-                canPreventDefault: true,
-              });
-
-              if (!isFocused && !event.defaultPrevented) {
-                props.navigation.navigate(route.name);
+              // Skip index route from tabs
+              if (route.name === 'index') {
+                return null;
               }
-            };
 
-            return (
-              <TouchableOpacity
-                key={route.key}
-                onPress={onPress}
-                style={styles.tabButton}
-              >
-                {options.tabBarIcon && options.tabBarIcon({
-                  focused: isFocused,
-                  color: isFocused ? '#6366F1' : '#999',
-                  size: 20,
-                })}
-                <Text style={[
-                  styles.tabLabel,
-                  { color: isFocused ? '#6366F1' : '#999' }
-                ]}>
-                  {label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+              const onPress = () => {
+                const event = props.navigation.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                });
+
+                if (!isFocused && !event.defaultPrevented) {
+                  props.navigation.navigate(route.name);
+                }
+              };
+
+              return (
+                <TouchableOpacity
+                  key={route.key}
+                  onPress={onPress}
+                  style={styles.tabButton}
+                >
+                  {options.tabBarIcon && options.tabBarIcon({
+                    focused: isFocused,
+                    color: isFocused ? Colors.primary : Colors.textSecondary,
+                    size: 20,
+                  })}
+                  <Text style={[
+                    styles.tabLabel,
+                    { color: isFocused ? Colors.primary : Colors.textSecondary }
+                  ]}>
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
-
-        {/* Orange TRADES Button */}
-        <TouchableOpacity style={styles.tradesButton}>
-          <Ionicons name="trending-up" size={16} color="white" />
-          <Text style={styles.tradesButtonText}>TRADES</Text>
-        </TouchableOpacity>
       </View>
     );
   };
@@ -116,42 +117,35 @@ export default function TradingTabsLayout() {
 
 const styles = StyleSheet.create({
   tabBarContainer: {
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    paddingBottom: 20,
-    paddingTop: 12,
+    borderTopColor: Colors.border,
+    paddingBottom: Spacing.lg,
+    paddingTop: Spacing.md,
+  },
+  tabBarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.base,
+    gap: Spacing.md,
+  },
+  tradesButton: {
+    // DoubleTapAppSwitcher will handle its own styling
   },
   tabsSection: {
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    marginBottom: 16,
+    alignItems: 'center',
   },
   tabButton: {
     alignItems: 'center',
     flex: 1,
+    paddingVertical: Spacing.xs,
   },
   tabLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 4,
-  },
-  tradesButton: {
-    backgroundColor: '#F97316',
-    borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    alignSelf: 'center',
-  },
-  tradesButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.medium,
+    marginTop: Spacing.xs,
   },
 });

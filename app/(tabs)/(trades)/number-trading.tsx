@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ScreenWrapper } from "../../../components/common";
+import { Colors, Typography, Spacing, BorderRadius } from "../../../constants/theme";
 
 interface Plan {
   id: string;
@@ -169,12 +170,9 @@ export default function NumberTrading() {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton}>
-            <Ionicons name="chevron-back" size={24} color="white" />
-          </TouchableOpacity>
           <Text style={styles.title}>Number Trading</Text>
           <View style={styles.balanceContainer}>
-            <Ionicons name="wallet" size={16} color="#F59E0B" />
+            <Ionicons name="wallet" size={16} color={Colors.warning} />
             <Text style={styles.balanceText}>₹{balance.toLocaleString()}</Text>
           </View>
         </View>
@@ -242,7 +240,10 @@ export default function NumberTrading() {
           onPress={handleProceedToConfirm}
           disabled={selectedNumbers.length === 0}
         >
-          <Text style={styles.proceedButtonText}>Proceed to Confirm</Text>
+          <Text style={[
+            styles.proceedButtonText,
+            selectedNumbers.length === 0 && styles.proceedButtonTextDisabled
+          ]}>Proceed to Confirm</Text>
         </TouchableOpacity>
 
         {renderConfirmationModal()}
@@ -254,156 +255,153 @@ export default function NumberTrading() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1A1A1A",
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#1A1A1A",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.base,
+    backgroundColor: Colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#333333",
-  },
-  backButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#2A2A2A",
-    justifyContent: "center",
-    alignItems: "center",
+    borderBottomColor: Colors.border,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "white",
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
   },
   balanceContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2A2A2A",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
+    backgroundColor: Colors.warning,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.lg,
+    gap: Spacing.xs,
   },
   balanceText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
+    color: Colors.white,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: Spacing.lg,
   },
   section: {
-    marginTop: 24,
+    marginTop: Spacing.xl,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "white",
-    marginBottom: 16,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
+    marginBottom: Spacing.base,
   },
   planContainer: {
     flexDirection: "row",
-    gap: 12,
+    gap: Spacing.md,
   },
   planButton: {
-    backgroundColor: "#3A3A3A",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
+    backgroundColor: Colors.buttonSecondary,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.full,
   },
   selectedPlanButton: {
-    backgroundColor: "#4A90E2",
+    backgroundColor: Colors.primary,
   },
   planText: {
-    color: "#AAAAAA",
-    fontSize: 14,
-    fontWeight: "500",
+    color: Colors.textSecondary,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
   },
   selectedPlanText: {
-    color: "white",
+    color: Colors.white,
   },
   instructionText: {
-    color: "#AAAAAA",
-    fontSize: 14,
-    marginBottom: 16,
+    color: Colors.textSecondary,
+    fontSize: Typography.fontSize.sm,
+    marginBottom: Spacing.base,
   },
   numberGrid: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   numberRow: {
     flexDirection: "row",
-    gap: 8,
+    gap: Spacing.sm,
   },
   numberButton: {
     flex: 1,
     height: 48,
-    backgroundColor: "#2A2A2A",
-    borderRadius: 24,
+    backgroundColor: Colors.buttonSecondary,
+    borderRadius: BorderRadius.full,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#3A3A3A",
+    borderColor: Colors.border,
   },
   selectedNumberButton: {
-    backgroundColor: "#4A90E2",
-    borderColor: "#4A90E2",
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   numberText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
+    color: Colors.text,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
   },
   selectedNumberText: {
-    color: "white",
-    fontWeight: "600",
+    color: Colors.white,
+    fontWeight: Typography.fontWeight.semibold,
   },
   summarySection: {
-    backgroundColor: "#2A2A2A",
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 24,
-    marginBottom: 20,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.base,
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: Spacing.sm,
   },
   summaryLabel: {
-    color: "#AAAAAA",
-    fontSize: 14,
+    color: Colors.textSecondary,
+    fontSize: Typography.fontSize.sm,
   },
   summaryValue: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
+    color: Colors.text,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
   },
   summaryValueTotal: {
-    color: "#22C55E",
-    fontSize: 16,
-    fontWeight: "600",
+    color: Colors.success,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
   },
   proceedButton: {
-    backgroundColor: "#4A90E2",
-    marginHorizontal: 20,
-    marginBottom: 20,
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: Colors.primary,
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.base,
     alignItems: "center",
   },
   proceedButtonDisabled: {
-    backgroundColor: "#3A3A3A",
+    backgroundColor: Colors.buttonDisabled,
   },
   proceedButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
+    color: Colors.white,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  proceedButtonTextDisabled: {
+    color: Colors.textSecondary,
   },
   modalOverlay: {
     flex: 1,

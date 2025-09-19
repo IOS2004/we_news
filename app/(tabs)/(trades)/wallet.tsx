@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ScreenWrapper } from "../../../components/common";
+import { Colors, Typography, Spacing, BorderRadius } from "../../../constants/theme";
 
 interface Transaction {
   id: string;
@@ -126,11 +127,7 @@ export default function Wallet() {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton}>
-            <Ionicons name="chevron-back" size={24} color="white" />
-          </TouchableOpacity>
           <Text style={styles.title}>Wallet</Text>
-          <View style={styles.placeholder} />
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -143,10 +140,12 @@ export default function Wallet() {
             
             <View style={styles.actionButtons}>
               <TouchableOpacity style={styles.addFundsButton} onPress={handleAddFunds}>
+                <Ionicons name="add" size={20} color={Colors.white} style={{ marginRight: Spacing.xs }} />
                 <Text style={styles.addFundsText}>Add Funds</Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.withdrawButton} onPress={handleWithdraw}>
+                <Ionicons name="arrow-up" size={20} color={Colors.text} style={{ marginRight: Spacing.xs }} />
                 <Text style={styles.withdrawText}>Withdraw</Text>
               </TouchableOpacity>
             </View>
@@ -209,142 +208,136 @@ export default function Wallet() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1A1A1A",
+    backgroundColor: Colors.background,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#1A1A1A",
-  },
-  backButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#2A2A2A",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.base,
+    backgroundColor: Colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "white",
-  },
-  placeholder: {
-    width: 32,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
   },
   content: {
     flex: 1,
   },
   balanceSection: {
-    backgroundColor: "#1A1A1A",
-    paddingHorizontal: 20,
-    paddingVertical: 32,
+    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing["3xl"],
     alignItems: "center",
   },
   balanceHeader: {
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   balanceLabel: {
-    fontSize: 16,
-    color: "#AAAAAA",
+    fontSize: Typography.fontSize.base,
+    color: Colors.textSecondary,
   },
   balanceAmount: {
-    fontSize: 48,
-    fontWeight: "700",
-    color: "white",
-    marginBottom: 32,
+    fontSize: Typography.fontSize["4xl"],
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text,
+    marginBottom: Spacing["3xl"],
   },
   actionButtons: {
     flexDirection: "row",
-    gap: 16,
+    gap: Spacing.base,
     width: "100%",
   },
   addFundsButton: {
     flex: 1,
-    backgroundColor: "#4A90E2",
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.base,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   addFundsText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
+    color: Colors.white,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
   },
   withdrawButton: {
     flex: 1,
-    backgroundColor: "#3A3A3A",
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: Colors.buttonSecondary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.base,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   withdrawText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
+    color: Colors.text,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
   },
   transactionsSection: {
-    backgroundColor: "#1A1A1A",
-    paddingHorizontal: 20,
-    paddingTop: 24,
+    backgroundColor: Colors.background,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
     flex: 1,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "white",
-    marginBottom: 20,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
+    marginBottom: Spacing.lg,
   },
   filterTabs: {
     flexDirection: "row",
-    gap: 8,
-    marginBottom: 16,
+    gap: Spacing.sm,
+    marginBottom: Spacing.base,
   },
   filterTab: {
-    backgroundColor: "#3A3A3A",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: Colors.buttonSecondary,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
   },
   activeFilterTab: {
-    backgroundColor: "#4A90E2",
+    backgroundColor: Colors.primary,
   },
   filterTabText: {
-    color: "#AAAAAA",
-    fontSize: 14,
-    fontWeight: "500",
+    color: Colors.textSecondary,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
   },
   activeFilterTabText: {
-    color: "white",
+    color: Colors.white,
   },
   timeFilter: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
-    marginBottom: 16,
+    paddingVertical: Spacing.md,
+    marginBottom: Spacing.base,
   },
   timeFilterText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "500",
+    color: Colors.text,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
   },
   transactionsList: {
-    gap: 16,
-    paddingBottom: 20,
+    gap: Spacing.base,
+    paddingBottom: Spacing.lg,
   },
   transactionItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: Spacing.md,
   },
   transactionIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: BorderRadius.full,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -352,17 +345,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   transactionDescription: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "500",
+    color: Colors.text,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
   },
   transactionDate: {
-    color: "#AAAAAA",
-    fontSize: 14,
+    color: Colors.textSecondary,
+    fontSize: Typography.fontSize.sm,
     marginTop: 2,
   },
   transactionAmount: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
   },
 });

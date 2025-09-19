@@ -7,6 +7,8 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { ScreenWrapper } from "../../../components/common";
+import { Colors, Typography, Spacing, BorderRadius } from "../../../constants/theme";
 
 interface Plan {
   id: string;
@@ -87,17 +89,16 @@ export default function ColourTrading() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="#666" />
-        </TouchableOpacity>
-        <Text style={styles.title}>ColourTrading</Text>
-        <View style={styles.balanceContainer}>
-          <Text style={styles.balanceText}>₹{balance.toLocaleString()}</Text>
+    <ScreenWrapper>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Colour Trading</Text>
+          <View style={styles.balanceContainer}>
+            <Ionicons name="wallet" size={16} color={Colors.warning} />
+            <Text style={styles.balanceText}>₹{balance.toLocaleString()}</Text>
+          </View>
         </View>
-      </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Select Plan */}
@@ -147,146 +148,148 @@ export default function ColourTrading() {
           ]}
           disabled={selectedColors.length === 0}
         >
-          <Text style={styles.proceedButtonText}>Proceed to Confirm</Text>
+          <Text style={[
+            styles.proceedButtonText,
+            selectedColors.length === 0 && styles.proceedButtonTextDisabled
+          ]}>Proceed to Confirm</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+      </View>
+    </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "white",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.base,
+    backgroundColor: Colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-  },
-  backButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F8F9FA",
-    justifyContent: "center",
-    alignItems: "center",
+    borderBottomColor: Colors.border,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000",
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
   },
   balanceContainer: {
-    backgroundColor: "#F59E0B",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: Colors.warning,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
   balanceText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
+    color: Colors.white,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: Spacing.lg,
     paddingBottom: 100, // Add bottom padding for tab bar
   },
   section: {
-    marginTop: 20,
+    marginTop: Spacing.lg,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#000",
-    marginBottom: 20,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text,
+    marginBottom: Spacing.lg,
   },
   planContainer: {
     flexDirection: "row",
-    gap: 12,
+    gap: Spacing.md,
   },
   planButton: {
-    backgroundColor: "#E5E7EB",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
+    backgroundColor: Colors.buttonSecondary,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.full,
   },
   selectedPlanButton: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: Colors.primary,
   },
   planText: {
-    color: "#6B7280",
-    fontSize: 14,
-    fontWeight: "600",
+    color: Colors.textSecondary,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
   },
   selectedPlanText: {
-    color: "white",
+    color: Colors.white,
   },
   instructionContainer: {
-    marginTop: 30,
+    marginTop: Spacing["3xl"],
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: Spacing.base,
   },
   instructionText: {
-    fontSize: 18,
-    color: "#000",
+    fontSize: Typography.fontSize.lg,
+    color: Colors.text,
     textAlign: "center",
-    fontWeight: "500",
+    fontWeight: Typography.fontWeight.medium,
   },
   instructionSubtext: {
-    fontSize: 14,
-    color: "#6B7280",
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
     textAlign: "center",
-    marginTop: 6,
+    marginTop: Spacing.xs,
   },
   colorGrid: {
-    marginTop: 30,
-    gap: 20,
+    marginTop: Spacing["3xl"],
+    gap: Spacing.lg,
   },
   colorRow: {
     flexDirection: "row",
-    gap: 20,
+    gap: Spacing.lg,
   },
   colorOption: {
     flex: 1,
     height: 110,
-    borderRadius: 16,
+    borderRadius: BorderRadius.lg,
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
   },
   selectedColorOption: {
     borderWidth: 4,
-    borderColor: "#3B82F6",
+    borderColor: Colors.primary,
   },
   colorText: {
-    fontSize: 17,
-    fontWeight: "600",
+    fontSize: Typography.fontSize.base + 1,
+    fontWeight: Typography.fontWeight.semibold,
   },
   emptyColorOption: {
     flex: 1,
     height: 110,
   },
   proceedButton: {
-    backgroundColor: "#E5E7EB",
+    backgroundColor: Colors.primary,
     marginHorizontal: 0,
-    marginVertical: 24,
-    borderRadius: 12,
-    paddingVertical: 16,
+    marginVertical: Spacing.xl,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.base,
     alignItems: "center",
   },
   proceedButtonDisabled: {
-    backgroundColor: "#E5E7EB",
+    backgroundColor: Colors.buttonDisabled,
   },
   proceedButtonText: {
-    color: "#9CA3AF",
-    fontSize: 16,
-    fontWeight: "600",
+    color: Colors.white,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  proceedButtonTextDisabled: {
+    color: Colors.textSecondary,
   },
 });
