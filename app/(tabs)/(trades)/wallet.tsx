@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ScreenWrapper } from "../../../components/common";
+import { useWallet } from "../../../contexts/WalletContext";
 import { Colors, Typography, Spacing, BorderRadius } from "../../../constants/theme";
 
 interface Transaction {
@@ -21,11 +22,14 @@ interface Transaction {
 }
 
 export default function Wallet() {
-  const [balance] = useState(1250);
+  const { balance, transactions: walletTransactions } = useWallet();
   const [activeFilter, setActiveFilter] = useState<'all' | 'winnings' | 'trades'>('all');
   const [timeFilter, setTimeFilter] = useState('Last 7 days');
+
+  // Filter wallet transactions to show only trading-related ones
+  const tradingTransactions = walletTransactions.filter(t => t.category === 'trading');
   
-  const [transactions] = useState<Transaction[]>([
+  const [sampleTransactions] = useState<Transaction[]>([
     {
       id: '1',
       type: 'trade',
@@ -68,7 +72,20 @@ export default function Wallet() {
     }
   ]);
 
-  const filteredTransactions = transactions.filter(transaction => {
+  // Convert wallet transactions to local format and combine with sample transactions
+  const allTransactions = [
+    ...tradingTransactions.map(t => ({
+      id: t.id,
+      type: t.type === 'credit' ? 'winning' as const : 'trade' as const,
+      amount: t.type === 'credit' ? t.amount : -t.amount,
+      description: t.description,
+      date: t.date,
+      status: t.status,
+    })),
+    ...sampleTransactions
+  ];
+
+  const filteredTransactions = allTransactions.filter(transaction => {
     if (activeFilter === 'all') return true;
     if (activeFilter === 'winnings') return transaction.type === 'winning';
     if (activeFilter === 'trades') return transaction.type === 'trade';

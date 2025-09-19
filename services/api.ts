@@ -104,6 +104,7 @@ export interface User {
   referralCode: string;
   totalReferrals: number;
   referralEarnings: number;
+  walletBalance: number;
   isActive: boolean;
   lastLogin: string;
   createdAt: string;

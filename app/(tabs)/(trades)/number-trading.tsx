@@ -6,16 +6,32 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
-  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ScreenWrapper } from "../../../components/common";
+import { useWallet } from "../../../contexts/WalletContext";
 import { Colors, Typography, Spacing, BorderRadius } from "../../../constants/theme";
 
 interface Plan {
   id: string;
   amount: number;
   label: string;
+}
+
+interface Bet {
+  id: string;
+  number: number;
+  amount: number;
+  timestamp: number;
+}
+
+interface GameRound {
+  id: string;
+  startTime: number;
+  endTime: number;
+  bettingEndTime: number;
+  winningNumber?: number;
+  status: 'waiting' | 'betting' | 'drawing' | 'finished';
 }
 
 const plans: Plan[] = [
@@ -25,35 +41,230 @@ const plans: Plan[] = [
   { id: '4', amount: 100, label: '₹100' },
 ];
 
+const ROUND_DURATION = 180000; // 3 minutes
+const BETTING_DURATION = 150000; // 2.5 minutes
+
 export default function NumberTrading() {
-  const [balance] = useState(1200);
+  const { balance, updateBalance } = useWallet();
   const [selectedPlan, setSelectedPlan] = useState<Plan>(plans[0]);
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [currentRound, setCurrentRound] = useState<GameRound | null>(null);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [bets, setBets] = useState<Bet[]>([]);
+  const [gameHistory, setGameHistory] = useState<GameRound[]>([]);
 
-  // Generate numbers 0-100
+  // Generate numbers 0-100 like in client screenshots
   const numbers = Array.from({ length: 101 }, (_, i) => i);
 
+  // Initialize game round
+  useEffect(() => {
+    if (!currentRound) {
+      startNewRound();
+    }
+  }, []);
+
+  // Timer effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        const newTime = Math.max(0, prev - 1000);
+        
+        if (newTime === 0 && currentRound) {
+          if (currentRound.status === 'betting') {
+            // Switch to drawing phase
+            setCurrentRound(prev => prev ? { ...prev, status: 'drawing' } : null);
+            setTimeLeft(30000); // 30 seconds for result
+          } else if (currentRound.status === 'drawing') {
+            finishRound();
+          }
+        }
+        
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [currentRound]);
+
+  const startNewRound = () => {
+    const now = Date.now();
+    const newRound: GameRound = {
+      id: `round_${now}`,
+      startTime: now,
+      endTime: now + ROUND_DURATION,
+      bettingEndTime: now + BETTING_DURATION,
+      status: 'betting',
+    };
+    setCurrentRound(newRound);
+    setBets([]);
+    setSelectedNumbers([]);
+    setTimeLeft(BETTING_DURATION);
+  };
+
+  const finishRound = () => {
+    if (!currentRound) return;
+
+    // Generate random winning number from 0-100
+    const winningNumber = Math.floor(Math.random() * 101);
+
+    const finishedRound: GameRound = {
+      ...currentRound,
+      winningNumber,
+      status: 'finished',
+    };
+
+    setCurrentRound(finishedRound);
+    setGameHistory(prev => [finishedRound, ...prev.slice(0, 9)]);
+
+    // Calculate winnings - simple 2x payout
+    const winningBets = bets.filter(bet => bet.number === winningNumber);
+    const totalWinnings = winningBets.reduce((sum, bet) => sum + (bet.amount * 2), 0);
+    
+    if (totalWinnings > 0) {
+      updateBalance(totalWinnings, 'credit', `Number trading win - ${winningNumber}`, 'trading');
+      Alert.alert(
+        "Congratulations! 🎉",
+        `You won ₹${totalWinnings}! The winning number was ${winningNumber}.`,
+        [{ text: "Continue", style: "default" }]
+      );
+    } else if (bets.length > 0) {
+      Alert.alert(
+        "Better luck next time!",
+        `The winning number was ${winningNumber}.`,
+        [{ text: "Try Again", style: "default" }]
+      );
+    }
+
+    // Start new round after delay
+    setTimeout(() => {
+      startNewRound();
+    }, 3000);
+  };
+
   const handleNumberSelect = (number: number) => {
-    if (selectedNumbers.includes(number)) {
-      setSelectedNumbers(prev => prev.filter(n => n !== number));
-    } else {
-      setSelectedNumbers(prev => [...prev, number]);
+    if (currentRound?.status !== 'betting') {
+      Alert.alert("Betting Closed", "Betting is not available right now.");
+      return;
+    }
+
+    setSelectedNumbers(prev => {
+      if (prev.includes(number)) {
+        return prev.filter(n => n !== number);
+      } else {
+        return [...prev, number];
+      }
+    });
+  };
+
+  const placeBet = () => {
+    if (selectedNumbers.length === 0) {
+      Alert.alert("Select Numbers", "Please select at least one number to bet on.");
+      return;
+    }
+
+    if (currentRound?.status !== 'betting') {
+      Alert.alert("Betting Closed", "Betting is not available right now.");
+      return;
+    }
+
+    const totalAmount = selectedNumbers.length * selectedPlan.amount;
+    if (balance < totalAmount) {
+      Alert.alert("Insufficient Balance", "You don't have enough balance to place this bet.");
+      return;
+    }
+
+    // Place a bet for each selected number
+    const newBets: Bet[] = selectedNumbers.map(number => ({
+      id: `${Date.now()}_${number}`,
+      number,
+      amount: selectedPlan.amount,
+      timestamp: Date.now(),
+    }));
+
+    setBets(prev => [...prev, ...newBets]);
+    updateBalance(totalAmount, 'debit', `Number trading bet on ${selectedNumbers.length} numbers`, 'trading');
+    setSelectedNumbers([]);
+
+    Alert.alert(
+      "Bet Placed!",
+      `You bet ₹${totalAmount} on ${selectedNumbers.length} number(s). Good luck!`,
+      [{ text: "OK", style: "default" }]
+    );
+  };
+
+  const formatTime = (milliseconds: number) => {
+    const seconds = Math.floor(milliseconds / 1000);
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getStatusText = () => {
+    if (!currentRound) return "Starting...";
+    switch (currentRound.status) {
+      case 'betting': return "Betting Open";
+      case 'drawing': return "Drawing Number";
+      case 'finished': return "Round Complete";
+      default: return "Loading";
     }
   };
 
-  const handleProceedToConfirm = () => {
-    if (selectedNumbers.length === 0) {
-      Alert.alert("Select Numbers", "Please select at least one number to proceed");
-      return;
-    }
-    setShowConfirmation(true);
+  const getTotalBetAmount = () => {
+    return bets.reduce((sum, bet) => sum + bet.amount, 0);
+  };
+
+  const renderGameHistory = () => {
+    if (gameHistory.length === 0) return null;
+
+    return (
+      <View style={styles.historySection}>
+        <Text style={styles.historyTitle}>Recent Results</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.historyRow}>
+            {gameHistory.map((round, index) => (
+              <View key={round.id} style={styles.historyItem}>
+                <Text style={styles.historyRound}>#{index + 1}</Text>
+                {round.winningNumber !== undefined && (
+                  <Text style={styles.historyNumber}>{round.winningNumber}</Text>
+                )}
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
+
+  const renderCurrentBets = () => {
+    if (bets.length === 0) return null;
+
+    return (
+      <View style={styles.currentBetsSection}>
+        <Text style={styles.sectionTitle}>Your Bets This Round</Text>
+        {bets.map(bet => (
+          <View key={bet.id} style={styles.betItem}>
+            <View style={styles.betInfo}>
+              <Text style={styles.betNumbers}>Number: {bet.number}</Text>
+              <Text style={styles.betAmount}>Bet: ₹{bet.amount}</Text>
+            </View>
+            <Text style={styles.betPotentialWin}>Win: ₹{bet.amount * 2}</Text>
+          </View>
+        ))}
+        <View style={styles.totalBet}>
+          <Text style={styles.totalBetText}>
+            Total Bet: ₹{getTotalBetAmount()}
+          </Text>
+        </View>
+      </View>
+    );
   };
 
   const renderNumberGrid = () => {
     const rows = [];
-    for (let i = 0; i < numbers.length; i += 5) {
-      const rowNumbers = numbers.slice(i, i + 5);
+    const numbersPerRow = 10;
+    
+    for (let i = 0; i < numbers.length; i += numbersPerRow) {
+      const rowNumbers = numbers.slice(i, i + numbersPerRow);
       rows.push(
         <View key={i} style={styles.numberRow}>
           {rowNumbers.map(number => (
@@ -61,13 +272,16 @@ export default function NumberTrading() {
               key={number}
               style={[
                 styles.numberButton,
-                selectedNumbers.includes(number) && styles.selectedNumberButton
+                selectedNumbers.includes(number) && styles.selectedNumberButton,
+                currentRound?.status !== 'betting' && styles.disabledNumberButton
               ]}
               onPress={() => handleNumberSelect(number)}
+              disabled={currentRound?.status !== 'betting'}
             >
               <Text style={[
                 styles.numberText,
-                selectedNumbers.includes(number) && styles.selectedNumberText
+                selectedNumbers.includes(number) && styles.selectedNumberText,
+                currentRound?.status !== 'betting' && styles.disabledNumberText
               ]}>
                 {number}
               </Text>
@@ -76,94 +290,29 @@ export default function NumberTrading() {
         </View>
       );
     }
-    return rows;
-  };
 
-  const renderConfirmationModal = () => (
-    <Modal
-      visible={showConfirmation}
-      transparent
-      animationType="slide"
-      onRequestClose={() => setShowConfirmation(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalIndicator} />
-          </View>
-          
-          <Text style={styles.modalTitle}>Trade Confirmation</Text>
-          
-          {/* Chosen Plan */}
-          <View style={styles.confirmationSection}>
-            <Text style={styles.confirmationLabel}>CHOSEN PLAN</Text>
-            <View style={styles.confirmationCard}>
-              <View style={styles.confirmationIcon}>
-                <Ionicons name="card" size={24} color="white" />
-              </View>
-              <View>
-                <Text style={styles.confirmationText}>Plan 1</Text>
-                <Text style={styles.confirmationValue}>$1000</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Selected Numbers */}
-          <View style={styles.confirmationSection}>
-            <Text style={styles.confirmationLabel}>SELECTED NUMBERS</Text>
-            <View style={styles.confirmationCard}>
-              <View style={styles.confirmationIcon}>
-                <Text style={styles.confirmationIconText}>#</Text>
-              </View>
-              <View>
-                <Text style={styles.confirmationText}>{selectedNumbers.join(', ')}</Text>
-                <Text style={styles.confirmationSubtext}>{selectedNumbers.length} Numbers</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Total Amount */}
-          <View style={styles.confirmationSection}>
-            <Text style={styles.confirmationLabel}>TOTAL AMOUNT</Text>
-            <View style={styles.confirmationCard}>
-              <View style={styles.confirmationIcon}>
-                <Ionicons name="cash" size={24} color="white" />
-              </View>
-              <Text style={styles.confirmationValue}>$1000</Text>
-            </View>
-          </View>
-
-          {/* Warning */}
-          <View style={styles.warningContainer}>
-            <Text style={styles.warningText}>Trades cannot be cancelled once placed.</Text>
-          </View>
-
-          {/* Action Buttons */}
-          <View style={styles.modalActions}>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setShowConfirmation(false)}
-            >
-              <Ionicons name="close" size={20} color="white" />
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.confirmButton}
-              onPress={() => {
-                setShowConfirmation(false);
-                Alert.alert("Trade Placed", "Your trade has been placed successfully!");
-                setSelectedNumbers([]);
-              }}
-            >
-              <Ionicons name="checkmark" size={20} color="white" />
-              <Text style={styles.confirmButtonText}>Confirm</Text>
-            </TouchableOpacity>
-          </View>
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Select Numbers (0-100)</Text>
+        <Text style={styles.instructionText}>
+          Tap numbers to select. Betting amount = ₹{selectedPlan.amount} × {selectedNumbers.length} numbers = ₹{selectedNumbers.length * selectedPlan.amount}
+        </Text>
+        <View style={styles.numberContainer}>
+          {rows}
         </View>
+        {selectedNumbers.length > 0 && (
+          <View style={styles.selectionSummary}>
+            <Text style={styles.selectionText}>
+              Selected: {selectedNumbers.join(', ')} ({selectedNumbers.length} numbers)
+            </Text>
+            <Text style={styles.totalAmountText}>
+              Total Bet: ₹{selectedNumbers.length * selectedPlan.amount}
+            </Text>
+          </View>
+        )}
       </View>
-    </Modal>
-  );
+    );
+  };
 
   return (
     <ScreenWrapper>
@@ -178,9 +327,34 @@ export default function NumberTrading() {
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          {/* Game Status and Timer */}
+          <View style={styles.gameStatus}>
+            <View style={styles.statusRow}>
+              <Text style={styles.statusText}>{getStatusText()}</Text>
+              <Text style={styles.timerText}>
+                {timeLeft > 0 ? formatTime(timeLeft) : "00:00"}
+              </Text>
+            </View>
+            <View style={styles.progressBar}>
+              <View 
+                style={[
+                  styles.progressFill,
+                  { 
+                    width: currentRound ? 
+                      `${((Date.now() - currentRound.startTime) / ROUND_DURATION) * 100}%` : 
+                      '0%' 
+                  }
+                ]} 
+              />
+            </View>
+          </View>
+
+          {/* Game History */}
+          {renderGameHistory()}
+
           {/* Select Plan */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Select Plan</Text>
+            <Text style={styles.sectionTitle}>Select Bet Amount</Text>
             <View style={styles.planContainer}>
               {plans.map(plan => (
                 <TouchableOpacity
@@ -203,50 +377,30 @@ export default function NumberTrading() {
           </View>
 
           {/* Number Selection */}
-          <View style={styles.section}>
-            <Text style={styles.instructionText}>
-              Select your lucky numbers from 0 to 100
+          {renderNumberGrid()}
+
+          {/* Current Bets */}
+          {renderCurrentBets()}
+
+          {/* Place Bet Button */}
+          <TouchableOpacity
+            style={[
+              styles.proceedButton,
+              (selectedNumbers.length === 0 || currentRound?.status !== 'betting') && styles.proceedButtonDisabled
+            ]}
+            disabled={selectedNumbers.length === 0 || currentRound?.status !== 'betting'}
+            onPress={placeBet}
+          >
+            <Text style={[
+              styles.proceedButtonText,
+              (selectedNumbers.length === 0 || currentRound?.status !== 'betting') && styles.proceedButtonTextDisabled
+            ]}>
+              {selectedNumbers.length > 0 ? 
+                `Bet ₹${selectedNumbers.length * selectedPlan.amount}` : 
+                'Select Numbers'}
             </Text>
-            <View style={styles.numberGrid}>
-              {renderNumberGrid()}
-            </View>
-          </View>
-
-          {/* Summary */}
-          {selectedNumbers.length > 0 && (
-            <View style={styles.summarySection}>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Selected Plan</Text>
-                <Text style={styles.summaryValue}>{selectedPlan.label}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Selected Numbers</Text>
-                <Text style={styles.summaryValue}>{selectedNumbers.length}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Total Trade Amount</Text>
-                <Text style={styles.summaryValueTotal}>₹{selectedPlan.amount * selectedNumbers.length}</Text>
-              </View>
-            </View>
-          )}
+          </TouchableOpacity>
         </ScrollView>
-
-        {/* Bottom Button */}
-        <TouchableOpacity
-          style={[
-            styles.proceedButton,
-            selectedNumbers.length === 0 && styles.proceedButtonDisabled
-          ]}
-          onPress={handleProceedToConfirm}
-          disabled={selectedNumbers.length === 0}
-        >
-          <Text style={[
-            styles.proceedButtonText,
-            selectedNumbers.length === 0 && styles.proceedButtonTextDisabled
-          ]}>Proceed to Confirm</Text>
-        </TouchableOpacity>
-
-        {renderConfirmationModal()}
       </View>
     </ScreenWrapper>
   );
@@ -526,5 +680,224 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  
+  // Game Status Styles
+  gameStatus: {
+    backgroundColor: Colors.white,
+    margin: 16,
+    padding: 16,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  timerText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.primary,
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: Colors.border,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: Colors.primary,
+  },
+  
+  // History Styles
+  historySection: {
+    margin: 16,
+    marginTop: 0,
+  },
+  historyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 12,
+  },
+  historyRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  historyItem: {
+    backgroundColor: Colors.surface,
+    padding: 8,
+    borderRadius: 8,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  historyRound: {
+    fontSize: 10,
+    fontWeight: '500',
+    color: Colors.textSecondary,
+  },
+  historyNumber: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
+  historyJodi: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: Colors.text,
+  },
+  
+  // Bet Type Styles
+  betTypeContainer: {
+    gap: 12,
+  },
+  betTypeButton: {
+    backgroundColor: Colors.surface,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedBetTypeButton: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryLight,
+  },
+  betTypeText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  selectedBetTypeText: {
+    color: Colors.primary,
+  },
+  betTypeOdds: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.success,
+    marginTop: 4,
+  },
+  betTypeDesc: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 4,
+  },
+  
+  // Number Grid Styles
+  gridTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  gridSubtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginBottom: 16,
+  },
+  numberContainer: {
+    gap: Spacing.sm,
+    marginBottom: 16,
+  },
+  disabledNumberButton: {
+    opacity: 0.5,
+  },
+  disabledNumberText: {
+    color: Colors.textLight,
+  },
+  selectionStatus: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  
+  // Current Bets Styles
+  currentBetsSection: {
+    margin: 16,
+    marginTop: 0,
+  },
+  betItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  betInfo: {
+    flex: 1,
+  },
+  betTypeLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  betNumbers: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  betAmount: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  betPotentialWin: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.success,
+  },
+  
+  // Selection Summary Styles
+  selectionSummary: {
+    backgroundColor: Colors.surface,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginTop: Spacing.md,
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.primary,
+  },
+  selectionText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: Spacing.xs,
+  },
+  totalAmountText: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.primary,
+    textAlign: 'center',
+  },
+  
+  // Missing styles for totalBet
+  totalBet: {
+    padding: 16,
+    backgroundColor: Colors.white,
+    borderRadius: 8,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  totalBetText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    textAlign: 'center',
   },
 });

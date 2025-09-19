@@ -298,6 +298,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         referralCode: 'DEV123',
         totalReferrals: 12,
         referralEarnings: 500,
+        walletBalance: 1200,
         isActive: true,
         lastLogin: new Date().toISOString(),
         createdAt: new Date().toISOString(),
