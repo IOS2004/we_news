@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useAppMode } from '../contexts/AppModeContext';
-import { Colors } from '../constants/theme';
+import { useAppMode } from '../../contexts/AppModeContext';
+import { Colors } from '../../constants/theme';
 
 const AppModeDebugPanel: React.FC = () => {
   const { currentMode, availableModes, switchToNextMode, switchToMode } = useAppMode();

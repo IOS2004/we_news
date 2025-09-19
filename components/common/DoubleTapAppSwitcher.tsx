@@ -152,7 +152,7 @@ const DoubleTapAppSwitcher: React.FC<DoubleTapAppSwitcherProps> = ({ style }) =>
         {/* Mode icon */}
         <Ionicons 
           name={getModeIcon(currentMode) as any} 
-          size={16} 
+          size={20} 
           color="white" 
         />
         
@@ -179,11 +179,11 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 6,
-    minWidth: 70,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 8,
+    minWidth: 110,
     justifyContent: 'center',
     position: 'relative',
   },
@@ -193,11 +193,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 16,
+    borderRadius: 20,
     zIndex: 0,
   },
   label: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
     color: 'white',
     zIndex: 1,

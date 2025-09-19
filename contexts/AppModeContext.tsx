@@ -24,7 +24,7 @@ export const AppModeProvider: React.FC<AppModeProviderProps> = ({
 }) => {
   const router = useRouter();
   const [currentMode, setCurrentMode] = useState<AppMode>(initialMode);
-  const [availableModes, setAvailableModes] = useState<AppMode[]>(['home', 'news']);
+  const [availableModes, setAvailableModes] = useState<AppMode[]>(['home', 'news', 'trades']);
 
   const getRouteForMode = (mode: AppMode): string => {
     switch (mode) {
@@ -33,7 +33,7 @@ export const AppModeProvider: React.FC<AppModeProviderProps> = ({
       case 'news':
         return '/(tabs)/(news)';
       case 'trades':
-        return '/(tabs)/(trades)'; // For future implementation
+        return '/(tabs)/(trades)';
       default:
         return '/(tabs)/(home)/dashboard';
     }

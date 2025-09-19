@@ -17,10 +17,9 @@ export default function RootLayout() {
       </Stack>
     );
   } else if (currentMode === "trades") {
-    // Future implementation for trades mode
     return (
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(home)" />
+        <Stack.Screen name="(trades)" />
       </Stack>
     );
   } else {
