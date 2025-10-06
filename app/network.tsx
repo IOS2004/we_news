@@ -8,6 +8,8 @@ import ScreenWrapper from '../components/common/ScreenWrapper';
 import Header from '../components/common/Header';
 import Card from '../components/common/Card';
 import { Colors } from '../constants/theme';
+import { referralAPI } from '../services/api';
+import { showToast } from '../utils/toast';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -151,18 +153,66 @@ const getNetworkData = (planId: string) => {
 export default function NetworkScreen() {
   const { planId } = useLocalSearchParams();
   const [networkData, setNetworkData] = useState<any>(null);
+  const [referralInfo, setReferralInfo] = useState<any>(null);
+  const [referralTree, setReferralTree] = useState<any>(null);
   const [selectedLevel, setSelectedLevel] = useState<number>(1);
   const [viewMode, setViewMode] = useState<'overview' | 'tree' | 'members'>('overview');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const data = getNetworkData(planId as string);
-      setNetworkData(data);
-      setLoading(false);
-    }, 500);
+    fetchNetworkData();
   }, [planId]);
+
+  const fetchNetworkData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch referral info and tree data from APIs
+      const [infoResponse, treeResponse] = await Promise.all([
+        referralAPI.getReferralInfo(),
+        referralAPI.getReferralTree(13) // Get up to 13 levels as per MLM spec
+      ]);
+
+      if (infoResponse.success && infoResponse.data) {
+        setReferralInfo(infoResponse.data);
+      }
+
+      if (treeResponse.success && treeResponse.data) {
+        setReferralTree(treeResponse.data);
+        console.log('Referral Tree Data:', treeResponse.data);
+        
+        // Convert API data to UI format
+        const apiNetworkData = {
+          planName: 'Network Plan',
+          planColor: '#3B82F6',
+          totalNetworkSize: treeResponse.data.totalDownlineUsers || 0,
+          directReferrals: infoResponse.data?.referralStats?.directReferrals || 0,
+          activeThisMonth: infoResponse.data?.referralStats?.totalReferrals || 0,
+          totalEarnings: infoResponse.data?.referralStats?.commissionEarnings || 0,
+          monthlyEarnings: 0,
+          levels: [] // Will be populated from tree data
+        };
+        setNetworkData(apiNetworkData);
+      } else {
+        // Only use mock data if API fails completely
+        const mockData = getNetworkData(planId as string);
+        setNetworkData(mockData);
+      }
+      
+    } catch (error) {
+      console.error('Error fetching network data:', error);
+      showToast.error({
+        title: 'Network Error',
+        message: 'Failed to load referral network data. Using offline data.',
+      });
+      
+      // Fallback to mock data
+      const mockData = getNetworkData(planId as string);
+      setNetworkData(mockData);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {

@@ -475,6 +475,47 @@ export const referralAPI = {
     }
   },
 
+  // Get referral tree/genealogy
+  getReferralTree: async (levels: number = 5): Promise<ApiResponse<any>> => {
+    try {
+      const response: AxiosResponse<ApiResponse<any>> = await api.get(
+        `/referrals/tree?levels=${levels}`
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching referral tree:", error);
+      throw error;
+    }
+  },
+
+  // Validate referral code
+  validateReferralCode: async (
+    referralCode: string
+  ): Promise<ApiResponse<any>> => {
+    try {
+      const response: AxiosResponse<ApiResponse<any>> = await api.get(
+        `/referrals/validate/${referralCode}`
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error validating referral code:", error);
+      throw error;
+    }
+  },
+
+  // Get commission structure
+  getCommissionStructure: async (): Promise<ApiResponse<any>> => {
+    try {
+      const response: AxiosResponse<ApiResponse<any>> = await api.get(
+        "/referrals/commission-structure"
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching commission structure:", error);
+      throw error;
+    }
+  },
+
   // Get earnings breakdown
   getEarnings: async (): Promise<ApiResponse<BackendEarningsData>> => {
     try {

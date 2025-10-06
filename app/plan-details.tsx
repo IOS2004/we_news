@@ -9,6 +9,8 @@ import Header from '../components/common/Header';
 import Card from '../components/common/Card';
 import { Colors } from '../constants/theme';
 import { showToast } from '../utils/toast';
+import { referralAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -118,22 +120,52 @@ const getPlanDetails = (planId: string) => {
 
 export default function PlanDetailsScreen() {
   const { planId } = useLocalSearchParams();
+  const { user } = useAuth();
   const [planDetails, setPlanDetails] = useState<any>(null);
+  const [referralInfo, setReferralInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const details = getPlanDetails(planId as string);
-      setPlanDetails(details);
-      setLoading(false);
-    }, 500);
+    fetchPlanData();
   }, [planId]);
 
+  const fetchPlanData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch referral info from API
+      const referralResponse = await referralAPI.getReferralInfo();
+      if (referralResponse.success && referralResponse.data) {
+        setReferralInfo(referralResponse.data);
+      }
+
+      // Simulate plan details API call (this would be replaced with actual plan API)
+      const details = getPlanDetails(planId as string);
+      setPlanDetails(details);
+      
+    } catch (error) {
+      console.error('Error fetching plan data:', error);
+      showToast.error({
+        title: 'Load Error',
+        message: 'Failed to load plan details. Using offline data.',
+      });
+      
+      // Fallback to mock data
+      const details = getPlanDetails(planId as string);
+      setPlanDetails(details);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleReferAndEarn = async () => {
-    const referralCode = 'WE123ABC'; // This would come from user data
-    const referralLink = `https://wenews.app/refer/${referralCode}`;
-    const shareMessage = `🚀 *Join WeNews & Start Earning Today!*\n\n💰 *What You Get:*\n✅ Guaranteed daily returns from news reading\n✅ Multiple growth plans (Daily/Weekly/Monthly)\n✅ Build your team & earn unlimited commissions\n✅ 13-level MLM earning structure\n\n🎯 *My Results:*\n• Currently earning ₹${planDetails.monthlyEarnings}/month\n• Built a team of 47 members\n• Multiple passive income streams\n\n🔥 *Special Offer:*\nUse my referral code: *${referralCode}*\nGet bonus rewards on signup!\n\n📲 *Download Now:*\n${referralLink}\n\n#WeNews #PassiveIncome #MLMSuccess #EarnFromNews`;
+    // Get referral code from API response structure we tested
+    const referralCode = referralInfo?.userReferralCode || user?.referralCode || 'WE123ABC';
+    const referralLink = referralInfo?.referralLink || `https://wenews.app/refer/${referralCode}`;
+    const monthlyEarnings = planDetails?.monthlyEarnings || 0;
+    const totalReferrals = referralInfo?.referralStats?.totalReferrals || planDetails?.referrals?.total || 0;
+    
+    const shareMessage = `🚀 *Join WeNews & Start Earning Today!*\n\n💰 *What You Get:*\n✅ Guaranteed daily returns from news reading\n✅ Multiple growth plans (Daily/Weekly/Monthly)\n✅ Build your team & earn unlimited commissions\n✅ 13-level MLM earning structure\n\n🎯 *My Results:*\n• Currently earning ₹${monthlyEarnings}/month\n• Built a team of ${totalReferrals} members\n• Multiple passive income streams\n\n🔥 *Special Offer:*\nUse my referral code: *${referralCode}*\nGet bonus rewards on signup!\n\n📲 *Download Now:*\n${referralLink}\n\n#WeNews #PassiveIncome #MLMSuccess #EarnFromNews`;
 
     try {
       const result = await Share.share({
@@ -156,7 +188,7 @@ export default function PlanDetailsScreen() {
   };
 
   const handleCopyReferralCode = () => {
-    const referralCode = 'WE123ABC';
+    const referralCode = referralInfo?.userReferralCode || user?.referralCode || 'WE123ABC';
     Clipboard.setString(referralCode);
     showToast.success({
       title: 'Copied!',
@@ -276,21 +308,21 @@ export default function PlanDetailsScreen() {
             <Text style={styles.cardTitle}>Referral Performance</Text>
             <TouchableOpacity style={styles.referralCodeContainer} onPress={handleCopyReferralCode}>
               <Text style={styles.referralCodeLabel}>Your Code:</Text>
-              <Text style={styles.referralCode}>WE123ABC</Text>
+              <Text style={styles.referralCode}>{referralInfo?.referralCode || 'Loading...'}</Text>
               <Ionicons name="copy" size={14} color={Colors.primary} />
             </TouchableOpacity>
           </View>
           <View style={styles.referralStatsRow}>
             <View style={styles.referralStat}>
-              <Text style={styles.referralStatValue}>12</Text>
+              <Text style={styles.referralStatValue}>{referralInfo?.referralStats?.directReferrals || 0}</Text>
               <Text style={styles.referralStatLabel}>Direct Referrals</Text>
             </View>
             <View style={styles.referralStat}>
-              <Text style={styles.referralStatValue}>₹3,600</Text>
+              <Text style={styles.referralStatValue}>₹{referralInfo?.referralStats?.commissionEarnings || 0}</Text>
               <Text style={styles.referralStatLabel}>Referral Earnings</Text>
             </View>
             <View style={styles.referralStat}>
-              <Text style={styles.referralStatValue}>47</Text>
+              <Text style={styles.referralStatValue}>{referralInfo?.referralStats?.totalReferrals || 0}</Text>
               <Text style={styles.referralStatLabel}>Team Size</Text>
             </View>
           </View>

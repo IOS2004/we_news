@@ -8,6 +8,7 @@ import { Button, InputField, ScreenWrapper, Logo } from '../../components/common
 import { Colors, Typography, Spacing, BorderRadius, Shadows, Gradients, Layout } from '../../constants/theme';
 import { useAuth } from '../../contexts/AuthContext';
 import { showToast } from '../../utils/toast';
+import { referralAPI } from '../../services/api';
 
 export default function SignUpScreen() {
   const [firstName, setFirstName] = useState('');
@@ -17,6 +18,8 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isValidatingReferral, setIsValidatingReferral] = useState(false);
+  const [referralValidationStatus, setReferralValidationStatus] = useState<'none' | 'valid' | 'invalid'>('none');
   
   const lastNameRef = useRef<TextInput>(null);
   const usernameRef = useRef<TextInput>(null);
@@ -25,6 +28,54 @@ export default function SignUpScreen() {
   const referralRef = useRef<TextInput>(null);
 
   const { signUp, isLoading, error } = useAuth();
+
+  const validateReferralCode = async (code: string) => {
+    if (!code.trim()) {
+      setReferralValidationStatus('none');
+      return;
+    }
+
+    try {
+      setIsValidatingReferral(true);
+      const response = await referralAPI.validateReferralCode(code.trim());
+      
+      if (response.success && response.data.isValid) {
+        setReferralValidationStatus('valid');
+        showToast.success({
+          title: 'Valid Referral Code',
+          message: `Referral code is valid! Referred by ${response.data.referrer.firstName} ${response.data.referrer.lastName}`,
+        });
+      } else {
+        setReferralValidationStatus('invalid');
+        showToast.warning({
+          title: 'Invalid Referral Code',
+          message: 'This referral code is not valid or has expired.',
+        });
+      }
+    } catch (error) {
+      setReferralValidationStatus('invalid');
+      showToast.error({
+        title: 'Validation Error',
+        message: 'Unable to validate referral code. Please check and try again.',
+      });
+    } finally {
+      setIsValidatingReferral(false);
+    }
+  };
+
+  const handleReferralCodeChange = (text: string) => {
+    setReferralCode(text);
+    setReferralValidationStatus('none');
+    
+    // Debounce validation to avoid too many API calls
+    if (text.trim()) {
+      const timeoutId = setTimeout(() => {
+        validateReferralCode(text);
+      }, 1000);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  };
 
   const handleSignUp = async () => {
     if (!firstName.trim() || !lastName.trim() || !username.trim() || !email.trim() || !password.trim()) {
@@ -174,11 +225,20 @@ export default function SignUpScreen() {
                 label="" 
                 placeholder="Referral Code (Optional)"
                 value={referralCode}
-                onChangeText={setReferralCode}
+                onChangeText={handleReferralCodeChange}
                 autoCapitalize="characters"
                 returnKeyType="done"
                 onSubmitEditing={handleSignUp}
                 leftIcon={<Ionicons name="gift-outline" size={20} color={Colors.textSecondary} />}
+                rightIcon={
+                  isValidatingReferral ? (
+                    <Ionicons name="refresh" size={20} color={Colors.textSecondary} />
+                  ) : referralValidationStatus === 'valid' ? (
+                    <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                  ) : referralValidationStatus === 'invalid' ? (
+                    <Ionicons name="close-circle" size={20} color={Colors.error} />
+                  ) : null
+                }
               />
             </View>
 
