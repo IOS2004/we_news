@@ -3,7 +3,9 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert 
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper, Header, Button } from '../components/common';
+import { MockPaymentGateway } from '../components/plans';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { showToast } from '../utils/toast';
 
 // Predefined amounts for quick selection
 const quickAmounts = [100, 500, 1000, 2000, 5000, 10000];
@@ -51,6 +53,7 @@ export default function AddMoneyScreen() {
   const [amount, setAmount] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const handleQuickAmount = (value: number) => {
     setAmount(value.toString());
@@ -62,41 +65,64 @@ export default function AddMoneyScreen() {
 
   const handleAddMoney = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      Alert.alert('Invalid Amount', 'Please enter a valid amount');
-      return;
-    }
-
-    if (!selectedPaymentMethod) {
-      Alert.alert('Payment Method Required', 'Please select a payment method');
+      showToast.error({
+        title: 'Invalid Amount',
+        message: 'Please enter a valid amount'
+      });
       return;
     }
 
     if (parseFloat(amount) < 10) {
-      Alert.alert('Minimum Amount', 'Minimum amount to add is ₹10');
+      showToast.error({
+        title: 'Minimum Amount',
+        message: 'Minimum amount to add is ₹10'
+      });
       return;
     }
 
     if (parseFloat(amount) > 100000) {
-      Alert.alert('Maximum Amount', 'Maximum amount to add is ₹1,00,000');
+      showToast.error({
+        title: 'Maximum Amount',
+        message: 'Maximum amount to add is ₹1,00,000'
+      });
       return;
     }
 
-    setIsProcessing(true);
+    // Open payment gateway
+    setShowPaymentModal(true);
+  };
 
-    // Simulate payment processing
+  const handlePaymentSuccess = async () => {
+    setShowPaymentModal(false);
+    
+    // TODO: Call backend API to add money to wallet
+    // await walletAPI.addMoney(parseFloat(amount));
+    
+    showToast.success({
+      title: 'Money Added!',
+      message: `₹${amount} has been added to your wallet successfully.`
+    });
+    
+    // Reset form
+    setAmount('');
+    setSelectedPaymentMethod('');
+    
+    // Navigate back after short delay
     setTimeout(() => {
-      setIsProcessing(false);
-      Alert.alert(
-        'Payment Successful',
-        `₹${amount} has been added to your wallet successfully!`,
-        [
-          {
-            text: 'OK',
-            onPress: () => router.back(),
-          },
-        ]
-      );
-    }, 2000);
+      router.back();
+    }, 1500);
+  };
+
+  const handlePaymentFailure = (errorMessage: string) => {
+    setShowPaymentModal(false);
+    showToast.error({
+      title: 'Payment Failed',
+      message: errorMessage
+    });
+  };
+
+  const handlePaymentClose = () => {
+    setShowPaymentModal(false);
   };
 
   const formatAmount = (value: string) => {
@@ -235,10 +261,20 @@ export default function AddMoneyScreen() {
           <Button
             title={isProcessing ? 'Processing...' : `Add ₹${amount || '0'}`}
             onPress={handleAddMoney}
-            disabled={!amount || !selectedPaymentMethod || isProcessing}
+            disabled={!amount || isProcessing}
           />
         </View>
       </ScrollView>
+      
+      {/* Mock Payment Gateway Modal */}
+      <MockPaymentGateway
+        visible={showPaymentModal}
+        planName="Add Money to Wallet"
+        amount={parseFloat(amount) || 0}
+        onClose={handlePaymentClose}
+        onSuccess={handlePaymentSuccess}
+        onFailure={handlePaymentFailure}
+      />
     </ScreenWrapper>
   );
 }

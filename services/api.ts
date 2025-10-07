@@ -214,11 +214,11 @@ export const authAPI = {
     }
   },
 
-  // Verify token
-  verifyToken: async (): Promise<ApiResponse<{ user: User }>> => {
+  // Refresh token
+  refreshToken: async (): Promise<ApiResponse<{ token: string }>> => {
     try {
-      const response: AxiosResponse<ApiResponse<{ user: User }>> =
-        await api.get("/auth/verify");
+      const response: AxiosResponse<ApiResponse<{ token: string }>> =
+        await api.post("/auth/refresh");
       return response.data;
     } catch (error: any) {
       throw (
@@ -326,6 +326,16 @@ export const storage = {
     }
   },
 
+  // Save token only
+  saveToken: async (token: string): Promise<void> => {
+    try {
+      await AsyncStorage.setItem(TOKEN_STORAGE_KEY, token);
+    } catch (error) {
+      console.error("Error saving auth token:", error);
+      throw error;
+    }
+  },
+
   // Save user data
   saveUser: async (user: User): Promise<void> => {
     try {
@@ -350,6 +360,24 @@ export interface BackendInvestmentPlan {
   isActive: boolean;
   createdAt: any;
   updatedAt: any;
+}
+
+export interface UserInvestment {
+  id: string;
+  userId: string;
+  planId: string;
+  planName: string;
+  investmentAmount: number;
+  startDate: string;
+  expiryDate: string;
+  currentLevel: number;
+  totalReferrals: number;
+  totalEarnings: number;
+  lastPayoutDate: string;
+  isActive: boolean;
+  status: "active" | "completed" | "expired";
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GrowthPlan {
@@ -390,14 +418,14 @@ export const investmentAPI = {
   },
 
   // Purchase investment plan
-  purchaseInvestmentPlan: async (planId: string): Promise<ApiResponse<any>> => {
+  purchaseInvestmentPlan: async (
+    planId: string
+  ): Promise<ApiResponse<UserInvestment>> => {
     try {
-      const response: AxiosResponse<ApiResponse<any>> = await api.post(
-        "/investment/purchase",
-        {
+      const response: AxiosResponse<ApiResponse<UserInvestment>> =
+        await api.post("/investment/purchase", {
           planId,
-        }
-      );
+        });
       return response.data;
     } catch (error: any) {
       console.error("Error purchasing investment plan:", error);

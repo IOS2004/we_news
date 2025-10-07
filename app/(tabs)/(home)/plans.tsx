@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import ScreenWrapper from '../../../components/common/ScreenWrapper';
 import Header from '../../../components/common/Header';
 import Card from '../../../components/common/Card';
+import { MockPaymentGateway } from '../../../components/plans';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
 import { showToast } from '../../../utils/toast';
 import { investmentAPI, mapBackendPlansToGrowthPlans, GrowthPlan } from '../../../services/api';
@@ -18,6 +19,8 @@ export default function PlansScreen() {
   const [growthPlans, setGrowthPlans] = useState<GrowthPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [planToPurchase, setPlanToPurchase] = useState<GrowthPlan | null>(null);
 
   // Load growth plans from backend
   useEffect(() => {
@@ -54,42 +57,68 @@ export default function PlansScreen() {
   };
 
   const handlePurchasePlan = async (plan: GrowthPlan) => {
-    const currentPlan = plan.plans[selectedFrequency];
-    Alert.alert(
-      'Confirm Purchase',
-      `Are you sure you want to purchase ${plan.name} (${selectedFrequency}) for ₹${currentPlan.initialPayment}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Purchase', 
-          onPress: async () => {
-            try {
-              showToast.info({
-                title: 'Processing Purchase',
-                message: 'Please wait while we process your purchase...'
-              });
+    setPlanToPurchase(plan);
+    setShowPaymentModal(true);
+  };
 
-              const response = await investmentAPI.purchaseInvestmentPlan(plan.id);
-              
-              if (response.success) {
-                showToast.success({
-                  title: 'Purchase Successful!',
-                  message: `${plan.name} (${selectedFrequency}) purchased successfully!`
-                });
-              } else {
-                throw new Error(response.message || 'Purchase failed');
-              }
-            } catch (error: any) {
-              console.error('Error purchasing plan:', error);
-              showToast.error({
-                title: 'Purchase Failed',
-                message: error.message || 'Unable to complete purchase. Please try again.'
-              });
-            }
-          }
-        }
-      ]
-    );
+  const handlePaymentSuccess = async () => {
+    if (!planToPurchase) return;
+
+    try {
+      showToast.info({
+        title: 'Activating Plan',
+        message: 'Please wait while we activate your plan...'
+      });
+
+      const response = await investmentAPI.purchaseInvestmentPlan(planToPurchase.id);
+      
+      if (response.success) {
+        setShowPaymentModal(false);
+        setPlanToPurchase(null);
+        
+        showToast.success({
+          title: 'Plan Activated!',
+          message: `${planToPurchase.name} has been successfully activated.`
+        });
+        
+        // Optionally navigate to plan details or dashboard
+        // router.push('/plan-details?planId=' + planToPurchase.id);
+      } else {
+        throw new Error(response.message || 'Failed to activate plan');
+      }
+    } catch (error: any) {
+      console.error('Error activating plan:', error);
+      
+      // Check if user already has an active plan
+      if (error.response?.data?.message?.includes('already have an active investment')) {
+        showToast.error({
+          title: 'Plan Already Active',
+          message: 'You already have an active investment plan. Please complete your current plan before purchasing a new one.'
+        });
+      } else {
+        showToast.error({
+          title: 'Activation Failed',
+          message: error.response?.data?.message || 'Unable to activate plan. Please try again or contact support.'
+        });
+      }
+      
+      setShowPaymentModal(false);
+      setPlanToPurchase(null);
+    }
+  };
+
+  const handlePaymentFailure = (errorMessage: string) => {
+    showToast.error({
+      title: 'Payment Failed',
+      message: errorMessage
+    });
+    setShowPaymentModal(false);
+    setPlanToPurchase(null);
+  };
+
+  const handlePaymentClose = () => {
+    setShowPaymentModal(false);
+    setPlanToPurchase(null);
   };
 
   const PlanCard = ({ plan }: { plan: GrowthPlan }) => {
@@ -266,6 +295,18 @@ export default function PlansScreen() {
             </View>
           </View>
         </ScrollView>
+      )}
+      
+      {/* Mock Payment Gateway Modal */}
+      {planToPurchase && (
+        <MockPaymentGateway
+          visible={showPaymentModal}
+          planName={planToPurchase.name}
+          amount={planToPurchase.plans[selectedFrequency].initialPayment}
+          onClose={handlePaymentClose}
+          onSuccess={handlePaymentSuccess}
+          onFailure={handlePaymentFailure}
+        />
       )}
     </ScreenWrapper>
   );

@@ -56,23 +56,61 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       const authData = await storage.getAuthData();
-      
+
       if (authData) {
-        // Verify token is still valid
+        // Try to validate the existing token by fetching the user profile
         try {
-          const response = await authAPI.verifyToken();
-          if (response.success && response.data) {
-            setUser(response.data.user);
-            // Update stored user data
-            await storage.saveUser(response.data.user);
-          } else {
-            // Token is invalid, clear storage
-            await storage.clearAuthData();
+          const profileResponse = await userAPI.getProfile();
+          
+          if (profileResponse.success && profileResponse.data?.user) {
+            // Token is valid, use it with updated user data
+            setUser(profileResponse.data.user);
+            await storage.saveAuthData({ 
+              token: authData.token, 
+              user: profileResponse.data.user 
+            });
+            return;
           }
-        } catch (error) {
-          // Token verification failed, clear storage
+        } catch (profileError: any) {
+          console.warn('Stored token validation failed, attempting refresh:', profileError);
+          
+          // Only try to refresh if we get a 401 (unauthorized) error
+          if (profileError?.response?.status === 401) {
+            try {
+              const refreshResponse = await authAPI.refreshToken();
+
+              if (refreshResponse.success && refreshResponse.data?.token) {
+                const newToken = refreshResponse.data.token;
+                await storage.saveToken(newToken);
+
+                // Try to get profile again with new token
+                const newProfileResponse = await userAPI.getProfile();
+                if (newProfileResponse.success && newProfileResponse.data?.user) {
+                  setUser(newProfileResponse.data.user);
+                  await storage.saveAuthData({ 
+                    token: newToken, 
+                    user: newProfileResponse.data.user 
+                  });
+                  return;
+                }
+              }
+            } catch (refreshError) {
+              console.error('Token refresh failed:', refreshError);
+            }
+          } else {
+            // Network or other error - keep the user signed in with cached data
+            console.warn('Network error during validation, using cached data');
+            setUser(authData.user);
+            return;
+          }
+          
+          // If we get here, both validation and refresh failed
+          console.log('Session expired, clearing auth data');
           await storage.clearAuthData();
+          setUser(null);
         }
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error('Error initializing auth:', error);
@@ -264,12 +302,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       if (!isAuthenticated) return;
 
-      const response = await userAPI.getProfile();
-      
-      if (response.success && response.data) {
-        const updatedUser = response.data.user;
+      const refreshResponse = await authAPI.refreshToken();
+
+      if (!refreshResponse.success || !refreshResponse.data?.token) {
+        throw new Error('Failed to refresh token');
+      }
+
+      const newToken = refreshResponse.data.token;
+      await storage.saveToken(newToken);
+
+      const profileResponse = await userAPI.getProfile();
+
+      if (profileResponse.success && profileResponse.data?.user) {
+        const updatedUser = profileResponse.data.user;
         setUser(updatedUser);
-        await storage.saveUser(updatedUser);
+        await storage.saveAuthData({ token: newToken, user: updatedUser });
       }
     } catch (error) {
       console.error('Error refreshing user:', error);
