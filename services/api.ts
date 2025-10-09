@@ -792,4 +792,47 @@ export const updateUserWithReferralData = (
   };
 };
 
+// Wallet API interfaces
+export interface WalletTransaction {
+  id: string;
+  walletId: string;
+  transactionType: 'credit' | 'debit';
+  amount: number;
+  description: string;
+  gstAmount?: number;
+  discountAmount?: number;
+  originalAmount?: number;
+  status: 'pending' | 'completed' | 'failed';
+  createdAt: {
+    _seconds: number;
+    _nanoseconds: number;
+  };
+  transactionReference?: string;
+}
+
+export interface WalletData {
+  walletId: string;
+  balance: number;
+  formattedBalance: string;
+  status: string;
+  transactions: WalletTransaction[];
+  totalTransactions: number;
+  canTransact: boolean;
+}
+
+export interface WalletResponse {
+  success: boolean;
+  message: string;
+  data: WalletData;
+}
+
+// Wallet API
+export const walletAPI = {
+  // Fetch wallet details
+  getWalletDetails: async (): Promise<WalletResponse> => {
+    const response: AxiosResponse<WalletResponse> = await api.get('/wallet');
+    return response.data;
+  },
+};
+
 export default api;

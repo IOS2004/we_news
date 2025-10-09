@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper, Header } from '../../../components/common';
 import { TransactionListItem, AddMoneyCard } from '../../../components/wallet';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
+import { useWallet } from '../../../contexts/WalletContext';
 
 // Dummy add money transactions
 const addMoneyTransactions = [
@@ -126,6 +127,14 @@ interface Transaction {
 
 export default function WalletScreen() {
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const { balance, formattedBalance, transactions: walletTransactions, isLoading, refreshWallet } = useWallet();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refreshWallet();
+    setRefreshing(false);
+  };
   
   const handleWithdrawal = () => {
     router.push('/withdrawal-request');
@@ -143,25 +152,53 @@ export default function WalletScreen() {
     router.push('/withdrawal-history');
   };
 
-  const filteredTransactions = selectedFilter === 'all' 
-    ? dummyTransactions 
-    : dummyTransactions.filter(t => t.type === selectedFilter);
+  // Use wallet transactions from context, fallback to dummy data
+  const displayTransactions = walletTransactions.length > 0 ? walletTransactions : dummyTransactions;
 
-  const totalIncome = dummyTransactions
+  const filteredTransactions = selectedFilter === 'all' 
+    ? displayTransactions 
+    : displayTransactions.filter(t => t.type === selectedFilter);
+
+  const totalIncome = displayTransactions
     .filter(t => t.type === 'credit')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const totalWithdrawn = dummyTransactions
+  const totalWithdrawn = displayTransactions
     .filter(t => t.type === 'debit' && t.status === 'completed')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const currentBalance = 1500;
+  // Use balance from context
+  const currentBalance = balance;
+
+  // Get credit transactions for "Add Money" section
+  const addMoneyFromAPI = displayTransactions
+    .filter(t => t.type === 'credit')
+    .slice(0, 3)
+    .map(t => ({
+      id: t.id,
+      amount: t.amount,
+      method: t.description.includes('UPI') ? 'UPI Payment' : 
+              t.description.includes('Bank') ? 'Net Banking' : 
+              t.description.includes('topup') || t.description.includes('Wallet') ? 'Wallet Topup' : 'Payment',
+      date: t.date,
+      status: t.status === 'completed' ? 'success' as const : 
+              t.status === 'pending' ? 'pending' as const : 'success' as const,
+    }));
+
+  // Use API data if available, otherwise fallback to dummy data
+  const displayAddMoney = addMoneyFromAPI.length > 0 ? addMoneyFromAPI : addMoneyTransactions;
 
   return (
     <ScreenWrapper style={styles.container}>
       <Header title="My Wallet" />
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollView} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
         {/* Balance Card */}
         <View style={styles.balanceCard}>
           <View style={styles.balanceHeader}>
@@ -170,7 +207,7 @@ export default function WalletScreen() {
               <Ionicons name="eye-outline" size={20} color={Colors.textSecondary} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.balanceAmount}>₹{currentBalance.toLocaleString()}</Text>
+          <Text style={styles.balanceAmount}>{formattedBalance || `₹${currentBalance.toLocaleString()}`}</Text>
           <Text style={styles.balanceSubtext}>Last updated: Today, 9:30 AM</Text>
         </View>
 
@@ -239,7 +276,7 @@ export default function WalletScreen() {
           </View>
           
           <View style={styles.addMoneyList}>
-            {addMoneyTransactions.slice(0, 3).map((item) => (
+            {displayAddMoney.slice(0, 3).map((item) => (
               <AddMoneyCard
                 key={item.id}
                 amount={item.amount}
