@@ -3,9 +3,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert 
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper, Header, Button } from '../components/common';
-import { MockPaymentGateway } from '../components/plans';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/theme';
 import { showToast } from '../utils/toast';
+import walletApi, { TopupRequest } from '../services/walletApi';
+import { processCashfreePaymentSimple } from '../utils/cashfree';
 
 // Predefined amounts for quick selection
 const quickAmounts = [100, 500, 1000, 2000, 5000, 10000];
@@ -13,10 +14,17 @@ const quickAmounts = [100, 500, 1000, 2000, 5000, 10000];
 // Payment methods
 const paymentMethods = [
   {
-    id: 'upi',
+    id: 'cashfree',
     name: 'UPI',
     icon: 'phone-portrait-outline',
     description: 'Pay using UPI ID or QR code',
+    isAvailable: true,
+  },
+  {
+    id: 'card',
+    name: 'Credit/Debit Card',
+    icon: 'card-outline',
+    description: 'Visa, Mastercard, RuPay',
     isAvailable: true,
   },
   {
@@ -24,20 +32,6 @@ const paymentMethods = [
     name: 'Net Banking',
     icon: 'card-outline',
     description: 'Pay using your bank account',
-    isAvailable: true,
-  },
-  {
-    id: 'debitcard',
-    name: 'Debit Card',
-    icon: 'card-outline',
-    description: 'Visa, Mastercard, RuPay',
-    isAvailable: true,
-  },
-  {
-    id: 'creditcard',
-    name: 'Credit Card',
-    icon: 'card-outline',
-    description: 'Visa, Mastercard',
     isAvailable: true,
   },
   {
@@ -51,7 +45,7 @@ const paymentMethods = [
 
 export default function AddMoneyScreen() {
   const [amount, setAmount] = useState('');
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cashfree');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
@@ -60,7 +54,8 @@ export default function AddMoneyScreen() {
   };
 
   const handlePaymentMethodSelect = (methodId: string) => {
-    setSelectedPaymentMethod(methodId);
+    // All payment methods use cashfree gateway
+    setSelectedPaymentMethod('cashfree');
   };
 
   const handleAddMoney = async () => {
@@ -88,41 +83,113 @@ export default function AddMoneyScreen() {
       return;
     }
 
-    // Open payment gateway
-    setShowPaymentModal(true);
+    setIsProcessing(true);
+
+    try {
+      // Call wallet topup API
+      const topupRequest: TopupRequest = {
+        amount: parseFloat(amount),
+        paymentMethod: 'cashfree',
+      };
+
+      console.log('Initiating wallet topup:', topupRequest);
+
+      const response = await walletApi.topup(topupRequest);
+
+      console.log('Topup API response:', response);
+
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to initiate payment');
+      }
+
+      // Extract payment details from response
+      const { transactionId, amounts, paymentResponse, userDetails } = response.data;
+      
+      // Log the full paymentResponse to debug
+      console.log('Payment Response:', JSON.stringify(paymentResponse, null, 2));
+      console.log('Payment Data:', JSON.stringify(paymentResponse.paymentData, null, 2));
+      
+      const { payment_session_id, order_id, customer_details } = paymentResponse.paymentData;
+
+      // Validate payment session ID
+      if (!payment_session_id) {
+        console.error('Payment session ID is missing!');
+        console.error('Available keys:', Object.keys(paymentResponse.paymentData));
+        throw new Error('Payment session ID not received from server');
+      }
+
+      console.log('Opening Cashfree payment gateway...');
+      console.log('Transaction ID:', transactionId);
+      console.log('Final Amount:', amounts.finalAmount);
+      console.log('Payment Session ID:', payment_session_id);
+
+      // Open Cashfree payment gateway
+      await processCashfreePaymentSimple(
+        transactionId,
+        payment_session_id,
+        {
+          onSuccess: async (data) => {
+            console.log('Payment successful:', data);
+            setIsProcessing(false);
+            
+            showToast.success({
+              title: 'Payment Successful!',
+              message: `₹${amounts.creditAmount} has been added to your wallet.`
+            });
+
+            // Reset form
+            setAmount('');
+            setSelectedPaymentMethod('cashfree');
+
+            // Navigate back after short delay
+            setTimeout(() => {
+              router.back();
+            }, 1500);
+          },
+          onFailure: (error) => {
+            console.error('Payment failed:', error);
+            setIsProcessing(false);
+            
+            showToast.error({
+              title: 'Payment Failed',
+              message: error.error?.message || 'Payment was not completed. Please try again.'
+            });
+          },
+          onError: (error) => {
+            console.error('Payment error:', error);
+            setIsProcessing(false);
+            
+            showToast.error({
+              title: 'Payment Error',
+              message: 'An error occurred during payment. Please try again.'
+            });
+          },
+        }
+      );
+    } catch (error: any) {
+      console.error('Wallet topup error:', error);
+      setIsProcessing(false);
+      
+      showToast.error({
+        title: 'Error',
+        message: error.response?.data?.message || error.message || 'Failed to initiate payment. Please try again.'
+      });
+    }
   };
 
   const handlePaymentSuccess = async () => {
-    setShowPaymentModal(false);
-    
-    // TODO: Call backend API to add money to wallet
-    // await walletAPI.addMoney(parseFloat(amount));
-    
-    showToast.success({
-      title: 'Money Added!',
-      message: `₹${amount} has been added to your wallet successfully.`
-    });
-    
-    // Reset form
-    setAmount('');
-    setSelectedPaymentMethod('');
-    
-    // Navigate back after short delay
-    setTimeout(() => {
-      router.back();
-    }, 1500);
+    // This function is no longer needed as Cashfree handles the payment
+    // Kept for backward compatibility
   };
 
   const handlePaymentFailure = (errorMessage: string) => {
-    setShowPaymentModal(false);
-    showToast.error({
-      title: 'Payment Failed',
-      message: errorMessage
-    });
+    // This function is no longer needed as Cashfree handles the payment
+    // Kept for backward compatibility
   };
 
   const handlePaymentClose = () => {
-    setShowPaymentModal(false);
+    // This function is no longer needed as Cashfree handles the payment
+    // Kept for backward compatibility
   };
 
   const formatAmount = (value: string) => {
@@ -203,7 +270,7 @@ export default function AddMoneyScreen() {
               key={method.id}
               style={[
                 styles.paymentMethodCard,
-                selectedPaymentMethod === method.id && styles.paymentMethodCardSelected,
+                selectedPaymentMethod === 'cashfree' && styles.paymentMethodCardSelected,
                 !method.isAvailable && styles.paymentMethodCardDisabled,
               ]}
               onPress={() => method.isAvailable && handlePaymentMethodSelect(method.id)}
@@ -212,12 +279,12 @@ export default function AddMoneyScreen() {
               <View style={styles.paymentMethodLeft}>
                 <View style={[
                   styles.paymentMethodIcon,
-                  selectedPaymentMethod === method.id && styles.paymentMethodIconSelected,
+                  selectedPaymentMethod === 'cashfree' && styles.paymentMethodIconSelected,
                 ]}>
                   <Ionicons
                     name={method.icon as any}
                     size={24}
-                    color={selectedPaymentMethod === method.id ? Colors.textOnPrimary : Colors.primary}
+                    color={selectedPaymentMethod === 'cashfree' ? Colors.textOnPrimary : Colors.primary}
                   />
                 </View>
                 <View style={styles.paymentMethodInfo}>
@@ -235,7 +302,7 @@ export default function AddMoneyScreen() {
                   </Text>
                 </View>
               </View>
-              {selectedPaymentMethod === method.id && (
+              {selectedPaymentMethod === 'cashfree' && (
                 <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />
               )}
               {!method.isAvailable && (
@@ -259,22 +326,12 @@ export default function AddMoneyScreen() {
         {/* Add Money Button */}
         <View style={styles.buttonContainer}>
           <Button
-            title={isProcessing ? 'Processing...' : `Add ₹${amount || '0'}`}
+            title={isProcessing ? 'Processing...' : `Pay ₹${amount || '0'}`}
             onPress={handleAddMoney}
             disabled={!amount || isProcessing}
           />
         </View>
       </ScrollView>
-      
-      {/* Mock Payment Gateway Modal */}
-      <MockPaymentGateway
-        visible={showPaymentModal}
-        planName="Add Money to Wallet"
-        amount={parseFloat(amount) || 0}
-        onClose={handlePaymentClose}
-        onSuccess={handlePaymentSuccess}
-        onFailure={handlePaymentFailure}
-      />
     </ScreenWrapper>
   );
 }
