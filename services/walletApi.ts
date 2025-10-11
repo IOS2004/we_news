@@ -108,12 +108,43 @@ const walletApi = {
 
   /**
    * Get wallet transaction history
-   * @returns Array of transactions
+   * @param limit - Number of transactions to fetch (default: 50)
+   * @param skip - Number of transactions to skip (default: 0)
+   * @param type - Filter by transaction type (credit, debit, refund, cashback)
+   * @param status - Filter by status (pending, success, failed)
+   * @returns Transaction history response
    */
-  async getTransactions(): Promise<any[]> {
+  async getTransactions(params?: {
+    limit?: number;
+    skip?: number;
+    type?: 'credit' | 'debit' | 'refund' | 'cashback';
+    status?: 'pending' | 'success' | 'failed';
+  }): Promise<{
+    transactions: any[];
+    totalTransactions: number;
+    currentBalance: number;
+    formattedBalance: string;
+  }> {
     try {
-      const response = await api.get<ApiResponse<any[]>>('/wallet/transactions');
-      return response.data.data || [];
+      const queryParams = new URLSearchParams();
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (params?.skip) queryParams.append('skip', params.skip.toString());
+      if (params?.type) queryParams.append('type', params.type);
+      if (params?.status) queryParams.append('status', params.status);
+      
+      const url = `/wallet/transactions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const response = await api.get<{
+        success: boolean;
+        message: string;
+        data: {
+          transactions: any[];
+          totalTransactions: number;
+          currentBalance: number;
+          formattedBalance: string;
+        };
+      }>(url);
+      
+      return response.data.data;
     } catch (error: any) {
       console.error('Get transactions error:', error.response?.data || error.message);
       throw error;

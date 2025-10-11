@@ -1,138 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper, Header } from '../../../components/common';
 import { TransactionListItem, AddMoneyCard } from '../../../components/wallet';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
 import { useWallet } from '../../../contexts/WalletContext';
-
-// Dummy add money transactions
-const addMoneyTransactions = [
-  {
-    id: '1',
-    amount: 1000,
-    method: 'UPI Payment',
-    date: '2024-01-21',
-    status: 'success' as const,
-  },
-  {
-    id: '2',
-    amount: 500,
-    method: 'Net Banking',
-    date: '2024-01-20',
-    status: 'success' as const,
-  },
-  {
-    id: '3',
-    amount: 2000,
-    method: 'Debit Card',
-    date: '2024-01-19',
-    status: 'pending' as const,
-  },
-];
-
-// Dummy transaction data
-const dummyTransactions = [
-  {
-    id: '1',
-    type: 'credit' as const,
-    amount: 250,
-    date: '2024-01-20',
-    description: 'News Article Interaction',
-    status: 'completed' as const,
-    category: 'Reading',
-    time: '10:30 AM',
-  },
-  {
-    id: '2',
-    type: 'credit' as const,
-    amount: 180,
-    date: '2024-01-19',
-    description: 'Daily Streak Bonus',
-    status: 'completed' as const,
-    category: 'Bonus',
-    time: '11:45 AM',
-  },
-  {
-    id: '3',
-    type: 'debit' as const,
-    amount: 500,
-    date: '2024-01-18',
-    description: 'Withdrawal to Bank',
-    status: 'completed' as const,
-    category: 'Withdrawal',
-    time: '2:15 PM',
-  },
-  {
-    id: '4',
-    type: 'credit' as const,
-    amount: 320,
-    date: '2024-01-17',
-    description: 'News Sharing Reward',
-    status: 'completed' as const,
-    category: 'Sharing',
-    time: '4:20 PM',
-  },
-  {
-    id: '5',
-    type: 'credit' as const,
-    amount: 90,
-    date: '2024-01-16',
-    description: 'Article Comment Reward',
-    status: 'completed' as const,
-    category: 'Engagement',
-    time: '9:15 AM',
-  },
-  {
-    id: '6',
-    type: 'debit' as const,
-    amount: 200,
-    date: '2024-01-15',
-    description: 'Withdrawal to UPI',
-    status: 'pending' as const,
-    category: 'Withdrawal',
-    time: '6:30 PM',
-  },
-  {
-    id: '7',
-    type: 'credit' as const,
-    amount: 150,
-    date: '2024-01-14',
-    description: 'Weekly Challenge Completion',
-    status: 'completed' as const,
-    category: 'Challenge',
-    time: '12:00 PM',
-  },
-  {
-    id: '8',
-    type: 'credit' as const,
-    amount: 75,
-    date: '2024-01-13',
-    description: 'News Category Quiz',
-    status: 'completed' as const,
-    category: 'Quiz',
-    time: '3:45 PM',
-  },
-];
+import walletApi from '../../../services/walletApi';
 
 interface Transaction {
-  id: string;
-  type: 'credit' | 'debit';
+  id?: string;
+  walletId?: string;
+  type?: 'credit' | 'debit';
+  transactionType?: 'credit' | 'debit' | 'refund' | 'cashback';
   amount: number;
-  date: string;
+  date?: string;
   description: string;
-  status?: 'completed' | 'pending';
+  status?: 'completed' | 'pending' | 'failed' | 'success';
+  category?: string;
+  time?: string;
+  createdAt?: {
+    _seconds: number;
+    _nanoseconds: number;
+  };
+  transactionReference?: string;
 }
 
 export default function WalletScreen() {
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const { balance, formattedBalance, transactions: walletTransactions, isLoading, refreshWallet } = useWallet();
+  const { balance, formattedBalance } = useWallet();
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [totalTransactionsCount, setTotalTransactionsCount] = useState(0);
+  const [apiBalance, setApiBalance] = useState<number>(0);
+
+  // Fetch transactions from API
+  const fetchTransactions = async () => {
+    try {
+      const response = await walletApi.getTransactions({ limit: 5 });
+      
+      // Transform API transactions to match component format
+      const transformedTransactions = response.transactions.map((txn: any) => ({
+        id: txn.transactionReference || txn.id || `txn-${Date.now()}`,
+        type: txn.transactionType as 'credit' | 'debit',
+        amount: txn.amount,
+        date: txn.createdAt?._seconds 
+          ? new Date(txn.createdAt._seconds * 1000).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0],
+        time: txn.createdAt?._seconds
+          ? new Date(txn.createdAt._seconds * 1000).toLocaleTimeString('en-US', { 
+              hour: 'numeric', 
+              minute: '2-digit',
+              hour12: true 
+            })
+          : '',
+        description: txn.description,
+        status: txn.status === 'success' ? 'completed' as const : 
+                txn.status === 'pending' ? 'pending' as const : 
+                txn.status === 'failed' ? 'failed' as const : 'completed' as const,
+        category: txn.transactionType === 'credit' ? 'Deposit' : 'Withdrawal',
+      }));
+
+      setRecentTransactions(transformedTransactions);
+      setTotalTransactionsCount(response.totalTransactions);
+      setApiBalance(response.currentBalance);
+    } catch (error) {
+      console.error('Failed to fetch transactions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await refreshWallet();
+    await fetchTransactions();
     setRefreshing(false);
   };
   
@@ -152,8 +98,8 @@ export default function WalletScreen() {
     router.push('/withdrawal-history');
   };
 
-  // Use wallet transactions from context, fallback to dummy data
-  const displayTransactions = walletTransactions.length > 0 ? walletTransactions : dummyTransactions;
+  // Use API transactions
+  const displayTransactions = recentTransactions;
 
   const filteredTransactions = selectedFilter === 'all' 
     ? displayTransactions 
@@ -164,29 +110,41 @@ export default function WalletScreen() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalWithdrawn = displayTransactions
-    .filter(t => t.type === 'debit' && t.status === 'completed')
+    .filter(t => t.type === 'debit' && (t.status === 'completed' || t.status === 'success'))
     .reduce((sum, t) => sum + t.amount, 0);
 
-  // Use balance from context
-  const currentBalance = balance;
+  // Use balance from API or context
+  const currentBalance = apiBalance || balance;
 
   // Get credit transactions for "Add Money" section
   const addMoneyFromAPI = displayTransactions
     .filter(t => t.type === 'credit')
     .slice(0, 3)
     .map(t => ({
-      id: t.id,
+      id: t.id!,
       amount: t.amount,
       method: t.description.includes('UPI') ? 'UPI Payment' : 
               t.description.includes('Bank') ? 'Net Banking' : 
               t.description.includes('topup') || t.description.includes('Wallet') ? 'Wallet Topup' : 'Payment',
-      date: t.date,
-      status: t.status === 'completed' ? 'success' as const : 
+      date: t.date!,
+      status: t.status === 'completed' || t.status === 'success' ? 'success' as const : 
               t.status === 'pending' ? 'pending' as const : 'success' as const,
     }));
 
-  // Use API data if available, otherwise fallback to dummy data
-  const displayAddMoney = addMoneyFromAPI.length > 0 ? addMoneyFromAPI : addMoneyTransactions;
+  // Use API data
+  const displayAddMoney = addMoneyFromAPI;
+
+  if (loading) {
+    return (
+      <ScreenWrapper style={styles.container}>
+        <Header title="My Wallet" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading wallet data...</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper style={styles.container}>
@@ -319,9 +277,24 @@ export default function WalletScreen() {
 
           {/* Transaction List */}
           <View style={styles.transactionList}>
-            {filteredTransactions.slice(0, 5).map((item) => (
-              <TransactionListItem key={item.id} {...item} />
-            ))}
+            {filteredTransactions.length > 0 ? (
+              filteredTransactions.slice(0, 5).map((item) => (
+                <TransactionListItem 
+                  key={item.id || `txn-${Math.random()}`}
+                  type={item.type || 'credit'}
+                  amount={item.amount}
+                  date={item.date || ''}
+                  description={item.description}
+                  status={item.status === 'success' ? 'completed' : item.status || 'completed'}
+                  category={item.category}
+                  time={item.time}
+                />
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>No transactions yet</Text>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -496,5 +469,25 @@ const styles = StyleSheet.create({
   },
   addMoneyList: {
     gap: Spacing.sm,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  loadingText: {
+    marginTop: Spacing.md,
+    fontSize: Typography.fontSize.base,
+    color: Colors.textSecondary,
+  },
+  emptyState: {
+    padding: Spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyStateText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.textSecondary,
   },
 });
