@@ -12,17 +12,29 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Article } from '../../types/news';
 import { getFullArticleContent } from '../../services/externalNewsApi';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
+import { AdMobBanner } from '../../components/ads';
+import { useInterstitialAd } from '../../hooks/useInterstitialAd';
 import { Colors } from '../../constants/theme';
+import { BannerAdSize } from 'react-native-google-mobile-ads';
+
+import { AdFrequency } from '../../config/adConfig';
+
+const ARTICLE_VIEW_COUNT_KEY = 'article_view_count';
+const ARTICLE_VIEW_THRESHOLD = AdFrequency.INTERSTITIAL_AFTER_ARTICLES;
 
 export default function ArticleDetailScreen() {
   const params = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
   const [fullContent, setFullContent] = useState<string>('');
   const [loadingContent, setLoadingContent] = useState(true);
+  
+  // Interstitial ad hook
+  const { showAd, isLoaded } = useInterstitialAd();
 
   // Safely extract parameters with fallbacks
   const article: Article = {
@@ -37,7 +49,7 @@ export default function ArticleDetailScreen() {
     category: 'General',
   };
 
-  // Try to fetch full article content when component mounts
+  // Try to fetch full article content and manage interstitial ads
   useEffect(() => {
     const fetchFullContent = async () => {
       const description = article.description || 'No description available for this article.';
@@ -64,7 +76,30 @@ export default function ArticleDetailScreen() {
     };
 
     fetchFullContent();
-  }, [article.id, article.description]);
+    
+    // Handle interstitial ad display after viewing articles
+    const handleArticleView = async () => {
+      try {
+        const countStr = await AsyncStorage.getItem(ARTICLE_VIEW_COUNT_KEY);
+        const count = countStr ? parseInt(countStr, 10) : 0;
+        const newCount = count + 1;
+        
+        await AsyncStorage.setItem(ARTICLE_VIEW_COUNT_KEY, newCount.toString());
+        
+        // Show interstitial ad based on configured frequency
+        if (newCount % ARTICLE_VIEW_THRESHOLD === 0 && isLoaded) {
+          console.log(`Showing interstitial ad after ${newCount} articles`);
+          setTimeout(() => {
+            showAd();
+          }, AdFrequency.INTERSTITIAL_DELAY_SECONDS * 1000);
+        }
+      } catch (error) {
+        console.error('Error tracking article views:', error);
+      }
+    };
+    
+    handleArticleView();
+  }, [article.id, article.description, isLoaded, showAd]);
 
   // Don't render if critical data is missing
   if (!article.id || !article.title) {
@@ -213,6 +248,9 @@ export default function ArticleDetailScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+
+          {/* Banner Ad */}
+          <AdMobBanner size={BannerAdSize.MEDIUM_RECTANGLE} />
 
           {/* Source Information */}
           <View style={styles.sourceContainer}>

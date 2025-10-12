@@ -6,8 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button, ScreenWrapper } from '../../../components/common';
 import { EarningsSummary, OverviewCard } from '../../../components/dashboard';
 import { DashboardNotifications, QuickActions, RecentTransactions } from '../../../components/dashboard';
-import { AdPlaceholder } from '../../../components/ads';
+import { AdMobBanner } from '../../../components/ads';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
+import { BannerAdSize } from 'react-native-google-mobile-ads';
 import { useAuth } from '../../../contexts/AuthContext';
 import { referralAPI, investmentAPI, mapReferralDataToSubscriptions, updateUserWithReferralData } from '../../../services/api';
 import { showToast } from '../../../utils/toast';
@@ -210,8 +211,8 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Banner Ad Placeholder - Replacing News Highlight */}
-        <AdPlaceholder onAdPress={() => console.log('Ad clicked')} />
+        {/* Banner Ad */}
+        <AdMobBanner size={BannerAdSize.LARGE_BANNER} />
 
         {/* Enhanced Earnings Summary */}
         <EarningsSummary today={50} week={350} month={1500} />

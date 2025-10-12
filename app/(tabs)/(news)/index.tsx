@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { FlatList, StyleSheet, View, ActivityIndicator, Text, RefreshControl } from 'react-native';
 import { Header, ScreenWrapper, NewsListSkeleton } from '../../../components/common';
 import { CategoryFilter, NewsArticleCard } from '../../../components/news';
+import { AdMobBanner } from '../../../components/ads';
 import { router } from 'expo-router';
 import { getTopHeadlines, getArticlesByLanguage } from '../../../services/externalNewsApi';
 import { Article } from '../../../types/news';
 import { Colors } from '../../../constants/theme';
+import { BannerAdSize } from 'react-native-google-mobile-ads';
 
 // Updated categories to match both app categories and API categories
 const categories = [
@@ -118,31 +120,37 @@ export default function NewsScreen() {
           style={styles.flatList}
           data={articles}
           renderItem={({ item, index }) => (
-            <NewsArticleCard
-              title={item.title}
-              thumbnail={item.thumbnail}
-              category={item.category}
-              description={item.description}
-              author={item.author}
-              timeAgo={item.timeAgo}
-              onPress={() => {
-                console.log('Opening article:', item.title);
-                // Navigate to article detail page
-                router.push({
-                  pathname: '/article/[id]',
-                  params: {
-                    id: item.id,
-                    title: item.title,
-                    description: item.description || '',
-                    author: item.author || '',
-                    image: item.thumbnail || '',
-                    timeAgo: item.timeAgo || '',
-                    url: item.url || '',
-                    source: item.source || '',
-                  },
-                });
-              }}
-            />
+            <>
+              <NewsArticleCard
+                title={item.title}
+                thumbnail={item.thumbnail}
+                category={item.category}
+                description={item.description}
+                author={item.author}
+                timeAgo={item.timeAgo}
+                onPress={() => {
+                  console.log('Opening article:', item.title);
+                  // Navigate to article detail page
+                  router.push({
+                    pathname: '/article/[id]',
+                    params: {
+                      id: item.id,
+                      title: item.title,
+                      description: item.description || '',
+                      author: item.author || '',
+                      image: item.thumbnail || '',
+                      timeAgo: item.timeAgo || '',
+                      url: item.url || '',
+                      source: item.source || '',
+                    },
+                  });
+                }}
+              />
+              {/* Show banner ad after every 5 articles */}
+              {(index + 1) % 5 === 0 && (
+                <AdMobBanner size={BannerAdSize.MEDIUM_RECTANGLE} />
+              )}
+            </>
           )}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
