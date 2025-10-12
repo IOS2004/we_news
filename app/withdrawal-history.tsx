@@ -10,6 +10,7 @@ import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants
 const mockWithdrawalHistory = [
   {
     id: '1',
+    
     amount: 500,
     date: '2024-01-20',
     status: 'completed' as const,
