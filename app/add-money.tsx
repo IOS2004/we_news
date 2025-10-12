@@ -123,49 +123,59 @@ export default function AddMoneyScreen() {
       console.log('Final Amount:', amounts.finalAmount);
       console.log('Payment Session ID:', payment_session_id);
 
-      // Open Cashfree payment gateway
-      await processCashfreePaymentSimple(
-        transactionId,
-        payment_session_id,
-        {
-          onSuccess: async (data) => {
-            console.log('Payment successful:', data);
-            setIsProcessing(false);
-            
-            showToast.success({
-              title: 'Payment Successful!',
-              message: `₹${amounts.creditAmount} has been added to your wallet.`
-            });
+      // Open Cashfree payment gateway with proper error handling
+      try {
+        await processCashfreePaymentSimple(
+          transactionId,
+          payment_session_id,
+          {
+            onSuccess: async (data) => {
+              console.log('Payment successful:', data);
+              setIsProcessing(false);
+              
+              showToast.success({
+                title: 'Payment Successful!',
+                message: `₹${amounts.creditAmount} has been added to your wallet.`
+              });
 
-            // Reset form
-            setAmount('');
-            setSelectedPaymentMethod('cashfree');
+              // Reset form
+              setAmount('');
+              setSelectedPaymentMethod('cashfree');
 
-            // Navigate back after short delay
-            setTimeout(() => {
-              router.back();
-            }, 1500);
-          },
-          onFailure: (error) => {
-            console.error('Payment failed:', error);
-            setIsProcessing(false);
-            
-            showToast.error({
-              title: 'Payment Failed',
-              message: error.error?.message || 'Payment was not completed. Please try again.'
-            });
-          },
-          onError: (error) => {
-            console.error('Payment error:', error);
-            setIsProcessing(false);
-            
-            showToast.error({
-              title: 'Payment Error',
-              message: 'An error occurred during payment. Please try again.'
-            });
-          },
-        }
-      );
+              // Navigate back after short delay
+              setTimeout(() => {
+                router.back();
+              }, 1500);
+            },
+            onFailure: (error) => {
+              console.error('Payment failed:', error);
+              setIsProcessing(false);
+              
+              showToast.error({
+                title: 'Payment Failed',
+                message: error.error?.message || 'Payment was not completed. Please try again.'
+              });
+            },
+            onError: (error) => {
+              console.error('Payment error:', error);
+              setIsProcessing(false);
+              
+              showToast.error({
+                title: 'Payment Error',
+                message: 'An error occurred during payment. Please try again.'
+              });
+            },
+          }
+        );
+      } catch (sdkError: any) {
+        console.error('Cashfree SDK initialization error:', sdkError);
+        setIsProcessing(false);
+        
+        showToast.error({
+          title: 'SDK Error',
+          message: sdkError.message || 'Failed to initialize payment gateway. Please try again.'
+        });
+      }
     } catch (error: any) {
       console.error('Wallet topup error:', error);
       setIsProcessing(false);
