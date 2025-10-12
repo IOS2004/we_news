@@ -3,15 +3,18 @@
 ## ✅ What's Been Integrated
 
 ### Banner Ads
+
 - **News Feed**: After every 5 articles (300x250)
 - **Article Detail**: Below article content (300x250)
 - **Dashboard**: Top banner (320x100)
 
 ### Interstitial Ads
+
 - **Article Reading**: After every 3 articles viewed
 - Smart timing with 2-second delay for better UX
 
 ### Components & Hooks
+
 - `<AdMobBanner />` - Banner ad component
 - `useInterstitialAd()` - Interstitial ad hook
 - `useRewardedAd()` - Rewarded ad hook (ready to use)
@@ -20,6 +23,7 @@
 ## 🧪 Current Status: TEST MODE
 
 The app is currently using **Google's test ad unit IDs**. This means:
+
 - ✅ Ads will display with "Test Ad" watermark
 - ✅ Safe to click (won't affect your account)
 - ✅ No real revenue generated
@@ -28,6 +32,7 @@ The app is currently using **Google's test ad unit IDs**. This means:
 ## 🚀 Going to Production
 
 ### 1. Create AdMob Account & Ad Units
+
 ```
 1. Visit: https://admob.google.com/
 2. Sign in with Google account
@@ -40,7 +45,9 @@ The app is currently using **Google's test ad unit IDs**. This means:
 ```
 
 ### 2. Update Configuration
+
 Edit `config/adConfig.ts`:
+
 ```typescript
 // Change this line:
 export const USE_TEST_ADS = false; // Set to false for production
@@ -48,14 +55,15 @@ export const USE_TEST_ADS = false; // Set to false for production
 // Update these with your real ad unit IDs:
 const PRODUCTION_AD_UNITS = {
   banner: {
-    android: 'ca-app-pub-YOUR-ID-HERE/BANNER-ID',
-    ios: 'ca-app-pub-YOUR-ID-HERE/BANNER-ID',
+    android: "ca-app-pub-YOUR-ID-HERE/BANNER-ID",
+    ios: "ca-app-pub-YOUR-ID-HERE/BANNER-ID",
   },
   // ... etc
 };
 ```
 
 Edit `app.json`:
+
 ```json
 {
   "plugins": [
@@ -71,11 +79,12 @@ Edit `app.json`:
 ```
 
 ### 3. Rebuild App
+
 ```bash
 # For Android
 npm run android
 
-# For iOS  
+# For iOS
 npm run ios
 
 # For Production Build
@@ -86,12 +95,14 @@ eas build --platform ios
 ## 📊 Expected Revenue (Estimates)
 
 Based on typical news app metrics:
+
 - **Banner eCPM**: $0.50 - $2.00
 - **Interstitial eCPM**: $3.00 - $8.00
 - **1000 daily users**: $5 - $30/day
 - **10,000 daily users**: $50 - $300/day
 
 Actual revenue depends on:
+
 - User location (US/EU users = higher revenue)
 - Content category
 - User engagement
@@ -100,17 +111,21 @@ Actual revenue depends on:
 ## 🎛️ Customization
 
 ### Adjust Ad Frequency
+
 Edit `config/adConfig.ts`:
+
 ```typescript
 export const AdFrequency = {
-  BANNER_AFTER_ARTICLES: 5,      // Change to 3-7
+  BANNER_AFTER_ARTICLES: 5, // Change to 3-7
   INTERSTITIAL_AFTER_ARTICLES: 3, // Change to 2-5
-  INTERSTITIAL_DELAY_SECONDS: 2,  // Change to 1-3
+  INTERSTITIAL_DELAY_SECONDS: 2, // Change to 1-3
 };
 ```
 
 ### Change Banner Sizes
+
 Available sizes:
+
 - `BANNER`: 320x50 (standard)
 - `LARGE_BANNER`: 320x100 (larger)
 - `MEDIUM_RECTANGLE`: 300x250 (most revenue)
@@ -120,13 +135,16 @@ Available sizes:
 ## 🐛 Troubleshooting
 
 ### Ads Not Showing
+
 1. Check internet connection
 2. Wait 1-2 hours after creating new ad units
 3. Check AdMob console for errors
 4. Look for errors in app logs
 
 ### Production Build
+
 When creating production builds:
+
 ```bash
 # Android
 npx expo prebuild --platform android
