@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   # Trigger on push to main branch
   push:
-    branches: [main]
+    branches: [main,rahul-front]
 
   # Allow manual trigger
   workflow_dispatch:
