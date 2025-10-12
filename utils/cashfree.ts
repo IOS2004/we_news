@@ -88,27 +88,32 @@ export const processCashfreePaymentSimple = async (
       console.log('Callbacks set successfully');
 
       // Prepare payment session object for Cashfree SDK
-      const session = {
+      const environment = getCashfreeEnvironment();
+      
+      // Session object for doPayment method (requires version)
+      const paymentSession = {
         payment_session_id: paymentSessionId,
         orderID: orderId,
-        environment: getCashfreeEnvironment(),
+        environment: environment,
+        version: '1',
       };
 
       console.log('📱 Attempting to open Cashfree payment gateway...');
-      console.log('Session object:', JSON.stringify(session, null, 2));
+      console.log('Order ID:', orderId);
+      console.log('Environment:', environment);
 
-      // Check if CFPaymentGatewayService exists and has doWebPayment
+      // Check if CFPaymentGatewayService exists
       if (!CFPaymentGatewayService) {
         throw new Error('CFPaymentGatewayService is not available');
       }
 
-      if (typeof CFPaymentGatewayService.doWebPayment !== 'function') {
-        throw new Error('doWebPayment method is not available on CFPaymentGatewayService');
+      if (typeof CFPaymentGatewayService.doPayment !== 'function') {
+        throw new Error('doPayment method is not available on CFPaymentGatewayService');
       }
 
-      // Open Cashfree payment gateway
-      // Note: This is NOT async in the SDK - it returns void
-      CFPaymentGatewayService.doWebPayment(session);
+      // Open Cashfree payment gateway using doPayment
+      console.log('Calling doPayment...');
+      CFPaymentGatewayService.doPayment(paymentSession);
       
       console.log('🚀 Cashfree payment gateway opened successfully');
       
