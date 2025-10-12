@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ScrollView, Text, View, TouchableOpacity, Alert, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 
 import ScreenWrapper from '../../../components/common/ScreenWrapper';
 import Header from '../../../components/common/Header';
@@ -57,62 +58,78 @@ export default function PlansScreen() {
   };
 
   const handlePurchasePlan = async (plan: GrowthPlan) => {
-    setPlanToPurchase(plan);
-    setShowPaymentModal(true);
+    const currentPlan = plan.plans[selectedFrequency];
+    const planAmount = currentPlan.initialPayment;
+
+    Alert.alert(
+      'Confirm Purchase',
+      `Purchase ${plan.name} (${selectedFrequency}) for ₹${planAmount.toLocaleString()}?\n\nAmount will be deducted from your wallet.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Purchase', 
+          onPress: async () => {
+            try {
+              showToast.info({
+                title: 'Processing Purchase',
+                message: 'Please wait while we process your purchase...'
+              });
+
+              const response = await investmentAPI.purchaseInvestmentPlan(plan.id);
+              
+              if (response.success) {
+                const responseData = response.data as any;
+                const walletData = responseData?.wallet;
+                const currentBalance = walletData?.currentBalance;
+                
+                showToast.success({
+                  title: 'Plan Purchased!',
+                  message: `${plan.name} activated successfully!\n\nAmount Deducted: ₹${planAmount.toLocaleString()}\nNew Balance: ₹${currentBalance ? currentBalance.toLocaleString() : 'N/A'}`
+                });
+                
+                // Optionally navigate to plan details
+                // router.push('/plan-details?planId=' + plan.id);
+              } else {
+                throw new Error(response.message || 'Failed to purchase plan');
+              }
+            } catch (error: any) {
+              console.error('Error purchasing plan:', error);
+              
+              // Check for specific error types
+              if (error.response?.data?.message?.includes('already have an active investment')) {
+                showToast.error({
+                  title: 'Plan Already Active',
+                  message: 'You already have an active investment plan.'
+                });
+              } else if (error.response?.data?.message?.includes('Insufficient wallet balance')) {
+                const shortfall = error.response?.data?.data?.shortfall;
+                showToast.error({
+                  title: 'Insufficient Balance',
+                  message: `Please add ₹${shortfall?.toLocaleString() || planAmount.toLocaleString()} to your wallet to purchase this plan.`
+                });
+                // Optionally navigate to add money screen
+                setTimeout(() => router.push('/add-money'), 1500);
+              } else {
+                showToast.error({
+                  title: 'Purchase Failed',
+                  message: error.response?.data?.message || 'Unable to complete purchase. Please try again.'
+                });
+              }
+            }
+          }
+        }
+      ]
+    );
   };
 
   const handlePaymentSuccess = async () => {
-    if (!planToPurchase) return;
-
-    try {
-      showToast.info({
-        title: 'Activating Plan',
-        message: 'Please wait while we activate your plan...'
-      });
-
-      const response = await investmentAPI.purchaseInvestmentPlan(planToPurchase.id);
-      
-      if (response.success) {
-        setShowPaymentModal(false);
-        setPlanToPurchase(null);
-        
-        showToast.success({
-          title: 'Plan Activated!',
-          message: `${planToPurchase.name} has been successfully activated.`
-        });
-        
-        // Optionally navigate to plan details or dashboard
-        // router.push('/plan-details?planId=' + planToPurchase.id);
-      } else {
-        throw new Error(response.message || 'Failed to activate plan');
-      }
-    } catch (error: any) {
-      console.error('Error activating plan:', error);
-      
-      // Check if user already has an active plan
-      if (error.response?.data?.message?.includes('already have an active investment')) {
-        showToast.error({
-          title: 'Plan Already Active',
-          message: 'You already have an active investment plan. Please complete your current plan before purchasing a new one.'
-        });
-      } else {
-        showToast.error({
-          title: 'Activation Failed',
-          message: error.response?.data?.message || 'Unable to activate plan. Please try again or contact support.'
-        });
-      }
-      
-      setShowPaymentModal(false);
-      setPlanToPurchase(null);
-    }
+    // This function is no longer needed with direct wallet payment
+    // Kept for compatibility
   };
 
   const handlePaymentFailure = (errorMessage: string) => {
-    showToast.error({
-      title: 'Payment Failed',
-      message: errorMessage
-    });
-    setShowPaymentModal(false);
+    // This function is no longer needed with direct wallet payment
+    // Kept for compatibility
     setPlanToPurchase(null);
   };
 

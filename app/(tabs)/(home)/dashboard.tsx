@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, Text, TouchableOpacity, StatusBar, Dimensions, ActivityIndicator } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, TouchableOpacity, StatusBar, Dimensions, ActivityIndicator, RefreshControl } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import { AdPlaceholder } from '../../../components/ads';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
 import { useAuth } from '../../../contexts/AuthContext';
 import { referralAPI, investmentAPI, mapReferralDataToSubscriptions, updateUserWithReferralData } from '../../../services/api';
+import walletAPI from '../../../services/walletApi';
 import { showToast } from '../../../utils/toast';
 
 const notifications = [
@@ -26,7 +27,9 @@ export default function HomeScreen() {
   
   // Real data state
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Load real referral data
@@ -34,51 +37,113 @@ export default function HomeScreen() {
     loadDashboardData();
   }, []);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (isRefreshing = false) => {
     try {
-      setLoading(true);
+      // Only show loading spinner on initial load, not on refresh
+      if (!isRefreshing) {
+        setLoading(true);
+      }
       setError(null);
 
-      // Fetch referral info and earnings in parallel
-      const [referralResponse, earningsResponse] = await Promise.all([
-        referralAPI.getReferralInfo(),
-        referralAPI.getEarnings()
-      ]);
+      // Fetch wallet balance
+      try {
+        const walletData = await walletAPI.getBalance();
+        if (walletData && walletData.balance !== undefined) {
+          setWalletBalance(walletData.balance);
+          console.log('Wallet balance loaded:', walletData.balance);
+        }
+      } catch (walletError) {
+        console.log('Wallet balance not available:', walletError);
+        setWalletBalance(0);
+      }
 
-      // Try to get user investment data
+      // Try to get investment data first (most important)
       let investmentResponse = null;
       try {
         investmentResponse = await investmentAPI.getMyInvestment();
+        console.log('Investment data loaded:', investmentResponse);
       } catch (investmentError) {
-        // User might not have an investment yet, which is fine
-        console.log('No active investment found');
+        console.log('No active investment found:', investmentError);
       }
 
-      if (referralResponse.success && earningsResponse.success) {
-        // Map backend data to frontend structure
+      // Try to fetch referral info and earnings (use defaults if they fail)
+      let referralResponse = null;
+      let earningsResponse = null;
+
+      try {
+        referralResponse = await referralAPI.getReferralInfo();
+      } catch (error) {
+        console.log('Referral info not available, using defaults');
+        // Provide default referral data
+        referralResponse = {
+          success: true,
+          data: {
+            userReferralCode: user?.referralCode || 'NO_CODE',
+            referralStats: {
+              directReferrals: 0,
+              totalReferrals: 0,
+              commissionEarnings: 0,
+              level: 1
+            },
+            directReferrals: []
+          }
+        };
+      }
+
+      try {
+        earningsResponse = await referralAPI.getEarnings();
+      } catch (error) {
+        console.log('Earnings not available, using defaults');
+        // Provide default earnings data
+        earningsResponse = {
+          success: true,
+          data: {
+            totalEarnings: 0,
+            investmentEarnings: 0,
+            referralEarnings: 0,
+            dailyEarnings: 0,
+            withdrawableBalance: 0
+          }
+        };
+      }
+
+      // If user has investment, show it
+      if (investmentResponse?.success && investmentResponse?.data?.investment) {
         const mappedSubscriptions = mapReferralDataToSubscriptions(
           referralResponse.data!,
           earningsResponse.data!,
-          investmentResponse?.data
+          investmentResponse.data
         );
-        
         setSubscriptions(mappedSubscriptions);
+        setError(null);
       } else {
-        throw new Error('Failed to load dashboard data');
+        // No active investment found
+        setSubscriptions([]);
+        setError(null);
       }
+      
     } catch (error: any) {
       console.error('Error loading dashboard data:', error);
       setError('Failed to load dashboard data');
-      // Use fallback mock data
-      setSubscriptions(getFallbackSubscriptions());
       
-      showToast.error({
-        title: 'Dashboard Error',
-        message: 'Unable to load real-time data. Showing cached information.'
-      });
+      if (!isRefreshing) {
+        showToast.error({
+          title: 'Dashboard Error',
+          message: 'Unable to load data. Please check your connection.'
+        });
+      }
     } finally {
-      setLoading(false);
+      if (!isRefreshing) {
+        setLoading(false);
+      }
     }
+  };
+
+  // Handle pull-to-refresh
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadDashboardData(true);
+    setRefreshing(false);
   };
 
   // Fallback mock data (same as before)
@@ -209,7 +274,18 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={styles.container} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+          />
+        }
+      >
         {/* Banner Ad Placeholder - Replacing News Highlight */}
         <AdPlaceholder onAdPress={() => console.log('Ad clicked')} />
 
@@ -220,7 +296,7 @@ export default function HomeScreen() {
         <View style={styles.walletBalanceCard}>
           <View style={styles.walletSection}>
             <Text style={styles.walletLabel}>Total Wallet Balance</Text>
-            <Text style={styles.walletAmount}>₹{subscriptions.reduce((sum, sub) => sum + sub.totalEarnings, 0).toLocaleString()}.00</Text>
+            <Text style={styles.walletAmount}>₹{walletBalance.toLocaleString()}.00</Text>
             <Text style={styles.activePlansText}>
               {subscriptions.length} active subscription{subscriptions.length !== 1 ? 's' : ''} • ₹{subscriptions.reduce((sum, sub) => sum + sub.dailyEarning, 0)}/day
             </Text>
@@ -257,7 +333,7 @@ export default function HomeScreen() {
               <Ionicons name="alert-circle" size={48} color={Colors.error} />
               <Text style={styles.errorTitle}>Unable to Load Data</Text>
               <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity style={styles.retryButton} onPress={loadDashboardData}>
+              <TouchableOpacity style={styles.retryButton} onPress={() => loadDashboardData(false)}>
                 <Text style={styles.retryButtonText}>Try Again</Text>
               </TouchableOpacity>
             </View>

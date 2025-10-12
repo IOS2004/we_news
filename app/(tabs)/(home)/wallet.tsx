@@ -165,8 +165,8 @@ export default function WalletScreen() {
               <Ionicons name="eye-outline" size={20} color={Colors.textSecondary} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.balanceAmount}>{formattedBalance || `₹${currentBalance.toLocaleString()}`}</Text>
-          <Text style={styles.balanceSubtext}>Last updated: Today, 9:30 AM</Text>
+          <Text style={styles.balanceAmount}>₹{currentBalance.toLocaleString()}</Text>
+          <Text style={styles.balanceSubtext}>Last updated: {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</Text>
         </View>
 
         {/* Quick Actions */}
