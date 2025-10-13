@@ -1,13 +1,24 @@
 import { Stack } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Toast from 'react-native-toast-message';
 import { DeveloperProvider } from '../contexts/DeveloperContext';
 import { AuthProvider } from '../contexts/AuthContext';
 import { AppModeProvider } from '../contexts/AppModeContext';
 import { WalletProvider } from '../contexts/WalletContext';
 import { toastConfig } from '../config/toastConfig';
+import { initializeCashfree } from '../utils/cashfree';
 
 export default function RootLayout() {
+  // Initialize CashFree SDK when app starts
+  useEffect(() => {
+    console.log('🚀 App starting - initializing CashFree SDK...');
+    try {
+      initializeCashfree();
+      console.log('✅ CashFree SDK initialization completed');
+    } catch (error) {
+      console.error('❌ Failed to initialize CashFree SDK:', error);
+    }
+  }, []);
   return (
     <AuthProvider>
       <WalletProvider>

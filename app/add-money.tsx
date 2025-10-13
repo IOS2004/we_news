@@ -138,6 +138,8 @@ export default function AddMoneyScreen() {
       console.log('  💵 Final Amount:', amounts.finalAmount);
       console.log('  🔑 Payment Session ID:', payment_session_id);
       console.log('  📋 Order ID:', order_id);
+      console.log('  🔍 Payment Session ID Length:', payment_session_id ? payment_session_id.length : 'undefined');
+      console.log('  🔍 Payment Session ID Type:', typeof payment_session_id);
 
       // Open Cashfree payment gateway
       await processCashfreePaymentSimple(
@@ -168,7 +170,7 @@ export default function AddMoneyScreen() {
             
             showToast.error({
               title: 'Payment Failed',
-              message: error.error?.message || 'Payment was not completed. Please try again.'
+              message: error.error?.message || error.error || 'Payment was not completed. Please try again.'
             });
           },
           onError: (error) => {
