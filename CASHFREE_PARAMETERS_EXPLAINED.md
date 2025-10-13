@@ -53,7 +53,7 @@ const cashfreeResponse = await axios.post(
 ### Step 3: Frontend Needs This Data
 The CashFree SDK **REQUIRES** these values to open the payment page:
 ```typescript
-CFPaymentGatewayService.doPayment({
+CFPaymentGatewayService.doWebPayment({
   orderId: transactionId,
   paymentSessionId: "session_abc123...",  // ❌ Was undefined!
   orderToken: "token_xyz789..."           // ❌ Was undefined!
@@ -151,7 +151,7 @@ processCashFreePayment(
    orderToken = "token_xyz789abc"
           ↓
 9. Frontend Opens CashFree SDK:
-   CFPaymentGatewayService.doPayment({
+   CFPaymentGatewayService.doWebPayment({
      orderId: "WALLET_1234567890_ABC",
      paymentSessionId: "session_abc123xyz",  ✅
      orderToken: "token_xyz789abc"           ✅
@@ -230,7 +230,7 @@ interface TopupResponse {
 
 ### ❌ Mistake 1: Passing undefined
 ```typescript
-CFPaymentGatewayService.doPayment({
+CFPaymentGatewayService.doWebPayment({
   orderId: transactionId,
   paymentSessionId: undefined,  // ❌ SDK will fail!
   orderToken: undefined         // ❌ SDK will fail!
@@ -239,7 +239,7 @@ CFPaymentGatewayService.doPayment({
 
 ### ❌ Mistake 2: Using transactionId as session ID
 ```typescript
-CFPaymentGatewayService.doPayment({
+CFPaymentGatewayService.doWebPayment({
   orderId: transactionId,
   paymentSessionId: transactionId,  // ❌ Wrong! Not the same thing
   orderToken: transactionId         // ❌ Wrong! Not the same thing
@@ -264,7 +264,7 @@ if (!paymentSessionId) {
   throw new Error('Payment session ID not received from backend');
 }
 
-CFPaymentGatewayService.doPayment({
+CFPaymentGatewayService.doWebPayment({
   orderId: transactionId,
   paymentSessionId: paymentSessionId,  // ✅ Correct
   orderToken: orderToken               // ✅ Correct

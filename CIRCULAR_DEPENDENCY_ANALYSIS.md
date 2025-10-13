@@ -182,7 +182,7 @@ export const openCashFreePayment = (
   });
 
   // ✅ Opens payment UI (single call)
-  CFPaymentGatewayService.doPayment(paymentObject);
+  CFPaymentGatewayService.doWebPayment(paymentObject);
 };
 ```
 

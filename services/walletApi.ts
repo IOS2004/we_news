@@ -84,10 +84,22 @@ const walletApi = {
    */
   async topup(request: TopupRequest): Promise<TopupResponse> {
     try {
+      console.log('🚀 [Wallet API] Sending topup request:', JSON.stringify(request, null, 2));
+      
       const response = await api.post<TopupResponse>('/wallet/topup', request);
+      
+      console.log('✅ [Wallet API] Topup response received:');
+      console.log('📦 Full Response:', JSON.stringify(response.data, null, 2));
+      console.log('💰 Transaction ID:', response.data.data?.transactionId);
+      console.log('💵 Amounts:', response.data.data?.amounts);
+      console.log('🏦 Payment Gateway:', response.data.data?.paymentResponse?.paymentGateway);
+      console.log('🔑 Payment Session ID:', response.data.data?.paymentResponse?.paymentData?.payment_session_id);
+      console.log('📋 Order ID:', response.data.data?.paymentResponse?.paymentData?.order_id);
+      console.log('🌐 Payment URL:', response.data.data?.paymentResponse?.paymentUrl);
+      
       return response.data;
     } catch (error: any) {
-      console.error('Wallet topup error:', error.response?.data || error.message);
+      console.error('❌ [Wallet API] Topup error:', error.response?.data || error.message);
       throw error;
     }
   },

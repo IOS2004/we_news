@@ -92,11 +92,25 @@ export default function AddMoneyScreen() {
         paymentMethod: 'cashfree',
       };
 
-      console.log('Initiating wallet topup:', topupRequest);
+      console.log('💳 [Add Money] Initiating wallet topup:', topupRequest);
 
       const response = await walletApi.topup(topupRequest);
 
-      console.log('Topup API response:', response);
+      console.log('✅ [Add Money] Topup API response received');
+      console.log('================== FULL API RESPONSE ==================');
+      console.log(JSON.stringify(response, null, 2));
+      console.log('=======================================================');
+      
+      console.log('📊 [Add Money] Response breakdown:');
+      console.log('  ✓ Success:', response.success);
+      console.log('  ✓ Message:', response.message);
+      console.log('  ✓ Transaction ID:', response.data?.transactionId);
+      console.log('  ✓ Original Amount:', response.data?.amounts?.originalAmount);
+      console.log('  ✓ Final Amount:', response.data?.amounts?.finalAmount);
+      console.log('  ✓ Credit Amount:', response.data?.amounts?.creditAmount);
+      console.log('  ✓ Payment Gateway:', response.data?.paymentResponse?.paymentGateway);
+      console.log('  ✓ Payment Session ID:', response.data?.paymentResponse?.paymentData?.payment_session_id);
+      console.log('  ✓ Order ID:', response.data?.paymentResponse?.paymentData?.order_id);
 
       if (!response.success) {
         throw new Error(response.message || 'Failed to initiate payment');
@@ -106,22 +120,24 @@ export default function AddMoneyScreen() {
       const { transactionId, amounts, paymentResponse, userDetails } = response.data;
       
       // Log the full paymentResponse to debug
-      console.log('Payment Response:', JSON.stringify(paymentResponse, null, 2));
-      console.log('Payment Data:', JSON.stringify(paymentResponse.paymentData, null, 2));
+      console.log('🔍 [Add Money] Payment Response Details:', JSON.stringify(paymentResponse, null, 2));
+      console.log('🔍 [Add Money] Payment Data:', JSON.stringify(paymentResponse.paymentData, null, 2));
       
       const { payment_session_id, order_id, customer_details } = paymentResponse.paymentData;
 
       // Validate payment session ID
       if (!payment_session_id) {
-        console.error('Payment session ID is missing!');
-        console.error('Available keys:', Object.keys(paymentResponse.paymentData));
+        console.error('❌ [Add Money] Payment session ID is missing!');
+        console.error('📋 [Add Money] Available keys in paymentData:', Object.keys(paymentResponse.paymentData));
+        console.error('📋 [Add Money] Full paymentData:', JSON.stringify(paymentResponse.paymentData, null, 2));
         throw new Error('Payment session ID not received from server');
       }
 
-      console.log('Opening Cashfree payment gateway...');
-      console.log('Transaction ID:', transactionId);
-      console.log('Final Amount:', amounts.finalAmount);
-      console.log('Payment Session ID:', payment_session_id);
+      console.log('🚀 [Add Money] Opening Cashfree payment gateway...');
+      console.log('  📝 Transaction ID:', transactionId);
+      console.log('  💵 Final Amount:', amounts.finalAmount);
+      console.log('  🔑 Payment Session ID:', payment_session_id);
+      console.log('  📋 Order ID:', order_id);
 
       // Open Cashfree payment gateway
       await processCashfreePaymentSimple(
@@ -129,7 +145,7 @@ export default function AddMoneyScreen() {
         payment_session_id,
         {
           onSuccess: async (data) => {
-            console.log('Payment successful:', data);
+            console.log('✅ [Add Money] Payment successful:', data);
             setIsProcessing(false);
             
             showToast.success({
@@ -147,7 +163,7 @@ export default function AddMoneyScreen() {
             }, 1500);
           },
           onFailure: (error) => {
-            console.error('Payment failed:', error);
+            console.error('❌ [Add Money] Payment failed:', error);
             setIsProcessing(false);
             
             showToast.error({
@@ -156,7 +172,7 @@ export default function AddMoneyScreen() {
             });
           },
           onError: (error) => {
-            console.error('Payment error:', error);
+            console.error('⚠️ [Add Money] Payment error:', error);
             setIsProcessing(false);
             
             showToast.error({
@@ -167,7 +183,12 @@ export default function AddMoneyScreen() {
         }
       );
     } catch (error: any) {
-      console.error('Wallet topup error:', error);
+      console.error('❌ [Add Money] Wallet topup error:', error);
+      console.error('📋 [Add Money] Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       setIsProcessing(false);
       
       showToast.error({
