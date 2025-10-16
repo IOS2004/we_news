@@ -16,7 +16,8 @@ export interface CashfreePaymentCallbacks {
 export const initializeCashfree = () => {
   try {
     // Set the environment (SANDBOX or PROD)
-    const environment = __DEV__ ? 'SANDBOX' : 'PROD';
+    // For production: use 'PROD', for testing: use 'SANDBOX'
+    const environment = 'PROD'; // Changed to PROD to match backend
     
     CFPaymentGatewayService.setCallback({
       onVerify: (orderID: string) => {
@@ -53,7 +54,7 @@ export const processCashfreePaymentSimple = async (
     console.log('Initiating Cashfree payment (simple) with:', {
       orderId,
       paymentSessionId: paymentSessionId.substring(0, 20) + '...',
-      environment: __DEV__ ? 'SANDBOX' : 'PROD',
+      environment: 'PROD', // Always use PROD to match backend
     });
 
     // Set up Cashfree callbacks
@@ -82,19 +83,20 @@ export const processCashfreePaymentSimple = async (
     });
 
     // Prepare payment session object for Cashfree SDK
-    // Using the same structure as your working project
+    // The SDK expects the session object with payment_session_id and orderID (camelCase)
     const session = {
       payment_session_id: paymentSessionId,
       orderID: orderId,
-      environment: __DEV__ ? 'SANDBOX' : 'PROD',
+      environment: 'PROD', // Must match backend environment
     };
 
     console.log('📱 Opening Cashfree payment gateway with session:', session);
 
     // Open Cashfree payment gateway using doWebPayment
+    // Note: doWebPayment is synchronous, it just triggers the payment UI
     try {
-      const result = CFPaymentGatewayService.doWebPayment(session);
-      console.log('🚀 Cashfree doWebPayment called, result:', result);
+      CFPaymentGatewayService.doWebPayment(session);
+      console.log('🚀 Cashfree doWebPayment triggered successfully');
     } catch (sdkError) {
       console.error('💥 Cashfree SDK error:', sdkError);
       throw sdkError;
