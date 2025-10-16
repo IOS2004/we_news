@@ -15,6 +15,8 @@ export default function SignUpScreen() {
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,6 +26,8 @@ export default function SignUpScreen() {
   const lastNameRef = useRef<TextInput>(null);
   const usernameRef = useRef<TextInput>(null);
   const emailRef = useRef<TextInput>(null);
+  const dateOfBirthRef = useRef<TextInput>(null);
+  const phoneNumberRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const referralRef = useRef<TextInput>(null);
 
@@ -78,10 +82,19 @@ export default function SignUpScreen() {
   };
 
   const handleSignUp = async () => {
-    if (!firstName.trim() || !lastName.trim() || !username.trim() || !email.trim() || !password.trim()) {
+    if (!firstName.trim() || !lastName.trim() || !username.trim() || !email.trim() || 
+        !dateOfBirth.trim() || !phoneNumber.trim() || !password.trim()) {
       showToast.warning({
         title: 'Missing Information',
         message: 'Please fill in all required fields',
+      });
+      return;
+    }
+
+    if (!/^[0-9]{10}$/.test(phoneNumber.trim())) {
+      showToast.warning({
+        title: 'Invalid Phone Number',
+        message: 'Phone number must be 10 digits',
       });
       return;
     }
@@ -99,6 +112,8 @@ export default function SignUpScreen() {
       lastName: lastName.trim(),
       username: username.trim(),
       email: email.trim(),
+      dateOfBirth: dateOfBirth.trim(),
+      phoneNumber: phoneNumber.trim(),
       password,
       ...(referralCode.trim() && { referralCode: referralCode.trim() })
     };
@@ -202,8 +217,33 @@ export default function SignUpScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 returnKeyType="next"
-                onSubmitEditing={() => passwordRef.current?.focus()}
+                onSubmitEditing={() => dateOfBirthRef.current?.focus()}
                 leftIcon={<Ionicons name="mail-outline" size={20} color={Colors.textSecondary} />}
+              />
+
+              <InputField 
+                ref={dateOfBirthRef}
+                label="" 
+                placeholder="Date of Birth (YYYY-MM-DD)"
+                value={dateOfBirth}
+                onChangeText={setDateOfBirth}
+                keyboardType="default"
+                returnKeyType="next"
+                onSubmitEditing={() => phoneNumberRef.current?.focus()}
+                leftIcon={<Ionicons name="calendar-outline" size={20} color={Colors.textSecondary} />}
+              />
+
+              <InputField 
+                ref={phoneNumberRef}
+                label="" 
+                placeholder="Phone Number (10 digits)"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType="phone-pad"
+                maxLength={10}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                leftIcon={<Ionicons name="call-outline" size={20} color={Colors.textSecondary} />}
               />
 
               <InputField 

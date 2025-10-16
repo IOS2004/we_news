@@ -122,6 +122,8 @@ export interface SignUpData {
   password: string;
   firstName: string;
   lastName: string;
+  dateOfBirth: string;
+  phoneNumber: string;
   referralCode?: string;
   preferences?: {
     categories?: string[];
@@ -796,13 +798,13 @@ export const updateUserWithReferralData = (
 export interface WalletTransaction {
   id: string;
   walletId: string;
-  transactionType: 'credit' | 'debit';
+  transactionType: "credit" | "debit";
   amount: number;
   description: string;
   gstAmount?: number;
   discountAmount?: number;
   originalAmount?: number;
-  status: 'pending' | 'completed' | 'failed';
+  status: "pending" | "completed" | "failed";
   createdAt: {
     _seconds: number;
     _nanoseconds: number;
@@ -830,7 +832,7 @@ export interface WalletResponse {
 export const walletAPI = {
   // Fetch wallet details
   getWalletDetails: async (): Promise<WalletResponse> => {
-    const response: AxiosResponse<WalletResponse> = await api.get('/wallet');
+    const response: AxiosResponse<WalletResponse> = await api.get("/wallet");
     return response.data;
   },
 };
