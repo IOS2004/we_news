@@ -76,10 +76,18 @@ const mapTheNewsApiArticleToAppArticle = (apiArticle: any): Article => {
   // Combine description and snippet for more comprehensive content
   let fullDescription = "";
 
+  // TheNewsAPI returns: description (full text if available) and snippet (truncated preview)
+  // Try to use description first (more complete), then snippet, then fallback
   if (apiArticle.description && apiArticle.snippet) {
-    // If both exist and are different, combine them
+    // If both exist, use the longer one or combine if they're different
     if (apiArticle.description !== apiArticle.snippet) {
-      fullDescription = `${apiArticle.description}\n\n${apiArticle.snippet}`;
+      // If description is longer, it's likely the full content
+      if (apiArticle.description.length > apiArticle.snippet.length) {
+        fullDescription = apiArticle.description;
+      } else {
+        // Otherwise combine both for more context
+        fullDescription = `${apiArticle.description}\n\n${apiArticle.snippet}`;
+      }
     } else {
       fullDescription = apiArticle.description;
     }
@@ -89,6 +97,16 @@ const mapTheNewsApiArticleToAppArticle = (apiArticle: any): Article => {
       apiArticle.description ||
       apiArticle.snippet ||
       "विवरण उपलब्ध नहीं / No description available";
+  }
+
+  // Remove trailing ellipsis and add note if content appears truncated
+  const isTruncated =
+    fullDescription.endsWith("...") || fullDescription.endsWith("…");
+  if (isTruncated) {
+    // Remove the ellipsis
+    fullDescription = fullDescription.replace(/\.{3}$|…$/, "").trim();
+    // Add helpful note in bilingual format
+    fullDescription += `\n\n[पूरा लेख पढ़ने के लिए "Read Full Article" पर क्लिक करें / Tap "Read Full Article" to read the complete story]`;
   }
 
   return {
@@ -114,6 +132,7 @@ const mapTheNewsApiArticleToAppArticle = (apiArticle: any): Article => {
 
 /**
  * Try to get full article content by UUID (if supported by the API)
+ * Note: TheNewsAPI free tier may not provide full content, only snippets
  */
 export const getFullArticleContent = async (
   articleId: string
@@ -126,8 +145,19 @@ export const getFullArticleContent = async (
       },
     });
 
-    if (response.data?.data?.content || response.data?.data?.description) {
-      return response.data.data.content || response.data.data.description;
+    if (response.data?.data) {
+      const article = response.data.data;
+      // Try to get the most complete content available
+      let content =
+        article.content || article.description || article.snippet || null;
+
+      // If content is truncated, indicate where to read full article
+      if (content && (content.endsWith("...") || content.endsWith("…"))) {
+        content = content.replace(/\.{3}$|…$/, "").trim();
+        content += `\n\n[Full article available at the original source. Tap "Read Full Article" button to continue reading.]`;
+      }
+
+      return content;
     }
 
     return null;
