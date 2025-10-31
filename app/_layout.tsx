@@ -7,11 +7,17 @@ import { AppModeProvider } from '../contexts/AppModeContext';
 import { WalletProvider } from '../contexts/WalletContext';
 import { toastConfig } from '../config/toastConfig';
 import { initializeCashfree } from '../utils/cashfree';
+import { logEnvironmentInfo } from '../config/environment';
 
 export default function RootLayout() {
-  // Initialize CashFree SDK when app starts
+  // Initialize app services when app starts
   useEffect(() => {
-    console.log('🚀 App starting - initializing CashFree SDK...');
+    console.log('🚀 SammaWenewsPro App Starting...');
+    
+    // Log environment information
+    logEnvironmentInfo();
+    
+    // Initialize CashFree SDK
     try {
       initializeCashfree();
       console.log('✅ CashFree SDK initialization completed');
@@ -23,7 +29,7 @@ export default function RootLayout() {
     <AuthProvider>
       <WalletProvider>
         <DeveloperProvider>
-          <AppModeProvider>
+          <AppModeProvider initialMode="news">
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(tabs)" />

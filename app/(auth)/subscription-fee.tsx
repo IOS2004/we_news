@@ -10,7 +10,7 @@ export default function SubscriptionFeeScreen() {
   const handlePayment = () => {
     // For demo purposes, navigate to the main app after payment
     // In a real app, you would handle payment processing here
-    router.replace('/(tabs)/(home)/dashboard');
+    router.replace('/(tabs)/(news)');
   };
 
   const handleGoBack = () => {

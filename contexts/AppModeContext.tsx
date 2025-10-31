@@ -20,7 +20,7 @@ interface AppModeProviderProps {
 
 export const AppModeProvider: React.FC<AppModeProviderProps> = ({ 
   children, 
-  initialMode = 'home' 
+  initialMode = 'news' 
 }) => {
   const router = useRouter();
   const [currentMode, setCurrentMode] = useState<AppMode>(initialMode);
@@ -35,7 +35,7 @@ export const AppModeProvider: React.FC<AppModeProviderProps> = ({
       case 'trades':
         return '/(tabs)/(trades)';
       default:
-        return '/(tabs)/(home)/dashboard';
+        return '/(tabs)/(news)';
     }
   };
 

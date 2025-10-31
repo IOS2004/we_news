@@ -1,11 +1,18 @@
 import { CFPaymentGatewayService } from 'react-native-cashfree-pg-sdk';
+import { getCurrentConfig, isDevelopment } from '../config/environment';
 
 /**
- * Get CashFree environment from environment variables
- * Defaults to SANDBOX if not specified
+ * Get CashFree environment from configuration
+ * Uses environment-aware configuration
  */
 const getCashfreeEnvironment = (): 'SANDBOX' | 'PRODUCTION' => {
-  const env = process.env.EXPO_PUBLIC_CASHFREE_ENV?.toUpperCase();
+  const config = getCurrentConfig();
+  const env = config.cashfreeEnv;
+  
+  if (isDevelopment()) {
+    console.log('💳 CashFree Environment:', env);
+  }
+  
   return env === 'PROD' ? 'PRODUCTION' : 'SANDBOX';
 };
 

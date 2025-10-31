@@ -16,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ title, canGoBack = false }) => {
       router.back();
     } else {
       // If no previous screen, go to home/dashboard
-      router.replace('/(tabs)/(home)/dashboard');
+      router.replace('/(tabs)/(news)');
     }
   };
 

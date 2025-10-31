@@ -23,10 +23,10 @@ export default function RootLayout() {
       </Stack>
     );
   } else {
-    // Default fallback to home
+    // Default fallback to news
     return (
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(home)" />
+        <Stack.Screen name="(news)" />
       </Stack>
     );
   }

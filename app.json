@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "WeNews",
-    "slug": "we-news",
+    "name": "SammaWenewsPro",
+    "slug": "samma-wenews-pro",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.wenews.app"
+      "bundleIdentifier": "com.sammawenewspro.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,17 +22,19 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.wenews.app"
+      "package": "com.sammawenewspro.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "owner": "om_sahu2004",
     "extra": {
       "eas": {
-        "projectId": "79ed2a90-c9e2-4281-b0ed-646bfede4c83"
+        "projectId": "bd81d23c-7ee9-42a0-8cc1-9c90431d7aeb"
       }
-    },
-    "owner": "om_sahu2004"
+    }
   }
 }

@@ -1,4 +1,4 @@
-package com.wenews.app
+package com.sammawenewspro.app
 
 import android.app.Application
 import android.content.res.Configuration

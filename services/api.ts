@@ -1,15 +1,10 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getCurrentConfig, isDevelopment } from "../config/environment";
 
-// API Configuration
-const getApiBaseUrl = () => {
-  // Use environment variable, fallback to hosted backend
-  return (
-    process.env.EXPO_PUBLIC_API_BASE_URL || "https://wenews.onrender.com/api"
-  );
-};
-
-const API_BASE_URL = getApiBaseUrl();
+// Get environment-aware configuration
+const envConfig = getCurrentConfig();
+const API_BASE_URL = envConfig.apiBaseUrl;
 
 // Token storage keys
 export const TOKEN_STORAGE_KEY = "auth_token";
@@ -24,9 +19,10 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Debug logging in development
-if (__DEV__) {
-  console.log("API Base URL:", API_BASE_URL);
+// Debug logging in development only
+if (isDevelopment()) {
+  console.log("🔗 API Base URL:", API_BASE_URL);
+  console.log("🌍 Environment Config:", envConfig);
 }
 
 // Request interceptor to add auth token

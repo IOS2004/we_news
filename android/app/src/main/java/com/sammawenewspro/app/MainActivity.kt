@@ -1,4 +1,4 @@
-package com.wenews.app
+package com.sammawenewspro.app
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

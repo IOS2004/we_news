@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.wenews.app'
+    namespace 'com.sammawenewspro.app'
     defaultConfig {
-        applicationId 'com.wenews.app'
+        applicationId 'com.sammawenewspro.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
