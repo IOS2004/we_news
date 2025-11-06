@@ -102,12 +102,12 @@ export default function TradingTabsLayout() {
         }}
       />
       <Tabs.Screen 
-        name="wallet" 
+        name="cart"
         options={{
-          title: 'Wallet',
-          tabBarLabel: 'Wallet',
+          title: 'Cart',
+          tabBarLabel: 'Cart',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="wallet" size={size} color={color} />
+            <Ionicons name="cart" size={size} color={color} />
           ),
         }}
       />

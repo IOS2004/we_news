@@ -1,119 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  RefreshControl,
+  ActivityIndicator 
+} from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper, Header } from '../../../components/common';
 import { TransactionListItem, AddMoneyCard } from '../../../components/wallet';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
-
-// Dummy add money transactions
-const addMoneyTransactions = [
-  {
-    id: '1',
-    amount: 1000,
-    method: 'UPI Payment',
-    date: '2024-01-21',
-    status: 'success' as const,
-  },
-  {
-    id: '2',
-    amount: 500,
-    method: 'Net Banking',
-    date: '2024-01-20',
-    status: 'success' as const,
-  },
-  {
-    id: '3',
-    amount: 2000,
-    method: 'Debit Card',
-    date: '2024-01-19',
-    status: 'pending' as const,
-  },
-];
-
-// Dummy transaction data
-const dummyTransactions = [
-  {
-    id: '1',
-    type: 'credit' as const,
-    amount: 250,
-    date: '2024-01-20',
-    description: 'News Article Interaction',
-    status: 'completed' as const,
-    category: 'Reading',
-    time: '10:30 AM',
-  },
-  {
-    id: '2',
-    type: 'credit' as const,
-    amount: 180,
-    date: '2024-01-19',
-    description: 'Daily Streak Bonus',
-    status: 'completed' as const,
-    category: 'Bonus',
-    time: '11:45 AM',
-  },
-  {
-    id: '3',
-    type: 'debit' as const,
-    amount: 500,
-    date: '2024-01-18',
-    description: 'Withdrawal to Bank',
-    status: 'completed' as const,
-    category: 'Withdrawal',
-    time: '2:15 PM',
-  },
-  {
-    id: '4',
-    type: 'credit' as const,
-    amount: 320,
-    date: '2024-01-17',
-    description: 'News Sharing Reward',
-    status: 'completed' as const,
-    category: 'Sharing',
-    time: '4:20 PM',
-  },
-  {
-    id: '5',
-    type: 'credit' as const,
-    amount: 90,
-    date: '2024-01-16',
-    description: 'Article Comment Reward',
-    status: 'completed' as const,
-    category: 'Engagement',
-    time: '9:15 AM',
-  },
-  {
-    id: '6',
-    type: 'debit' as const,
-    amount: 200,
-    date: '2024-01-15',
-    description: 'Withdrawal to UPI',
-    status: 'pending' as const,
-    category: 'Withdrawal',
-    time: '6:30 PM',
-  },
-  {
-    id: '7',
-    type: 'credit' as const,
-    amount: 150,
-    date: '2024-01-14',
-    description: 'Weekly Challenge Completion',
-    status: 'completed' as const,
-    category: 'Challenge',
-    time: '12:00 PM',
-  },
-  {
-    id: '8',
-    type: 'credit' as const,
-    amount: 75,
-    date: '2024-01-13',
-    description: 'News Category Quiz',
-    status: 'completed' as const,
-    category: 'Quiz',
-    time: '3:45 PM',
-  },
-];
+import { useWallet } from '../../../contexts/WalletContext';
 
 interface Transaction {
   id: string;
@@ -126,6 +26,20 @@ interface Transaction {
 
 export default function WalletScreen() {
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const { balance, formattedBalance, transactions, isLoading, error, refreshWallet } = useWallet();
+  const [refreshing, setRefreshing] = useState(false);
+  
+  // Pull to refresh handler
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refreshWallet();
+    } catch (error) {
+      console.error('Error refreshing wallet:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
   
   const handleWithdrawal = () => {
     router.push('/withdrawal-request');
@@ -143,36 +57,80 @@ export default function WalletScreen() {
     router.push('/withdrawal-history');
   };
 
+  // Filter transactions based on selected filter
   const filteredTransactions = selectedFilter === 'all' 
-    ? dummyTransactions 
-    : dummyTransactions.filter(t => t.type === selectedFilter);
+    ? transactions 
+    : transactions.filter(t => t.type === selectedFilter);
 
-  const totalIncome = dummyTransactions
-    .filter(t => t.type === 'credit')
+  // Calculate stats from real transactions
+  const totalIncome = transactions
+    .filter(t => t.type === 'credit' && t.status === 'completed')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const totalWithdrawn = dummyTransactions
+  const totalWithdrawn = transactions
     .filter(t => t.type === 'debit' && t.status === 'completed')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const currentBalance = 1500;
+  // Get deposit transactions (topups)
+  const depositTransactions = transactions
+    .filter(t => t.category === 'deposit' && t.type === 'credit')
+    .slice(0, 3);
+
+  // Format last updated time
+  const lastUpdated = new Date().toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
 
   return (
     <ScreenWrapper style={styles.container}>
       <Header title="My Wallet" />
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Balance Card */}
-        <View style={styles.balanceCard}>
-          <View style={styles.balanceHeader}>
-            <Text style={styles.balanceLabel}>Available Balance</Text>
-            <TouchableOpacity>
-              <Ionicons name="eye-outline" size={20} color={Colors.textSecondary} />
+      <ScrollView 
+        style={styles.scrollView} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+          />
+        }
+      >
+        {/* Loading State */}
+        {isLoading && transactions.length === 0 && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingText}>Loading wallet data...</Text>
+          </View>
+        )}
+
+        {/* Error State */}
+        {error && !isLoading && (
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle-outline" size={48} color={Colors.error} />
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
+              <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.balanceAmount}>₹{currentBalance.toLocaleString()}</Text>
-          <Text style={styles.balanceSubtext}>Last updated: Today, 9:30 AM</Text>
-        </View>
+        )}
+
+        {/* Balance Card */}
+        {!isLoading && !error && (
+          <View>
+            <View style={styles.balanceCard}>
+              <View style={styles.balanceHeader}>
+                <Text style={styles.balanceLabel}>Available Balance</Text>
+                <TouchableOpacity>
+                  <Ionicons name="eye-outline" size={20} color={Colors.textSecondary} />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.balanceAmount}>{formattedBalance}</Text>
+              <Text style={styles.balanceSubtext}>Last updated: Today, {lastUpdated}</Text>
+            </View>
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
@@ -230,31 +188,33 @@ export default function WalletScreen() {
         </View>
 
         {/* Recent Add Money */}
-        <View style={styles.addMoneySection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Add Money</Text>
-            <TouchableOpacity onPress={handleAddMoney}>
-              <Text style={styles.viewAllText}>Add More</Text>
-            </TouchableOpacity>
+        {depositTransactions.length > 0 && (
+          <View style={styles.addMoneySection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent Deposits</Text>
+              <TouchableOpacity onPress={handleAddMoney}>
+                <Text style={styles.viewAllText}>Add More</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.addMoneyList}>
+              {depositTransactions.map((item, index) => (
+                <AddMoneyCard
+                  key={item.id || `deposit-${index}`}
+                  amount={item.amount}
+                  method="Online Payment"
+                  date={new Date(item.date).toLocaleDateString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                  status={item.status === 'completed' ? 'success' : item.status === 'pending' ? 'pending' : 'failed'}
+                  onPress={() => {}}
+                />
+              ))}
+            </View>
           </View>
-          
-          <View style={styles.addMoneyList}>
-            {addMoneyTransactions.slice(0, 3).map((item) => (
-              <AddMoneyCard
-                key={item.id}
-                amount={item.amount}
-                method={item.method}
-                date={new Date(item.date).toLocaleDateString('en-IN', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                })}
-                status={item.status}
-                onPress={() => {}}
-              />
-            ))}
-          </View>
-        </View>
+        )}
 
         {/* Transaction History */}
         <View style={styles.transactionSection}>
@@ -282,11 +242,20 @@ export default function WalletScreen() {
 
           {/* Transaction List */}
           <View style={styles.transactionList}>
-            {filteredTransactions.slice(0, 5).map((item) => (
-              <TransactionListItem key={item.id} {...item} />
-            ))}
+            {filteredTransactions.length > 0 ? (
+              filteredTransactions.slice(0, 8).map((item) => (
+                <TransactionListItem key={item.id} {...item} />
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Ionicons name="receipt-outline" size={48} color={Colors.textSecondary} />
+                <Text style={styles.emptyStateText}>No transactions yet</Text>
+              </View>
+            )}
           </View>
         </View>
+        </View>
+      )}
       </ScrollView>
     </ScreenWrapper>
   );
@@ -459,5 +428,54 @@ const styles = StyleSheet.create({
   },
   addMoneyList: {
     gap: Spacing.sm,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing['2xl'],
+    minHeight: 300,
+  },
+  loadingText: {
+    marginTop: Spacing.md,
+    fontSize: Typography.fontSize.base,
+    color: Colors.textSecondary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing['2xl'],
+    minHeight: 300,
+  },
+  errorText: {
+    marginTop: Spacing.md,
+    marginBottom: Spacing.lg,
+    fontSize: Typography.fontSize.base,
+    color: Colors.error,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.md,
+  },
+  retryButtonText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.textOnPrimary,
+  },
+  emptyState: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing['2xl'],
+    minHeight: 200,
+  },
+  emptyStateText: {
+    marginTop: Spacing.md,
+    fontSize: Typography.fontSize.base,
+    color: Colors.textSecondary,
+    textAlign: 'center',
   },
 });

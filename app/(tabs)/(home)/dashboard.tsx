@@ -39,32 +39,34 @@ export default function HomeScreen() {
       setLoading(true);
       setError(null);
 
-      // Fetch referral info and earnings in parallel
-      const [referralResponse, earningsResponse] = await Promise.all([
-        referralAPI.getReferralInfo(),
-        referralAPI.getEarnings()
-      ]);
+      // Fetch referral info (returns success: false for new users)
+      const referralResponse = await referralAPI.getReferralInfo();
+
+      // Fetch earnings (returns success: false for new users)
+      const earningsResponse = await referralAPI.getEarnings();
 
       // Try to get user investment data
       let investmentResponse = null;
       try {
         investmentResponse = await investmentAPI.getMyInvestment();
       } catch (investmentError) {
-        // User might not have an investment yet, which is fine
         console.log('No active investment found');
+        // This is OK - user might not have an investment yet
       }
 
-      if (referralResponse.success && earningsResponse.success) {
-        // Map backend data to frontend structure
+      // If we have at least some data, use it
+      if (referralResponse?.success || earningsResponse?.success || investmentResponse?.data) {
         const mappedSubscriptions = mapReferralDataToSubscriptions(
-          referralResponse.data!,
-          earningsResponse.data!,
+          referralResponse?.success ? referralResponse.data : null,
+          earningsResponse?.success ? earningsResponse.data : null,
           investmentResponse?.data
         );
         
         setSubscriptions(mappedSubscriptions);
       } else {
-        throw new Error('Failed to load dashboard data');
+        // No data at all, use fallback
+        console.log('No data available, using fallback');
+        setSubscriptions(getFallbackSubscriptions());
       }
     } catch (error: any) {
       console.error('Error loading dashboard data:', error);

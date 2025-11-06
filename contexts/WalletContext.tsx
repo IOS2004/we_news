@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { useAuth } from './AuthContext';
+import walletApi, { WalletTransaction as APITransaction } from '../services/walletApi';
 
 interface Transaction {
   id: string;
@@ -15,8 +16,11 @@ interface Transaction {
 interface WalletContextType {
   // Wallet state
   balance: number;
+  formattedBalance: string;
+  walletId: string | null;
   transactions: Transaction[];
   isLoading: boolean;
+  error: string | null;
   
   // Wallet actions
   updateBalance: (amount: number, type: 'credit' | 'debit', description: string, category?: string) => void;
@@ -33,55 +37,108 @@ interface WalletProviderProps {
 export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
   const [balance, setBalance] = useState<number>(0);
+  const [formattedBalance, setFormattedBalance] = useState<string>('₹0.00');
+  const [walletId, setWalletId] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasInitialized, setHasInitialized] = useState(false);
+  const isFetchingRef = useRef(false);
 
-  // Initialize wallet from user data
+  // Initialize wallet from API - ONLY ONCE per session
   useEffect(() => {
-    if (isAuthenticated && user) {
-      setBalance(user.walletBalance || 0);
-      // Load sample transactions for demo
-      loadSampleTransactions();
-    } else {
+    if (isAuthenticated && !hasInitialized) {
+      console.log('WalletContext: Initializing wallet and fetching data...');
+      fetchWalletData();
+      setHasInitialized(true);
+    } else if (!isAuthenticated) {
+      // Reset wallet data when user logs out
+      console.log('WalletContext: User logged out, resetting wallet data...');
       setBalance(0);
+      setFormattedBalance('₹0.00');
+      setWalletId(null);
       setTransactions([]);
+      setError(null);
+      setHasInitialized(false);
+    } else if (isAuthenticated && hasInitialized) {
+      console.log('WalletContext: Already initialized, skipping API call');
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated]);
 
-  const loadSampleTransactions = () => {
-    const sampleTransactions: Transaction[] = [
-      {
-        id: '1',
-        type: 'credit',
-        amount: 250,
-        description: 'Daily bonus reward',
-        date: new Date().toISOString().split('T')[0],
-        timestamp: Date.now() - 86400000,
-        category: 'bonus',
-        status: 'completed',
-      },
-      {
-        id: '2',
-        type: 'credit',
-        amount: 100,
-        description: 'News reading reward',
-        date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
-        timestamp: Date.now() - 172800000,
-        category: 'earnings',
-        status: 'completed',
-      },
-      {
-        id: '3',
-        type: 'debit',
-        amount: 50,
-        description: 'Color trading bet',
-        date: new Date(Date.now() - 172800000).toISOString().split('T')[0],
-        timestamp: Date.now() - 259200000,
-        category: 'trading',
-        status: 'completed',
-      },
-    ];
-    setTransactions(sampleTransactions);
+  /**
+   * Convert API transaction to local transaction format
+   */
+  const convertAPITransaction = (apiTx: APITransaction): Transaction => {
+    const date = new Date(apiTx.createdAt._seconds * 1000);
+    
+    // Determine category based on description
+    let category: Transaction['category'] = 'earnings';
+    const desc = apiTx.description.toLowerCase();
+    
+    if (desc.includes('trading') || desc.includes('bet') || desc.includes('game')) {
+      category = 'trading';
+    } else if (desc.includes('withdrawal') || desc.includes('withdraw')) {
+      category = 'withdrawal';
+    } else if (desc.includes('topup') || desc.includes('deposit') || desc.includes('add money')) {
+      category = 'deposit';
+    } else if (desc.includes('bonus') || desc.includes('reward')) {
+      category = 'bonus';
+    }
+
+    return {
+      id: apiTx.id,
+      type: apiTx.transactionType,
+      amount: apiTx.amount,
+      description: apiTx.description,
+      date: date.toISOString().split('T')[0],
+      timestamp: apiTx.createdAt._seconds * 1000,
+      category,
+      status: apiTx.status,
+    };
+  };
+
+  /**
+   * Fetch wallet data from API
+   */
+  const fetchWalletData = async () => {
+    // Prevent multiple simultaneous API calls
+    if (isFetchingRef.current) {
+      console.log('WalletContext: Wallet fetch already in progress, skipping...');
+      return;
+    }
+
+    console.log('WalletContext: Starting wallet API fetch...');
+    isFetchingRef.current = true;
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await walletApi.getWalletDetails();
+      
+      if (response.success && response.data) {
+        console.log('WalletContext: Wallet data fetched successfully');
+        setBalance(response.data.balance);
+        setFormattedBalance(response.data.formattedBalance);
+        setWalletId(response.data.walletId);
+        
+        // Convert API transactions to local format
+        const convertedTransactions = response.data.transactions.map(convertAPITransaction);
+        setTransactions(convertedTransactions);
+      } else {
+        throw new Error(response.message || 'Failed to fetch wallet data');
+      }
+    } catch (error: any) {
+      console.error('WalletContext: Error fetching wallet data:', error);
+      setError(error.message || 'Failed to load wallet data');
+      
+      // Set default values on error
+      setBalance(0);
+      setFormattedBalance('₹0.00');
+      setTransactions([]);
+    } finally {
+      setIsLoading(false);
+      isFetchingRef.current = false;
+    }
   };
 
   const updateBalance = (amount: number, type: 'credit' | 'debit', description: string, category: string = 'trading') => {
@@ -115,23 +172,21 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     setTransactions(prev => [newTransaction, ...prev]);
   };
 
+  /**
+   * Refresh wallet data (for pull-to-refresh)
+   */
   const refreshWallet = async () => {
-    setIsLoading(true);
-    try {
-      // In a real app, this would fetch from API
-      // For now, just simulate a refresh
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (error) {
-      console.error('Failed to refresh wallet:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    console.log('WalletContext: Manual refresh triggered');
+    await fetchWalletData();
   };
 
   const contextValue: WalletContextType = {
     balance,
+    formattedBalance,
+    walletId,
     transactions,
     isLoading,
+    error,
     updateBalance,
     addTransaction,
     refreshWallet,

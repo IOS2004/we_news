@@ -1,39 +1,30 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ScrollView,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { ScreenWrapper } from "../../../components/common";
-import { useWallet } from "../../../contexts/WalletContext";
-import { Colors, Typography, Spacing, BorderRadius } from "../../../constants/theme";
+  RefreshControl,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { ScreenWrapper } from '../../../components/common';
+import { useWallet } from '../../../contexts/WalletContext';
+import { useRounds } from '../../../contexts/RoundsContext';
+import { useCart } from '../../../hooks/useCart';
+import { tradingApi } from '../../../services/tradingApi';
+import { Colors, Typography, Spacing, BorderRadius } from '../../../constants/theme';
 
+// Types
 interface Plan {
   id: string;
   amount: number;
   label: string;
 }
 
-interface Bet {
-  id: string;
-  number: number;
-  amount: number;
-  timestamp: number;
-}
-
-interface GameRound {
-  id: string;
-  startTime: number;
-  endTime: number;
-  bettingEndTime: number;
-  winningNumber?: number;
-  status: 'waiting' | 'betting' | 'drawing' | 'finished';
-}
-
+// Constants
 const plans: Plan[] = [
   { id: '1', amount: 10, label: '₹10' },
   { id: '2', amount: 20, label: '₹20' },
@@ -41,109 +32,52 @@ const plans: Plan[] = [
   { id: '4', amount: 100, label: '₹100' },
 ];
 
-const ROUND_DURATION = 180000; // 3 minutes
-const BETTING_DURATION = 150000; // 2.5 minutes
+// Generate numbers 0-99
+const numbers = Array.from({ length: 100 }, (_, i) => i);
 
 export default function NumberTrading() {
-  const { balance, updateBalance } = useWallet();
+  const { balance, formattedBalance, refreshWallet } = useWallet();
+  const {
+    numberActiveRounds,
+    numberUpcomingRounds,
+    selectedNumberRoundId,
+    setSelectedNumberRoundId,
+    isLoadingNumberRounds,
+    numberRoundsError,
+    fetchNumberRounds,
+  } = useRounds();
+  
+  const { cart, addItem, removeItem, clearCart, validateCartBalance } = useCart();
+
   const [selectedPlan, setSelectedPlan] = useState<Plan>(plans[0]);
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
-  const [currentRound, setCurrentRound] = useState<GameRound | null>(null);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [bets, setBets] = useState<Bet[]>([]);
-  const [gameHistory, setGameHistory] = useState<GameRound[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Generate numbers 0-100 like in client screenshots
-  const numbers = Array.from({ length: 101 }, (_, i) => i);
-
-  // Initialize game round
+  // Initialize - fetch rounds on mount
   useEffect(() => {
-    if (!currentRound) {
-      startNewRound();
-    }
+    fetchNumberRounds();
   }, []);
 
-  // Timer effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        const newTime = Math.max(0, prev - 1000);
-        
-        if (newTime === 0 && currentRound) {
-          if (currentRound.status === 'betting') {
-            // Switch to drawing phase
-            setCurrentRound(prev => prev ? { ...prev, status: 'drawing' } : null);
-            setTimeLeft(30000); // 30 seconds for result
-          } else if (currentRound.status === 'drawing') {
-            finishRound();
-          }
-        }
-        
-        return newTime;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [currentRound]);
-
-  const startNewRound = () => {
-    const now = Date.now();
-    const newRound: GameRound = {
-      id: `round_${now}`,
-      startTime: now,
-      endTime: now + ROUND_DURATION,
-      bettingEndTime: now + BETTING_DURATION,
-      status: 'betting',
-    };
-    setCurrentRound(newRound);
-    setBets([]);
-    setSelectedNumbers([]);
-    setTimeLeft(BETTING_DURATION);
-  };
-
-  const finishRound = () => {
-    if (!currentRound) return;
-
-    // Generate random winning number from 0-100
-    const winningNumber = Math.floor(Math.random() * 101);
-
-    const finishedRound: GameRound = {
-      ...currentRound,
-      winningNumber,
-      status: 'finished',
-    };
-
-    setCurrentRound(finishedRound);
-    setGameHistory(prev => [finishedRound, ...prev.slice(0, 9)]);
-
-    // Calculate winnings - simple 2x payout
-    const winningBets = bets.filter(bet => bet.number === winningNumber);
-    const totalWinnings = winningBets.reduce((sum, bet) => sum + (bet.amount * 2), 0);
-    
-    if (totalWinnings > 0) {
-      updateBalance(totalWinnings, 'credit', `Number trading win - ${winningNumber}`, 'trading');
-      Alert.alert(
-        "Congratulations! 🎉",
-        `You won ₹${totalWinnings}! The winning number was ${winningNumber}.`,
-        [{ text: "Continue", style: "default" }]
-      );
-    } else if (bets.length > 0) {
-      Alert.alert(
-        "Better luck next time!",
-        `The winning number was ${winningNumber}.`,
-        [{ text: "Try Again", style: "default" }]
-      );
+  // Pull to refresh handler
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchNumberRounds(true),
+        refreshWallet()
+      ]);
+    } catch (error) {
+      console.error('Error refreshing:', error);
+    } finally {
+      setRefreshing(false);
     }
-
-    // Start new round after delay
-    setTimeout(() => {
-      startNewRound();
-    }, 3000);
   };
 
-  const handleNumberSelect = (number: number) => {
-    if (currentRound?.status !== 'betting') {
-      Alert.alert("Betting Closed", "Betting is not available right now.");
+  // Toggle number selection
+  const toggleNumber = (number: number) => {
+    if (!selectedNumberRoundId) {
+      Alert.alert('Select Round', 'Please select a round first!');
       return;
     }
 
@@ -156,359 +90,462 @@ export default function NumberTrading() {
     });
   };
 
-  const placeBet = () => {
-    if (selectedNumbers.length === 0) {
-      Alert.alert("Select Numbers", "Please select at least one number to bet on.");
+  // Add selections to cart
+  const addToCart = () => {
+    if (!selectedNumberRoundId) {
+      Alert.alert('No Round Selected', 'Please select a round first!');
       return;
     }
 
-    if (currentRound?.status !== 'betting') {
-      Alert.alert("Betting Closed", "Betting is not available right now.");
+    if (selectedNumbers.length === 0) {
+      Alert.alert('No Numbers Selected', 'Please select at least one number');
       return;
     }
 
     const totalAmount = selectedNumbers.length * selectedPlan.amount;
-    if (balance < totalAmount) {
-      Alert.alert("Insufficient Balance", "You don't have enough balance to place this bet.");
+    
+    const result = addItem({
+      roundId: selectedNumberRoundId,
+      gameType: 'number',
+      options: selectedNumbers.map(String),
+      amount: totalAmount,
+    });
+
+    if (result.success) {
+      Alert.alert('Success', result.message);
+      setSelectedNumbers([]);
+    } else {
+      Alert.alert('Error', result.message);
+    }
+  };
+
+  // Submit all cart orders
+  const submitCartOrders = async () => {
+    if (!selectedNumberRoundId) {
+      Alert.alert('Error', 'No round selected!');
       return;
     }
 
-    // Place a bet for each selected number
-    const newBets: Bet[] = selectedNumbers.map(number => ({
-      id: `${Date.now()}_${number}`,
-      number,
-      amount: selectedPlan.amount,
-      timestamp: Date.now(),
-    }));
-
-    setBets(prev => [...prev, ...newBets]);
-    updateBalance(totalAmount, 'debit', `Number trading bet on ${selectedNumbers.length} numbers`, 'trading');
-    setSelectedNumbers([]);
-
-    Alert.alert(
-      "Bet Placed!",
-      `You bet ₹${totalAmount} on ${selectedNumbers.length} number(s). Good luck!`,
-      [{ text: "OK", style: "default" }]
-    );
-  };
-
-  const formatTime = (milliseconds: number) => {
-    const seconds = Math.floor(milliseconds / 1000);
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const getStatusText = () => {
-    if (!currentRound) return "Starting...";
-    switch (currentRound.status) {
-      case 'betting': return "Betting Open";
-      case 'drawing': return "Drawing Number";
-      case 'finished': return "Round Complete";
-      default: return "Loading";
+    if (cart.totalItems === 0) {
+      Alert.alert('Empty Cart', 'Your cart is empty!');
+      return;
     }
-  };
 
-  const getTotalBetAmount = () => {
-    return bets.reduce((sum, bet) => sum + bet.amount, 0);
-  };
+    // Validate balance
+    const balanceCheck = validateCartBalance(balance);
+    if (!balanceCheck.isValid) {
+      Alert.alert('Insufficient Balance', balanceCheck.message);
+      return;
+    }
 
-  const renderGameHistory = () => {
-    if (gameHistory.length === 0) return null;
-
-    return (
-      <View style={styles.historySection}>
-        <Text style={styles.historyTitle}>Recent Results</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.historyRow}>
-            {gameHistory.map((round, index) => (
-              <View key={round.id} style={styles.historyItem}>
-                <Text style={styles.historyRound}>#{index + 1}</Text>
-                {round.winningNumber !== undefined && (
-                  <Text style={styles.historyNumber}>{round.winningNumber}</Text>
-                )}
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
-    );
-  };
-
-  const renderCurrentBets = () => {
-    if (bets.length === 0) return null;
-
-    return (
-      <View style={styles.currentBetsSection}>
-        <Text style={styles.sectionTitle}>Your Bets This Round</Text>
-        {bets.map(bet => (
-          <View key={bet.id} style={styles.betItem}>
-            <View style={styles.betInfo}>
-              <Text style={styles.betNumbers}>Number: {bet.number}</Text>
-              <Text style={styles.betAmount}>Bet: ₹{bet.amount}</Text>
-            </View>
-            <Text style={styles.betPotentialWin}>Win: ₹{bet.amount * 2}</Text>
-          </View>
-        ))}
-        <View style={styles.totalBet}>
-          <Text style={styles.totalBetText}>
-            Total Bet: ₹{getTotalBetAmount()}
-          </Text>
-        </View>
-      </View>
-    );
-  };
-
-  const renderNumberGrid = () => {
-    const rows = [];
-    const numbersPerRow = 10;
+    setIsSubmitting(true);
     
-    for (let i = 0; i < numbers.length; i += numbersPerRow) {
-      const rowNumbers = numbers.slice(i, i + numbersPerRow);
-      rows.push(
-        <View key={i} style={styles.numberRow}>
-          {rowNumbers.map(number => (
-            <TouchableOpacity
-              key={number}
-              style={[
-                styles.numberButton,
-                selectedNumbers.includes(number) && styles.selectedNumberButton,
-                currentRound?.status !== 'betting' && styles.disabledNumberButton
-              ]}
-              onPress={() => handleNumberSelect(number)}
-              disabled={currentRound?.status !== 'betting'}
-            >
-              <Text style={[
-                styles.numberText,
-                selectedNumbers.includes(number) && styles.selectedNumberText,
-                currentRound?.status !== 'betting' && styles.disabledNumberText
-              ]}>
-                {number}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+    try {
+      // Prepare all trades
+      const allSelections = cart.items.flatMap(item => 
+        item.options.map(number => ({
+          option: number,
+          amount: selectedPlan.amount
+        }))
       );
-    }
 
-    return (
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Select Numbers (0-100)</Text>
-        <Text style={styles.instructionText}>
-          Tap numbers to select. Betting amount = ₹{selectedPlan.amount} × {selectedNumbers.length} numbers = ₹{selectedNumbers.length * selectedPlan.amount}
-        </Text>
-        <View style={styles.numberContainer}>
-          {rows}
-        </View>
-        {selectedNumbers.length > 0 && (
-          <View style={styles.selectionSummary}>
-            <Text style={styles.selectionText}>
-              Selected: {selectedNumbers.join(', ')} ({selectedNumbers.length} numbers)
-            </Text>
-            <Text style={styles.totalAmountText}>
-              Total Bet: ₹{selectedNumbers.length * selectedPlan.amount}
-            </Text>
-          </View>
-        )}
-      </View>
-    );
+      // Place order
+      const result = await tradingApi.placeOrder(selectedNumberRoundId, allSelections);
+
+      if (result) {
+        Alert.alert(
+          'Success! 🎉',
+          `Successfully placed ${allSelections.length} bet${allSelections.length > 1 ? 's' : ''} for ₹${cart.finalAmount}!`,
+          [{ text: 'OK', onPress: () => {} }]
+        );
+        
+        clearCart();
+        
+        // Refresh wallet and rounds
+        await Promise.all([
+          refreshWallet(),
+          fetchNumberRounds(true)
+        ]);
+      } else {
+        Alert.alert('Error', 'Failed to place bets');
+      }
+    } catch (error: any) {
+      console.error('Failed to submit orders:', error);
+      Alert.alert('Error', error.message || 'Failed to place orders. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Calculate total bet amount for selected numbers
+  const getTotalBetAmount = () => {
+    return selectedNumbers.length * selectedPlan.amount;
+  };
+
+  // Format time remaining
+  const formatTimeRemaining = (timestamp: any): string => {
+    if (!timestamp) return '--:--';
+    
+    const endTime = timestamp._seconds ? timestamp._seconds * 1000 : new Date(timestamp).getTime();
+    const now = Date.now();
+    const diff = endTime - now;
+    
+    if (diff <= 0) return 'Closed';
+    
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   return (
-    <ScreenWrapper>
-      <View style={styles.container}>
+    <ScreenWrapper style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+          />
+        }
+      >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Number Trading</Text>
-          <View style={styles.balanceContainer}>
-            <Ionicons name="wallet" size={16} color={Colors.warning} />
-            <Text style={styles.balanceText}>₹{balance.toLocaleString()}</Text>
+          <View>
+            <Text style={styles.headerTitle}>🔢 Number Trading</Text>
+            <Text style={styles.headerSubtitle}>Select numbers • Place bets • Win 9.5x!</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => fetchNumberRounds(true)}
+            disabled={isLoadingNumberRounds}
+            style={styles.refreshButton}
+          >
+            <Ionicons 
+              name="refresh" 
+              size={20} 
+              color={Colors.textOnPrimary}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Wallet Balance */}
+        <View style={styles.walletCard}>
+          <View style={styles.walletContent}>
+            <View>
+              <Text style={styles.walletLabel}>Wallet Balance</Text>
+              <Text style={styles.walletAmount}>{formattedBalance}</Text>
+            </View>
+            <Text style={styles.walletIcon}>💰</Text>
           </View>
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Game Status and Timer */}
-          <View style={styles.gameStatus}>
-            <View style={styles.statusRow}>
-              <Text style={styles.statusText}>{getStatusText()}</Text>
-              <Text style={styles.timerText}>
-                {timeLeft > 0 ? formatTime(timeLeft) : "00:00"}
+        {/* Important Info Banner */}
+        {!selectedNumberRoundId && (
+          <View style={styles.infoBanner}>
+            <Ionicons name="alert-circle" size={24} color={Colors.warning} />
+            <View style={styles.infoBannerText}>
+              <Text style={styles.infoBannerTitle}>Select a Round to Start Trading</Text>
+              <Text style={styles.infoBannerSubtitle}>
+                Choose an active round below
               </Text>
             </View>
-            <View style={styles.progressBar}>
-              <View 
-                style={[
-                  styles.progressFill,
-                  { 
-                    width: currentRound ? 
-                      `${((Date.now() - currentRound.startTime) / ROUND_DURATION) * 100}%` : 
-                      '0%' 
-                  }
-                ]} 
-              />
-            </View>
           </View>
+        )}
 
-          {/* Game History */}
-          {renderGameHistory()}
+        {/* Loading State */}
+        {isLoadingNumberRounds && numberActiveRounds.length === 0 && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingText}>Loading rounds...</Text>
+          </View>
+        )}
 
-          {/* Select Plan */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Select Bet Amount</Text>
-            <View style={styles.planContainer}>
-              {plans.map(plan => (
+        {/* Error State */}
+        {numberRoundsError && !isLoadingNumberRounds && (
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle-outline" size={48} color={Colors.error} />
+            <Text style={styles.errorText}>{numberRoundsError}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={() => fetchNumberRounds(true)}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Active Rounds */}
+        {!isLoadingNumberRounds && !numberRoundsError && numberActiveRounds.length > 0 && (
+          <View style={styles.roundsSection}>
+            <Text style={styles.sectionTitle}>🟢 Active Rounds</Text>
+            {numberActiveRounds.map((round) => (
+              <TouchableOpacity
+                key={round.id}
+                style={[
+                  styles.roundCard,
+                  selectedNumberRoundId === round.id && styles.selectedRoundCard
+                ]}
+                onPress={() => {
+                  setSelectedNumberRoundId(round.id);
+                  Alert.alert('Round Selected', 'Round selected for trading');
+                }}
+              >
+                <View style={styles.roundHeader}>
+                  <Text style={styles.roundNumber}>Round #{round.roundNumber}</Text>
+                  {selectedNumberRoundId === round.id && (
+                    <View style={styles.selectedBadge}>
+                      <Text style={styles.selectedBadgeText}>SELECTED</Text>
+                    </View>
+                  )}
+                </View>
+                <View style={styles.roundDetails}>
+                  <View style={styles.roundDetailItem}>
+                    <Ionicons name="time-outline" size={16} color={Colors.textSecondary} />
+                    <Text style={styles.roundDetailText}>
+                      {formatTimeRemaining(round.resultDeclarationTime)}
+                    </Text>
+                  </View>
+                  <View style={styles.roundDetailItem}>
+                    <Ionicons name="people-outline" size={16} color={Colors.textSecondary} />
+                    <Text style={styles.roundDetailText}>{round.totalTrades || 0} trades</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {/* Upcoming Rounds */}
+        {!isLoadingNumberRounds && numberUpcomingRounds.length > 0 && (
+          <View style={styles.roundsSection}>
+            <Text style={styles.sectionTitle}>⏳ Upcoming Rounds</Text>
+            {numberUpcomingRounds.slice(0, 3).map((round) => (
+              <View key={round.id} style={styles.upcomingRoundCard}>
+                <Text style={styles.upcomingRoundNumber}>Round #{round.roundNumber}</Text>
+                <Text style={styles.upcomingRoundText}>Upcoming</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Number Grid */}
+        <View style={styles.numberSection}>
+          <Text style={styles.sectionTitle}>Select Numbers (0-99)</Text>
+          <View style={styles.numberGrid}>
+            {numbers.map(number => {
+              const isSelected = selectedNumbers.includes(number);
+              
+              return (
                 <TouchableOpacity
-                  key={plan.id}
+                  key={number}
+                  onPress={() => toggleNumber(number)}
+                  disabled={!selectedNumberRoundId}
                   style={[
-                    styles.planButton,
-                    selectedPlan.id === plan.id && styles.selectedPlanButton
+                    styles.numberButton,
+                    isSelected && styles.selectedNumberButton,
+                    !selectedNumberRoundId && styles.disabledNumberButton
                   ]}
-                  onPress={() => setSelectedPlan(plan)}
                 >
                   <Text style={[
-                    styles.planText,
-                    selectedPlan.id === plan.id && styles.selectedPlanText
+                    styles.numberButtonText,
+                    isSelected && styles.selectedNumberButtonText
                   ]}>
-                    {plan.label}
+                    {number}
                   </Text>
+                  {isSelected && (
+                    <View style={styles.checkmark}>
+                      <Text style={styles.checkmarkText}>✓</Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
-              ))}
-            </View>
+              );
+            })}
           </View>
+        </View>
 
-          {/* Number Selection */}
-          {renderNumberGrid()}
+        {/* Bet Amount Selector */}
+        <View style={styles.planSection}>
+          <Text style={styles.sectionTitle}>Select Bet Amount</Text>
+          <View style={styles.planGrid}>
+            {plans.map(plan => (
+              <TouchableOpacity
+                key={plan.id}
+                onPress={() => setSelectedPlan(plan)}
+                style={[
+                  styles.planButton,
+                  selectedPlan.id === plan.id && styles.selectedPlanButton
+                ]}
+              >
+                <Text style={[
+                  styles.planButtonText,
+                  selectedPlan.id === plan.id && styles.selectedPlanButtonText
+                ]}>
+                  {plan.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
-          {/* Current Bets */}
-          {renderCurrentBets()}
+        {/* Add to Cart Button */}
+        {selectedNumbers.length > 0 && (
+          <View style={styles.cartPreview}>
+            {cart.totalItems > 0 && (
+              <View style={styles.cartInfo}>
+                <Text style={styles.cartInfoText}>
+                  📦 {cart.totalItems} item{cart.totalItems > 1 ? 's' : ''} in cart (₹{cart.finalAmount})
+                </Text>
+              </View>
+            )}
+            <View style={styles.betSummary}>
+              <View>
+                <Text style={styles.betSummaryLabel}>Total Bet</Text>
+                <Text style={styles.betSummaryAmount}>₹{getTotalBetAmount()}</Text>
+              </View>
+              <View>
+                <Text style={styles.betSummaryLabel}>Numbers</Text>
+                <Text style={styles.betSummaryAmount}>{selectedNumbers.length}</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={addToCart}
+              disabled={!selectedNumberRoundId || selectedNumbers.length === 0}
+              style={[
+                styles.addToCartButton,
+                (!selectedNumberRoundId || selectedNumbers.length === 0) && styles.disabledButton
+              ]}
+            >
+              <Ionicons name="cart" size={20} color={Colors.textOnPrimary} />
+              <Text style={styles.addToCartButtonText}>
+                {selectedNumberRoundId ? 'Add to Cart' : 'Select Round First'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-          {/* Place Bet Button */}
-          <TouchableOpacity
-            style={[
-              styles.proceedButton,
-              (selectedNumbers.length === 0 || currentRound?.status !== 'betting') && styles.proceedButtonDisabled
-            ]}
-            disabled={selectedNumbers.length === 0 || currentRound?.status !== 'betting'}
-            onPress={placeBet}
-          >
-            <Text style={[
-              styles.proceedButtonText,
-              (selectedNumbers.length === 0 || currentRound?.status !== 'betting') && styles.proceedButtonTextDisabled
-            ]}>
-              {selectedNumbers.length > 0 ? 
-                `Bet ₹${selectedNumbers.length * selectedPlan.amount}` : 
-                'Select Numbers'}
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
+        {/* Cart Summary & Submit */}
+        {cart.totalItems > 0 && (
+          <View style={styles.cartSummary}>
+            <View style={styles.cartSummaryHeader}>
+              <Text style={styles.cartSummaryTitle}>Cart ({cart.totalItems})</Text>
+              <TouchableOpacity onPress={clearCart}>
+                <Text style={styles.clearCartText}>Clear</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {cart.items.map((item) => (
+              <View key={item.id} style={styles.cartItem}>
+                <View style={styles.cartItemHeader}>
+                  <Text style={styles.cartItemTitle}>
+                    {item.options.join(', ')}
+                  </Text>
+                  <Text style={styles.cartItemAmount}>₹{item.amount}</Text>
+                </View>
+              </View>
+            ))}
+
+            <View style={styles.cartTotal}>
+              <Text style={styles.cartTotalLabel}>Total</Text>
+              <Text style={styles.cartTotalAmount}>₹{cart.finalAmount}</Text>
+            </View>
+
+            <TouchableOpacity
+              onPress={submitCartOrders}
+              disabled={isSubmitting}
+              style={[styles.submitButton, isSubmitting && styles.disabledButton]}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color={Colors.textOnPrimary} />
+              ) : (
+                <>
+                  <Ionicons name="checkmark-circle" size={20} color={Colors.textOnPrimary} />
+                  <Text style={styles.submitButtonText}>Place All Bets</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <View style={styles.bottomSpacing} />
+      </ScrollView>
     </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.base,
-    backgroundColor: Colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  title: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text,
-  },
-  balanceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.warning,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.lg,
-    gap: Spacing.xs,
-  },
-  balanceText: {
-    color: Colors.white,
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.semibold,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: Spacing.lg,
-  },
-  section: {
-    marginTop: Spacing.xl,
-  },
-  sectionTitle: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text,
-    marginBottom: Spacing.base,
-  },
-  planContainer: {
-    flexDirection: "row",
-    gap: Spacing.md,
-  },
-  planButton: {
-    backgroundColor: Colors.buttonSecondary,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.full,
-  },
-  selectedPlanButton: {
-    backgroundColor: Colors.primary,
-  },
-  planText: {
-    color: Colors.textSecondary,
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  selectedPlanText: {
-    color: Colors.white,
-  },
-  instructionText: {
-    color: Colors.textSecondary,
-    fontSize: Typography.fontSize.sm,
-    marginBottom: Spacing.base,
-  },
-  numberGrid: {
-    gap: Spacing.sm,
-  },
-  numberRow: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-  },
-  numberButton: {
-    flex: 1,
-    height: 48,
-    backgroundColor: Colors.buttonSecondary,
-    borderRadius: BorderRadius.full,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  selectedNumberButton: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  numberText: {
-    color: Colors.text,
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  selectedNumberText: {
-    color: Colors.white,
-    fontWeight: Typography.fontWeight.semibold,
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  scrollView: { flex: 1 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: Spacing.lg, paddingTop: Spacing.xl },
+  headerTitle: { fontSize: Typography.fontSize['2xl'], fontWeight: Typography.fontWeight.bold, color: Colors.text },
+  headerSubtitle: { fontSize: Typography.fontSize.sm, color: Colors.textSecondary, marginTop: Spacing.xs },
+  refreshButton: { backgroundColor: Colors.primary, padding: Spacing.md, borderRadius: BorderRadius.full },
+  walletCard: { backgroundColor: Colors.success, margin: Spacing.lg, padding: Spacing.lg, borderRadius: BorderRadius.lg },
+  walletContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  walletLabel: { fontSize: Typography.fontSize.sm, color: Colors.textOnPrimary, opacity: 0.9 },
+  walletAmount: { fontSize: Typography.fontSize['3xl'], fontWeight: Typography.fontWeight.bold, color: Colors.textOnPrimary },
+  walletIcon: { fontSize: 48, opacity: 0.8 },
+  infoBanner: { flexDirection: 'row', backgroundColor: '#FEF3C7', margin: Spacing.lg, padding: Spacing.md, borderRadius: BorderRadius.md, borderWidth: 2, borderColor: '#F59E0B' },
+  infoBannerText: { flex: 1, marginLeft: Spacing.md },
+  infoBannerTitle: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semibold, color: '#92400E', marginBottom: Spacing.xs },
+  infoBannerSubtitle: { fontSize: Typography.fontSize.sm, color: '#92400E' },
+  loadingContainer: { padding: Spacing['2xl'], alignItems: 'center', justifyContent: 'center' },
+  loadingText: { marginTop: Spacing.md, fontSize: Typography.fontSize.base, color: Colors.textSecondary },
+  errorContainer: { padding: Spacing['2xl'], alignItems: 'center', justifyContent: 'center' },
+  errorText: { marginTop: Spacing.md, marginBottom: Spacing.lg, fontSize: Typography.fontSize.base, color: Colors.error, textAlign: 'center' },
+  retryButton: { backgroundColor: Colors.primary, paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl, borderRadius: BorderRadius.md },
+  retryButtonText: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semibold, color: Colors.textOnPrimary },
+  roundsSection: { margin: Spacing.lg },
+  sectionTitle: { fontSize: Typography.fontSize.lg, fontWeight: Typography.fontWeight.semibold, color: Colors.text, marginBottom: Spacing.md },
+  roundCard: { backgroundColor: Colors.surface, padding: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.md, borderWidth: 2, borderColor: 'transparent' },
+  selectedRoundCard: { borderColor: Colors.primary, backgroundColor: '#EFF6FF' },
+  roundHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
+  roundNumber: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semibold, color: Colors.text },
+  selectedBadge: { backgroundColor: Colors.primary, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.sm },
+  selectedBadgeText: { fontSize: Typography.fontSize.xs, fontWeight: Typography.fontWeight.bold, color: Colors.textOnPrimary },
+  roundDetails: { flexDirection: 'row', gap: Spacing.lg },
+  roundDetailItem: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
+  roundDetailText: { fontSize: Typography.fontSize.sm, color: Colors.textSecondary },
+  upcomingRoundCard: { backgroundColor: Colors.surface, padding: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.sm, opacity: 0.7 },
+  upcomingRoundNumber: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semibold, color: Colors.text },
+  upcomingRoundText: { fontSize: Typography.fontSize.sm, color: Colors.textSecondary, marginTop: Spacing.xs },
+  numberSection: { margin: Spacing.lg },
+  numberGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  numberButton: { width: '18%', aspectRatio: 1, backgroundColor: Colors.buttonSecondary, borderRadius: BorderRadius.md, justifyContent: 'center', alignItems: 'center', position: 'relative', borderWidth: 1, borderColor: Colors.border },
+  selectedNumberButton: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  disabledNumberButton: { opacity: 0.5 },
+  numberButtonText: { fontSize: Typography.fontSize.sm, fontWeight: Typography.fontWeight.semibold, color: Colors.text },
+  selectedNumberButtonText: { color: Colors.textOnPrimary, fontWeight: Typography.fontWeight.bold },
+  checkmark: { position: 'absolute', top: -6, right: -6, backgroundColor: '#FBBF24', width: 20, height: 20, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  checkmarkText: { fontSize: 10, fontWeight: Typography.fontWeight.bold, color: '#000' },
+  planSection: { margin: Spacing.lg },
+  planGrid: { flexDirection: 'row', gap: Spacing.md },
+  planButton: { flex: 1, padding: Spacing.md, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, alignItems: 'center' },
+  selectedPlanButton: { backgroundColor: Colors.success },
+  planButtonText: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semibold, color: Colors.text },
+  selectedPlanButtonText: { color: Colors.textOnPrimary },
+  cartPreview: { backgroundColor: '#FEF3C7', margin: Spacing.lg, padding: Spacing.lg, borderRadius: BorderRadius.lg },
+  cartInfo: { backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: Spacing.sm, borderRadius: BorderRadius.md, marginBottom: Spacing.md, alignItems: 'center' },
+  cartInfoText: { fontSize: Typography.fontSize.sm, color: '#92400E' },
+  betSummary: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.lg },
+  betSummaryLabel: { fontSize: Typography.fontSize.sm, color: '#92400E', opacity: 0.9 },
+  betSummaryAmount: { fontSize: Typography.fontSize.xl, fontWeight: Typography.fontWeight.bold, color: '#92400E' },
+  addToCartButton: { backgroundColor: Colors.warning, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: Spacing.lg, borderRadius: BorderRadius.lg, gap: Spacing.md },
+  addToCartButtonText: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.bold, color: Colors.textOnPrimary },
+  disabledButton: { opacity: 0.5 },
+  cartSummary: { backgroundColor: Colors.surface, margin: Spacing.lg, padding: Spacing.lg, borderRadius: BorderRadius.lg },
+  cartSummaryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
+  cartSummaryTitle: { fontSize: Typography.fontSize.lg, fontWeight: Typography.fontWeight.semibold, color: Colors.text },
+  clearCartText: { fontSize: Typography.fontSize.sm, color: Colors.error, fontWeight: Typography.fontWeight.medium },
+  cartItem: { backgroundColor: Colors.background, padding: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.md },
+  cartItemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cartItemTitle: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.medium, color: Colors.text, flex: 1 },
+  cartItemAmount: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.bold, color: Colors.primary },
+  cartTotal: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: Colors.border, marginTop: Spacing.md, marginBottom: Spacing.lg },
+  cartTotalLabel: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semibold, color: Colors.text },
+  cartTotalAmount: { fontSize: Typography.fontSize.xl, fontWeight: Typography.fontWeight.bold, color: Colors.primary },
+  submitButton: { backgroundColor: Colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: Spacing.lg, borderRadius: BorderRadius.lg, gap: Spacing.md },
+  submitButtonText: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.bold, color: Colors.textOnPrimary },
+  bottomSpacing: { height: Spacing['6xl'] },
   summarySection: {
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.md,
@@ -795,109 +832,4 @@ const styles = StyleSheet.create({
   },
   
   // Number Grid Styles
-  gridTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  gridSubtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 16,
-  },
-  numberContainer: {
-    gap: Spacing.sm,
-    marginBottom: 16,
-  },
-  disabledNumberButton: {
-    opacity: 0.5,
-  },
-  disabledNumberText: {
-    color: Colors.textLight,
-  },
-  selectionStatus: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  
-  // Current Bets Styles
-  currentBetsSection: {
-    margin: 16,
-    marginTop: 0,
-  },
-  betItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    backgroundColor: Colors.surface,
-    borderRadius: 8,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  betInfo: {
-    flex: 1,
-  },
-  betTypeLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  betNumbers: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginTop: 2,
-  },
-  betAmount: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginTop: 2,
-  },
-  betPotentialWin: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.success,
-  },
-  
-  // Selection Summary Styles
-  selectionSummary: {
-    backgroundColor: Colors.surface,
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    marginTop: Spacing.md,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.primary,
-  },
-  selectionText: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: Spacing.xs,
-  },
-  totalAmountText: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.primary,
-    textAlign: 'center',
-  },
-  
-  // Missing styles for totalBet
-  totalBet: {
-    padding: 16,
-    backgroundColor: Colors.white,
-    borderRadius: 8,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  totalBetText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text,
-    textAlign: 'center',
-  },
 });

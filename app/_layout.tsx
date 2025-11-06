@@ -5,15 +5,17 @@ import { DeveloperProvider } from '../contexts/DeveloperContext';
 import { AuthProvider } from '../contexts/AuthContext';
 import { AppModeProvider } from '../contexts/AppModeContext';
 import { WalletProvider } from '../contexts/WalletContext';
+import { RoundsProvider } from '../contexts/RoundsContext';
 import { toastConfig } from '../config/toastConfig';
 
 export default function RootLayout() {
   return (
     <AuthProvider>
       <WalletProvider>
-        <DeveloperProvider>
-          <AppModeProvider>
-            <Stack screenOptions={{ headerShown: false }}>
+        <RoundsProvider>
+          <DeveloperProvider>
+            <AppModeProvider>
+              <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="developer-settings" />
@@ -31,6 +33,7 @@ export default function RootLayout() {
             <Toast config={toastConfig} />
           </AppModeProvider>
         </DeveloperProvider>
+      </RoundsProvider>
       </WalletProvider>
     </AuthProvider>
   );

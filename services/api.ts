@@ -498,6 +498,14 @@ export const referralAPI = {
         await api.get("/referrals/info");
       return response.data;
     } catch (error: any) {
+      // 404 is expected for new users without referral data - don't log as error
+      if (error.response?.status === 404) {
+        console.log("No referral info found (user is new or has no referrals)");
+        return {
+          success: false,
+          message: "No referral data found",
+        };
+      }
       console.error("Error fetching referral info:", error);
       throw error;
     }
@@ -548,9 +556,17 @@ export const referralAPI = {
   getEarnings: async (): Promise<ApiResponse<BackendEarningsData>> => {
     try {
       const response: AxiosResponse<ApiResponse<BackendEarningsData>> =
-        await api.get("/wallet/earnings");
+        await api.get("/earnings/stats");
       return response.data;
     } catch (error: any) {
+      // 404 is expected for new users without earnings data - don't log as error
+      if (error.response?.status === 404) {
+        console.log("No earnings found (user is new or has no earnings)");
+        return {
+          success: false,
+          message: "No earnings data found",
+        };
+      }
       console.error("Error fetching earnings:", error);
       throw error;
     }
@@ -680,8 +696,8 @@ export const mapBackendPlansToGrowthPlans = (
 
 // Utility function to map backend referral data to dashboard subscription structure
 export const mapReferralDataToSubscriptions = (
-  referralInfo: BackendReferralInfo,
-  earningsData: BackendEarningsData,
+  referralInfo: BackendReferralInfo | null,
+  earningsData: BackendEarningsData | null,
   userInvestment?: any
 ): any[] => {
   // If user has active investment, create subscription based on real data
@@ -744,19 +760,19 @@ export const mapReferralDataToSubscriptions = (
         purchaseDate,
         daysRemaining,
         totalEarnings: investment.totalEarnings || 0,
-        monthlyGain: Math.round((earningsData.investmentEarnings || 0) / 12), // Approximate monthly gain
-        referralTreeSize: referralInfo.referralStats.totalReferrals || 0,
-        directReferrals: referralInfo.referralStats.directReferrals || 0,
+        monthlyGain: Math.round((earningsData?.investmentEarnings || 0) / 12), // Approximate monthly gain
+        referralTreeSize: referralInfo?.referralStats?.totalReferrals || 0,
+        directReferrals: referralInfo?.referralStats?.directReferrals || 0,
         currentLevel: investment.currentLevel || 1,
         maxLevels: 13, // Based on backend plan structure
-        referralLink: referralInfo.userReferralCode || "NO_CODE",
+        referralLink: referralInfo?.userReferralCode || "NO_CODE",
         isActive: investment.isActive || true,
-        dailyEarning: earningsData.dailyEarnings || 0,
+        dailyEarning: earningsData?.dailyEarnings || 0,
       },
     ];
   }
 
-  // Fallback: Create mock subscription with real referral data
+  // Fallback: Create mock subscription with real referral data (if available)
   return [
     {
       id: "base_daily",
@@ -765,15 +781,15 @@ export const mapReferralDataToSubscriptions = (
       planColor: "#3B82F6",
       purchaseDate: new Date().toISOString().split("T")[0],
       daysRemaining: 750,
-      totalEarnings: earningsData.totalEarnings || 0,
-      monthlyGain: Math.round((earningsData.totalEarnings || 0) / 12),
-      referralTreeSize: referralInfo.referralStats.totalReferrals || 0,
-      directReferrals: referralInfo.referralStats.directReferrals || 0,
-      currentLevel: referralInfo.referralStats.level || 1,
+      totalEarnings: earningsData?.totalEarnings || 0,
+      monthlyGain: Math.round((earningsData?.totalEarnings || 0) / 12),
+      referralTreeSize: referralInfo?.referralStats?.totalReferrals || 0,
+      directReferrals: referralInfo?.referralStats?.directReferrals || 0,
+      currentLevel: referralInfo?.referralStats?.level || 1,
       maxLevels: 5,
-      referralLink: referralInfo.userReferralCode || "NO_CODE",
+      referralLink: referralInfo?.userReferralCode || "NO_CODE",
       isActive: true,
-      dailyEarning: earningsData.dailyEarnings || 0,
+      dailyEarning: earningsData?.dailyEarnings || 0,
     },
   ];
 };
