@@ -21,8 +21,8 @@ export default function HomeTabsLayout() {
             const label = options.tabBarLabel || options.title || route.name;
             const isFocused = props.state.index === index;
 
-            // Skip index route
-            if (route.name === 'index') {
+            // Skip hidden routes (index, add-money, withdrawals)
+            if (route.name === 'index' || route.name === 'add-money' || route.name === 'withdrawals') {
               return null;
             }
 
@@ -111,6 +111,15 @@ export default function HomeTabsLayout() {
             <Ionicons name="diamond" size={size} color={color} />
           ),
         }}
+      />
+      {/* Hidden screens - accessible only through wallet page */}
+      <Tabs.Screen 
+        name="add-money" 
+        options={{ href: null }}
+      />
+      <Tabs.Screen 
+        name="withdrawals" 
+        options={{ href: null }}
       />
     </Tabs>
   );

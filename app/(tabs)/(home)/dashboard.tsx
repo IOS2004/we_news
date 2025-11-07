@@ -9,6 +9,7 @@ import { DashboardNotifications, QuickActions, RecentTransactions } from '../../
 import { AdPlaceholder } from '../../../components/ads';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useWallet } from '../../../contexts/WalletContext';
 import { referralAPI, investmentAPI, mapReferralDataToSubscriptions, updateUserWithReferralData } from '../../../services/api';
 import { showToast } from '../../../utils/toast';
 
@@ -20,6 +21,7 @@ const notifications = [
 
 export default function HomeScreen() {
   const { user } = useAuth();
+  const { balance, formattedBalance, isLoading: walletLoading } = useWallet();
   const [selectedSubscription, setSelectedSubscription] = useState(0);
   const subscriptionScrollRef = useRef<ScrollView>(null);
   const { width: screenWidth } = Dimensions.get('window');
@@ -55,11 +57,11 @@ export default function HomeScreen() {
       }
 
       // If we have at least some data, use it
-      if (referralResponse?.success || earningsResponse?.success || investmentResponse?.data) {
+      if (referralResponse?.success || earningsResponse?.success || investmentResponse?.data?.investments) {
         const mappedSubscriptions = mapReferralDataToSubscriptions(
           referralResponse?.success ? referralResponse.data : null,
           earningsResponse?.success ? earningsResponse.data : null,
-          investmentResponse?.data
+          investmentResponse?.data?.investments || [] // Pass array of investments
         );
         
         setSubscriptions(mappedSubscriptions);
@@ -215,14 +217,18 @@ export default function HomeScreen() {
         {/* Banner Ad Placeholder - Replacing News Highlight */}
         <AdPlaceholder onAdPress={() => console.log('Ad clicked')} />
 
-        {/* Enhanced Earnings Summary */}
-        <EarningsSummary today={50} week={350} month={1500} />
+        {/* Enhanced Earnings Summary - Set to ₹0 as requested */}
+        <EarningsSummary today={0} week={0} month={0} />
 
-        {/* Total Wallet Balance - Moved above earnings */}
+        {/* Total Wallet Balance - Real Data from API */}
         <View style={styles.walletBalanceCard}>
           <View style={styles.walletSection}>
             <Text style={styles.walletLabel}>Total Wallet Balance</Text>
-            <Text style={styles.walletAmount}>₹{subscriptions.reduce((sum, sub) => sum + sub.totalEarnings, 0).toLocaleString()}.00</Text>
+            {walletLoading ? (
+              <ActivityIndicator size="small" color={Colors.primary} />
+            ) : (
+              <Text style={styles.walletAmount}>{formattedBalance}</Text>
+            )}
             <Text style={styles.activePlansText}>
               {subscriptions.length} active subscription{subscriptions.length !== 1 ? 's' : ''} • ₹{subscriptions.reduce((sum, sub) => sum + sub.dailyEarning, 0)}/day
             </Text>

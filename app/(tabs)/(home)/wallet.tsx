@@ -14,15 +14,8 @@ import { ScreenWrapper, Header } from '../../../components/common';
 import { TransactionListItem, AddMoneyCard } from '../../../components/wallet';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
 import { useWallet } from '../../../contexts/WalletContext';
-
-interface Transaction {
-  id: string;
-  type: 'credit' | 'debit';
-  amount: number;
-  date: string;
-  description: string;
-  status?: 'completed' | 'pending';
-}
+import { Transaction } from '../../../services/walletService';
+import { formatTransactionDate, categorizeTransaction } from '../../../utils/walletUtils';
 
 export default function WalletScreen() {
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -60,20 +53,24 @@ export default function WalletScreen() {
   // Filter transactions based on selected filter
   const filteredTransactions = selectedFilter === 'all' 
     ? transactions 
-    : transactions.filter(t => t.type === selectedFilter);
+    : transactions.filter(t => t.transactionType === selectedFilter);
 
   // Calculate stats from real transactions
   const totalIncome = transactions
-    .filter(t => t.type === 'credit' && t.status === 'completed')
+    .filter(t => t.transactionType === 'credit' && t.status === 'success')
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalWithdrawn = transactions
-    .filter(t => t.type === 'debit' && t.status === 'completed')
+    .filter(t => t.transactionType === 'debit' && t.status === 'success')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  // Get deposit transactions (topups)
+  // Get deposit transactions (topups) - check description for deposit/topup/add money keywords
   const depositTransactions = transactions
-    .filter(t => t.category === 'deposit' && t.type === 'credit')
+    .filter(t => {
+      const desc = t.description.toLowerCase();
+      return t.transactionType === 'credit' && 
+             (desc.includes('deposit') || desc.includes('topup') || desc.includes('add money') || desc.includes('payment'));
+    })
     .slice(0, 3);
 
   // Format last updated time
@@ -168,21 +165,13 @@ export default function WalletScreen() {
           <Text style={styles.sectionTitle}>This Month</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>₹{totalIncome}</Text>
+              <Text style={styles.statValue}>₹{totalIncome.toFixed(2)}</Text>
               <Text style={styles.statLabel}>Total Earned</Text>
-              <View style={styles.statTrend}>
-                <Ionicons name="trending-up" size={16} color={Colors.success} />
-                <Text style={styles.statTrendText}>+12%</Text>
-              </View>
             </View>
             
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>₹{totalWithdrawn}</Text>
+              <Text style={styles.statValue}>₹{totalWithdrawn.toFixed(2)}</Text>
               <Text style={styles.statLabel}>Withdrawn</Text>
-              <View style={styles.statTrend}>
-                <Ionicons name="trending-down" size={16} color={Colors.error} />
-                <Text style={styles.statTrendText}>-5%</Text>
-              </View>
             </View>
           </View>
         </View>
@@ -203,12 +192,8 @@ export default function WalletScreen() {
                   key={item.id || `deposit-${index}`}
                   amount={item.amount}
                   method="Online Payment"
-                  date={new Date(item.date).toLocaleDateString('en-IN', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                  status={item.status === 'completed' ? 'success' : item.status === 'pending' ? 'pending' : 'failed'}
+                  date={formatTransactionDate(item)}
+                  status={item.status}
                   onPress={() => {}}
                 />
               ))}

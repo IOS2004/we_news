@@ -10,11 +10,11 @@ const { width: screenWidth } = Dimensions.get('window');
 export default function EarningsScreen() {
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('today');
   
-  // Mock data - replace with actual data
+  // Earnings set to 0 as per requirements
   const earningsData = {
-    today: { amount: 125, change: '+12%' },
-    week: { amount: 875, change: '+8%' },
-    month: { amount: 3250, change: '+15%' },
+    today: { amount: 0, change: '+0%' },
+    week: { amount: 0, change: '+0%' },
+    month: { amount: 0, change: '+0%' },
   };
 
   const quickActions = [

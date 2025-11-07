@@ -55,15 +55,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const initializeAuth = async () => {
     try {
       setIsLoading(true);
+      console.log('[AuthContext] Initializing auth...');
       const authData = await storage.getAuthData();
 
       if (authData) {
+        console.log('[AuthContext] Found stored auth data, validating token...');
         // Try to validate the existing token by fetching the user profile
         try {
           const profileResponse = await userAPI.getProfile();
           
           if (profileResponse.success && profileResponse.data?.user) {
             // Token is valid, use it with updated user data
+            console.log('[AuthContext] Token valid, user authenticated:', profileResponse.data.user.email);
             setUser(profileResponse.data.user);
             await storage.saveAuthData({ 
               token: authData.token, 
@@ -72,20 +75,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             return;
           }
         } catch (profileError: any) {
-          console.warn('Stored token validation failed, attempting refresh:', profileError);
+          console.warn('[AuthContext] Token validation failed:', profileError.message);
           
           // Only try to refresh if we get a 401 (unauthorized) error
           if (profileError?.response?.status === 401) {
+            console.log('[AuthContext] Attempting token refresh...');
             try {
               const refreshResponse = await authAPI.refreshToken();
 
               if (refreshResponse.success && refreshResponse.data?.token) {
                 const newToken = refreshResponse.data.token;
+                console.log('[AuthContext] Token refreshed successfully');
                 await storage.saveToken(newToken);
 
                 // Try to get profile again with new token
                 const newProfileResponse = await userAPI.getProfile();
                 if (newProfileResponse.success && newProfileResponse.data?.user) {
+                  console.log('[AuthContext] User authenticated after refresh');
                   setUser(newProfileResponse.data.user);
                   await storage.saveAuthData({ 
                     token: newToken, 
@@ -95,25 +101,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 }
               }
             } catch (refreshError) {
-              console.error('Token refresh failed:', refreshError);
+              console.error('[AuthContext] Token refresh failed:', refreshError);
             }
           } else {
             // Network or other error - keep the user signed in with cached data
-            console.warn('Network error during validation, using cached data');
+            console.log('[AuthContext] Network error during validation, using cached data');
             setUser(authData.user);
             return;
           }
           
           // If we get here, both validation and refresh failed
-          console.log('Session expired, clearing auth data');
+          console.log('[AuthContext] Session expired, clearing auth data');
           await storage.clearAuthData();
           setUser(null);
         }
       } else {
+        console.log('[AuthContext] No stored auth data found');
         setUser(null);
       }
     } catch (error) {
-      console.error('Error initializing auth:', error);
+      console.error('[AuthContext] Error initializing auth:', error);
     } finally {
       setIsLoading(false);
     }
@@ -155,10 +162,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
+      console.log('[AuthContext] Signing in...');
       const response = await authAPI.signIn(data);
       
       if (response.success && response.data) {
+        console.log('[AuthContext] Sign in successful, saving auth data...');
         await storage.saveAuthData(response.data);
+        console.log('[AuthContext] Auth data saved to AsyncStorage');
         setUser(response.data.user);
         showToast.success({
           title: 'Welcome back!',
@@ -166,10 +176,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
         return true;
       } else {
+        console.error('[AuthContext] Sign in failed:', response);
         handleApiError(response, 'Failed to sign in');
         return false;
       }
     } catch (error: any) {
+      console.error('[AuthContext] Sign in error:', error);
       handleApiError(error, 'Failed to sign in');
       return false;
     } finally {

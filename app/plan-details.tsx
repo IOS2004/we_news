@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, StyleSheet, Dimensions, Share, Clipboard } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, StyleSheet, Dimensions, Share, Clipboard, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -9,13 +9,13 @@ import Header from '../components/common/Header';
 import Card from '../components/common/Card';
 import { Colors } from '../constants/theme';
 import { showToast } from '../utils/toast';
-import { referralAPI } from '../services/api';
+import { referralAPI, investmentAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-// Dummy data for plan details - this would come from backend API
-const getPlanDetails = (planId: string) => {
+// Fallback data for plan details when API data is unavailable
+const getFallbackPlanDetails = (planId: string) => {
   const planDetailsData = {
     'base_daily': {
       id: 'base_daily',
@@ -139,9 +139,62 @@ export default function PlanDetailsScreen() {
         setReferralInfo(referralResponse.data);
       }
 
-      // Simulate plan details API call (this would be replaced with actual plan API)
-      const details = getPlanDetails(planId as string);
-      setPlanDetails(details);
+      // Fetch user's investment data from API
+      const investmentResponse = await investmentAPI.getMyInvestment();
+      
+      if (investmentResponse?.success && investmentResponse?.data?.investments) {
+        // Find the specific investment that matches the planId
+        const investments = investmentResponse.data.investments;
+        const matchingInvestment = investments.find((inv: any) => inv.id === planId || inv.planId === planId);
+        
+        if (matchingInvestment) {
+          // Map backend investment data to expected format
+          const mappedDetails = {
+            id: matchingInvestment.id || matchingInvestment.planId,
+            name: matchingInvestment.planName || 'Plan',
+            frequency: matchingInvestment.frequency || 'Daily',
+            description: 'Your active investment plan',
+            initialPayment: matchingInvestment.investmentAmount || 0,
+            contributionAmount: matchingInvestment.dailyContribution || 0,
+            planValidity: matchingInvestment.validity || 750,
+            purchaseDate: matchingInvestment.startDate || matchingInvestment.createdAt,
+            expiryDate: matchingInvestment.expiryDate,
+            status: matchingInvestment.isActive ? 'Active' : 'Inactive',
+            color: getPlanColor(matchingInvestment.planName),
+            gradient: getPlanGradient(matchingInvestment.planName),
+            totalContributions: matchingInvestment.totalContributions || 0,
+            totalEarnings: matchingInvestment.totalEarnings || 0,
+            nextContributionDate: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
+            contributionStreak: matchingInvestment.totalContributions || 0,
+            referrals: {
+              direct: referralResponse?.data?.referralStats?.directReferrals || 0,
+              total: referralResponse?.data?.referralStats?.totalReferrals || 0,
+              activeThisMonth: referralResponse?.data?.referralStats?.directReferrals || 0
+            },
+            earnings: {
+              thisMonth: matchingInvestment.monthlyEarnings || 0,
+              lastMonth: 0,
+              total: matchingInvestment.totalEarnings || 0,
+              pending: 0
+            },
+            contributionHistory: [],
+            features: getPlanFeatures(matchingInvestment.planName),
+            performance: {
+              contributionCompliance: 100,
+              growthRate: 12.5,
+              monthlyAverage: matchingInvestment.monthlyEarnings || 0
+            }
+          };
+          
+          setPlanDetails(mappedDetails);
+        } else {
+          // Investment not found, use fallback
+          throw new Error('Investment not found');
+        }
+      } else {
+        // No investment data, use fallback
+        throw new Error('No investment data available');
+      }
       
     } catch (error) {
       console.error('Error fetching plan data:', error);
@@ -151,11 +204,46 @@ export default function PlanDetailsScreen() {
       });
       
       // Fallback to mock data
-      const details = getPlanDetails(planId as string);
+      const details = getFallbackPlanDetails(planId as string);
       setPlanDetails(details);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper functions to map plan names to colors and features
+  const getPlanColor = (planName: string) => {
+    const colorMap: any = {
+      base: '#3B82F6',
+      silver: '#6B7280',
+      gold: '#F59E0B',
+      diamond: '#8B5CF6',
+      platinum: '#10B981'
+    };
+    const key = planName?.toLowerCase() || 'base';
+    return colorMap[key] || '#3B82F6';
+  };
+
+  const getPlanGradient = (planName: string): [string, string] => {
+    const gradientMap: any = {
+      base: ['#3B82F6', '#1D4ED8'],
+      silver: ['#6B7280', '#4B5563'],
+      gold: ['#F59E0B', '#D97706'],
+      diamond: ['#8B5CF6', '#7C3AED'],
+      platinum: ['#10B981', '#059669']
+    };
+    const key = planName?.toLowerCase() || 'base';
+    return gradientMap[key] || ['#3B82F6', '#1D4ED8'];
+  };
+
+  const getPlanFeatures = (planName: string) => {
+    return [
+      'Daily contribution tracking',
+      'Growth rewards system',
+      'Portfolio analytics',
+      'Performance insights',
+      '24/7 customer support'
+    ];
   };
 
   const handleReferAndEarn = async () => {

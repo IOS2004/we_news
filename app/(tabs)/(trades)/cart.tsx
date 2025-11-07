@@ -15,10 +15,12 @@ import { useWallet } from '../../../contexts/WalletContext';
 import { useCart } from '../../../hooks/useCart';
 import { tradingApi } from '../../../services/tradingApi';
 import { Colors, Typography, Spacing, BorderRadius } from '../../../constants/theme';
+import { checkSufficientBalance, formatCurrency } from '../../../utils/walletUtils';
+import { showToast } from '../../../utils/toast';
 
 export default function Cart() {
   const router = useRouter();
-  const { balance, formattedBalance, refreshWallet } = useWallet();
+  const { balance, formattedBalance, deductFromWallet, refreshWallet } = useWallet();
   const { cart, removeItem, clearCart, validateCartBalance } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,17 +63,17 @@ export default function Cart() {
       return;
     }
 
-    // Validate balance
-    const balanceCheck = validateCartBalance(balance);
-    if (!balanceCheck.isValid) {
+    // Check sufficient balance using wallet utils
+    const balanceCheck = checkSufficientBalance(cart.finalAmount, balance);
+    if (!balanceCheck.sufficient) {
       Alert.alert(
         'Insufficient Balance',
-        balanceCheck.message || `You need ₹${cart.finalAmount.toFixed(2)} but have ${formattedBalance}. Please recharge your wallet.`,
+        `You need ${formatCurrency(cart.finalAmount)} but have ${formattedBalance}. You need ${formatCurrency(balanceCheck.shortfall)} more to complete this purchase.`,
         [
           { text: 'Cancel', style: 'cancel' },
           {
-            text: 'Recharge',
-            onPress: () => router.push('/(tabs)/(home)/wallet'),
+            text: 'Add Money',
+            onPress: () => router.push('/(tabs)/(home)/add-money'),
           },
         ]
       );
@@ -89,22 +91,35 @@ export default function Cart() {
         amount: item.amount,
       }));
 
+      // Deduct amount from wallet first
+      const paymentSuccess = await deductFromWallet(
+        cart.finalAmount,
+        `Trading: ${cart.items.length} trade${cart.items.length > 1 ? 's' : ''}`
+      );
+
+      if (!paymentSuccess) {
+        Alert.alert('Payment Failed', 'Failed to deduct amount from wallet. Please try again.');
+        return;
+      }
+
       // Submit all trades in batch
-  const response = await tradingApi.placeTradesBatch(trades as any);
+      const response = await tradingApi.placeTradesBatch(trades as any);
 
       if (response.success) {
-        Alert.alert('Success', 'All trades placed successfully!', [
-          {
-            text: 'OK',
-            onPress: () => {
-              clearCart();
-              refreshWallet();
-              router.push('/(tabs)/(trades)/my-trades');
-            },
-          },
-        ]);
+        clearCart();
+        
+        showToast.success({
+          title: 'Trades Placed!',
+          message: `Successfully placed ${cart.items.length} trade${cart.items.length > 1 ? 's' : ''}`,
+        });
+
+        router.push('/(tabs)/(trades)/my-trades');
       } else {
-        Alert.alert('Error', response.message || 'Failed to place trades');
+        // If trade placement fails after payment, show error
+        Alert.alert(
+          'Trade Failed',
+          response.message || 'Trades could not be placed. Please contact support if amount was deducted.'
+        );
       }
     } catch (error: any) {
       console.error('Error placing trades:', error);

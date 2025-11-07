@@ -1,127 +1,51 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
-
-interface Transaction {
-  id: string;
-  type: 'credit' | 'debit';
-  amount: number;
-  date: string;
-  time: string;
-  description: string;
-  category: string;
-  status: 'completed' | 'pending' | 'failed';
-}
+import { useWallet } from '../../contexts/WalletContext';
+import { Transaction } from '../../services/walletService';
+import { 
+  formatTransactionDate, 
+  formatTransactionTime, 
+  formatTransactionType, 
+  getTransactionIcon, 
+  getTransactionColor 
+} from '../../utils/walletUtils';
 
 interface RecentTransactionsProps {
   onViewMore: () => void;
   maxItems?: number;
 }
 
-// Mock transaction data
-const mockTransactions: Transaction[] = [
-  {
-    id: '1',
-    type: 'credit',
-    amount: 50,
-    date: '2024-01-15',
-    time: '2:30 PM',
-    description: 'Daily earnings credited',
-    category: 'Earnings',
-    status: 'completed'
-  },
-  {
-    id: '2',
-    type: 'credit',
-    amount: 25,
-    date: '2024-01-15',
-    time: '1:15 PM',
-    description: 'Video ad completion bonus',
-    category: 'Ad Revenue',
-    status: 'completed'
-  },
-  {
-    id: '3',
-    type: 'debit',
-    amount: 100,
-    date: '2024-01-14',
-    time: '4:45 PM',
-    description: 'Withdrawal to bank account',
-    category: 'Withdrawal',
-    status: 'completed'
-  },
-  {
-    id: '4',
-    type: 'credit',
-    amount: 15,
-    date: '2024-01-14',
-    time: '11:20 AM',
-    description: 'Referral bonus',
-    category: 'Referral',
-    status: 'completed'
-  },
-  {
-    id: '5',
-    type: 'credit',
-    amount: 200,
-    date: '2024-01-13',
-    time: '3:10 PM',
-    description: 'Level up reward',
-    category: 'Bonus',
-    status: 'completed'
-  }
-];
-
 const RecentTransactions: React.FC<RecentTransactionsProps> = ({ 
   onViewMore,
   maxItems = 4 
 }) => {
-  const displayTransactions = mockTransactions.slice(0, maxItems);
-
-  const getTransactionIcon = (type: string, category: string) => {
-    if (type === 'credit') {
-      switch (category) {
-        case 'Earnings': return 'trending-up';
-        case 'Ad Revenue': return 'play-circle';
-        case 'Referral': return 'people';
-        case 'Bonus': return 'gift';
-        default: return 'arrow-down-circle';
-      }
-    } else {
-      switch (category) {
-        case 'Withdrawal': return 'card';
-        default: return 'arrow-up-circle';
-      }
-    }
-  };
-
-  const getTransactionColor = (type: string) => {
-    return type === 'credit' ? Colors.success : Colors.primary;
-  };
+  const { transactions, isLoading } = useWallet();
+  const displayTransactions = transactions.slice(0, maxItems);
 
   const renderTransaction = ({ item }: { item: Transaction }) => (
     <View style={styles.transactionItem}>
-      <View style={[styles.iconContainer, { backgroundColor: getTransactionColor(item.type) + '15' }]}>
+      <View style={[styles.iconContainer, { backgroundColor: getTransactionColor(item.transactionType) + '15' }]}>
         <Ionicons 
-          name={getTransactionIcon(item.type, item.category) as any} 
+          name={getTransactionIcon(item.transactionType) as any} 
           size={20} 
-          color={getTransactionColor(item.type)} 
+          color={getTransactionColor(item.transactionType)} 
         />
       </View>
       
       <View style={styles.transactionDetails}>
         <View style={styles.transactionHeader}>
           <Text style={styles.transactionDescription}>{item.description}</Text>
-          <Text style={[styles.transactionAmount, { color: getTransactionColor(item.type) }]}>
-            {item.type === 'credit' ? '+' : '-'}₹{item.amount}
+          <Text style={[styles.transactionAmount, { color: getTransactionColor(item.transactionType) }]}>
+            {item.transactionType === 'credit' ? '+' : '-'}₹{item.amount.toFixed(2)}
           </Text>
         </View>
         
         <View style={styles.transactionMeta}>
-          <Text style={styles.transactionCategory}>{item.category}</Text>
-          <Text style={styles.transactionTime}>{item.time}</Text>
+          <Text style={styles.transactionCategory}>{formatTransactionType(item.transactionType)}</Text>
+          <Text style={styles.transactionTime}>{formatTransactionTime(item)}</Text>
         </View>
       </View>
     </View>
@@ -147,7 +71,17 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
         />
       </View>
 
-      {mockTransactions.length > maxItems && (
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading transactions...</Text>
+        </View>
+      ) : transactions.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="receipt-outline" size={48} color={Colors.textSecondary} />
+          <Text style={styles.emptyText}>No transactions yet</Text>
+        </View>
+      ) : transactions.length > maxItems && (
         <TouchableOpacity style={styles.viewMoreButton} onPress={onViewMore}>
           <LinearGradient
             colors={[Colors.primary, Colors.primaryLight]}
@@ -261,6 +195,26 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.textOnPrimary,
     marginRight: Spacing.sm,
+  },
+  loadingContainer: {
+    padding: Spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: Spacing.sm,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
+  },
+  emptyContainer: {
+    padding: Spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    marginTop: Spacing.sm,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.textSecondary,
   },
 });
 

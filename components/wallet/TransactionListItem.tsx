@@ -2,27 +2,24 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Spacing, Colors, Typography, BorderRadius, Shadows } from '../../constants/theme';
+import { Transaction } from '../../services/walletService';
+import { 
+  formatTransactionDate, 
+  formatTransactionTime, 
+  formatTransactionType, 
+  categorizeTransaction 
+} from '../../utils/walletUtils';
 
-interface TransactionListItemProps {
-  type: 'credit' | 'debit';
-  amount: number;
-  date: string;
-  description: string;
-  category?: string;
-  time?: string;
-  status?: 'completed' | 'pending' | 'failed';
-}
+interface TransactionListItemProps extends Transaction {}
 
 const TransactionListItem: React.FC<TransactionListItemProps> = ({ 
-  type, 
+  transactionType, 
   amount, 
-  date, 
   description, 
-  category = 'General',
-  time = '12:00 PM',
-  status = 'completed'
+  status,
+  createdAt
 }) => {
-  const isCredit = type === 'credit';
+  const isCredit = transactionType === 'credit';
   const amountPrefix = isCredit ? '+' : '-';
   
   // Enhanced icon and color logic
@@ -67,17 +64,15 @@ const TransactionListItem: React.FC<TransactionListItemProps> = ({
         
         <View style={styles.bottomRow}>
           <View style={styles.leftInfo}>
-            {category && (
-              <View style={styles.categoryTag}>
-                <Text style={styles.categoryText}>{category}</Text>
-              </View>
-            )}
+            <View style={styles.categoryTag}>
+              <Text style={styles.categoryText}>{formatTransactionType(transactionType)}</Text>
+            </View>
             <Text style={styles.dateTime}>
-              {new Date(date).toLocaleDateString()} • {time}
+              {formatTransactionDate({ createdAt } as Transaction)} • {formatTransactionTime({ createdAt } as Transaction)}
             </Text>
           </View>
           
-          {status !== 'completed' && (
+          {status !== 'success' && (
             <View style={[styles.statusBadge, { backgroundColor: getStatusColor() + '20' }]}>
               <Text style={[styles.statusText, { color: getStatusColor() }]}>
                 {status.charAt(0).toUpperCase() + status.slice(1)}

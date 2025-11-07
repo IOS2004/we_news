@@ -2,25 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { ScrollView, Text, View, TouchableOpacity, Alert, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 
 import ScreenWrapper from '../../../components/common/ScreenWrapper';
 import Header from '../../../components/common/Header';
 import Card from '../../../components/common/Card';
-import { MockPaymentGateway } from '../../../components/plans';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../constants/theme';
 import { showToast } from '../../../utils/toast';
 import { investmentAPI, mapBackendPlansToGrowthPlans, GrowthPlan } from '../../../services/api';
+import { useWallet } from '../../../contexts/WalletContext';
+import { checkSufficientBalance, formatCurrency } from '../../../utils/walletUtils';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function PlansScreen() {
+  const router = useRouter();
+  const { balance, deductFromWallet } = useWallet();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedFrequency, setSelectedFrequency] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [growthPlans, setGrowthPlans] = useState<GrowthPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [planToPurchase, setPlanToPurchase] = useState<GrowthPlan | null>(null);
 
   // Load growth plans from backend
   useEffect(() => {
@@ -57,69 +59,90 @@ export default function PlansScreen() {
   };
 
   const handlePurchasePlan = async (plan: GrowthPlan) => {
-    setPlanToPurchase(plan);
-    setShowPaymentModal(true);
-  };
-
-  const handlePaymentSuccess = async () => {
-    if (!planToPurchase) return;
-
     try {
+      // Get the plan amount based on selected frequency
+      const planAmount = plan.plans[selectedFrequency].initialPayment;
+
+      // Check if user has sufficient balance
+      const balanceCheck = checkSufficientBalance(planAmount, balance);
+      
+      if (!balanceCheck.sufficient) {
+        Alert.alert(
+          'Insufficient Balance',
+          `You need ${formatCurrency(balanceCheck.shortfall)} more to purchase this plan. Your current balance is ${formatCurrency(balance)}.`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Add Money',
+              onPress: () => router.push('/(tabs)/(home)/add-money')
+            }
+          ]
+        );
+        return;
+      }
+
+      // Deduct amount from wallet
+      showToast.info({
+        title: 'Processing Payment',
+        message: 'Please wait...'
+      });
+
+      const paymentSuccess = await deductFromWallet(
+        planAmount,
+        `Investment Plan: ${plan.name} (${selectedFrequency})`
+      );
+
+      if (!paymentSuccess) {
+        showToast.error({
+          title: 'Payment Failed',
+          message: 'Unable to process payment. Please try again.'
+        });
+        return;
+      }
+
+      // Payment successful, now activate the plan
       showToast.info({
         title: 'Activating Plan',
         message: 'Please wait while we activate your plan...'
       });
 
-      const response = await investmentAPI.purchaseInvestmentPlan(planToPurchase.id);
+      const response = await investmentAPI.purchaseInvestmentPlan(plan.id);
       
       if (response.success) {
-        setShowPaymentModal(false);
-        setPlanToPurchase(null);
-        
         showToast.success({
           title: 'Plan Activated!',
-          message: `${planToPurchase.name} has been successfully activated.`
+          message: `${plan.name} has been successfully activated.`
         });
         
         // Optionally navigate to plan details or dashboard
-        // router.push('/plan-details?planId=' + planToPurchase.id);
+        // router.push('/plan-details?planId=' + plan.id);
       } else {
-        throw new Error(response.message || 'Failed to activate plan');
-      }
-    } catch (error: any) {
-      console.error('Error activating plan:', error);
-      
-      // Check if user already has an active plan
-      if (error.response?.data?.message?.includes('already have an active investment')) {
-        showToast.error({
-          title: 'Plan Already Active',
-          message: 'You already have an active investment plan. Please complete your current plan before purchasing a new one.'
-        });
-      } else {
+        // If plan activation fails, we should ideally refund the amount
+        // This would require a refund API endpoint
         showToast.error({
           title: 'Activation Failed',
-          message: error.response?.data?.message || 'Unable to activate plan. Please try again or contact support.'
+          message: response.message || 'Plan activation failed. Please contact support for refund.'
         });
       }
+    } catch (error: any) {
+      console.error('Error purchasing plan:', error);
       
-      setShowPaymentModal(false);
-      setPlanToPurchase(null);
+      // Check if user already purchased this specific plan
+      if (error.response?.data?.message?.includes('already purchased') || 
+          error.response?.data?.message?.includes('already have this plan')) {
+        showToast.error({
+          title: 'Already Purchased',
+          message: 'You have already purchased this plan. You can purchase other plans if available.'
+        });
+      } else {
+        showToast.error({
+          title: 'Purchase Failed',
+          message: error.response?.data?.message || 'Unable to purchase plan. Please try again or contact support.'
+        });
+      }
     }
   };
 
-  const handlePaymentFailure = (errorMessage: string) => {
-    showToast.error({
-      title: 'Payment Failed',
-      message: errorMessage
-    });
-    setShowPaymentModal(false);
-    setPlanToPurchase(null);
-  };
-
-  const handlePaymentClose = () => {
-    setShowPaymentModal(false);
-    setPlanToPurchase(null);
-  };
 
   const PlanCard = ({ plan }: { plan: GrowthPlan }) => {
     const currentPlan = plan.plans[selectedFrequency];
@@ -168,25 +191,6 @@ export default function PlansScreen() {
               <Text style={styles.contributionText}>
                 Growth tracking included
               </Text>
-            </View>
-          </View>
-
-          {/* Earning Potential */}
-          <View style={styles.earningsSection}>
-            <Text style={styles.sectionTitle}>Growth Potential</Text>
-            <View style={styles.earningsGrid}>
-              <View style={styles.earningItem}>
-                <Text style={styles.earningAmount}>₹{plan.earnings.daily}</Text>
-                <Text style={styles.earningLabel}>Daily</Text>
-              </View>
-              <View style={styles.earningItem}>
-                <Text style={styles.earningAmount}>₹{plan.earnings.weekly}</Text>
-                <Text style={styles.earningLabel}>Weekly</Text>
-              </View>
-              <View style={styles.earningItem}>
-                <Text style={styles.earningAmount}>₹{plan.earnings.monthly}</Text>
-                <Text style={styles.earningLabel}>Monthly</Text>
-              </View>
             </View>
           </View>
 
@@ -296,18 +300,6 @@ export default function PlansScreen() {
           </View>
         </ScrollView>
       )}
-      
-      {/* Mock Payment Gateway Modal */}
-      {planToPurchase && (
-        <MockPaymentGateway
-          visible={showPaymentModal}
-          planName={planToPurchase.name}
-          amount={planToPurchase.plans[selectedFrequency].initialPayment}
-          onClose={handlePaymentClose}
-          onSuccess={handlePaymentSuccess}
-          onFailure={handlePaymentFailure}
-        />
-      )}
     </ScreenWrapper>
   );
 }
@@ -414,26 +406,6 @@ const styles = StyleSheet.create({
   },
   contributionText: {
     fontSize: 16,
-    color: Colors.textSecondary,
-  },
-  earningsSection: {
-    marginBottom: 20,
-  },
-  earningsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  earningItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  earningAmount: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.primary,
-  },
-  earningLabel: {
-    fontSize: 12,
     color: Colors.textSecondary,
   },
   featuresSection: {

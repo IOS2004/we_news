@@ -68,12 +68,11 @@ api.interceptors.response.use(
     }
 
     // Handle 401 errors (token expired/invalid)
+    // BUT don't clear token automatically - let AuthContext handle it
+    // This prevents premature token clearing on temporary network issues
     if (error.response?.status === 401) {
-      try {
-        await AsyncStorage.multiRemove([TOKEN_STORAGE_KEY, USER_STORAGE_KEY]);
-      } catch (storageError) {
-        console.error("Error clearing storage:", storageError);
-      }
+      console.log("[API] 401 Unauthorized - Token may be expired");
+      // Don't clear storage here - let AuthContext initializeAuth handle it
     }
     return Promise.reject(error);
   }
@@ -433,13 +432,42 @@ export const investmentAPI = {
     }
   },
 
-  // Get user's current investment
+  // Get user's current investment(s)
+  // Note: Backend returns single investment, but may have multiple in future
   getMyInvestment: async (): Promise<ApiResponse<any>> => {
     try {
       const response: AxiosResponse<ApiResponse<any>> = await api.get(
         "/investment/my-investment"
       );
-      return response.data;
+
+      // Handle different response formats (matching web frontend)
+      if (response.data?.data?.investments) {
+        // Backend returned multiple investments
+        return {
+          ...response.data,
+          data: {
+            investments: response.data.data.investments,
+          },
+        };
+      }
+
+      if (response.data?.data?.investment) {
+        // Backend returned single investment - wrap in array for consistency
+        return {
+          ...response.data,
+          data: {
+            investments: [response.data.data.investment],
+          },
+        };
+      }
+
+      // No investment found
+      return {
+        ...response.data,
+        data: {
+          investments: [],
+        },
+      };
     } catch (error: any) {
       console.error("Error fetching user investment:", error);
       throw error;
@@ -698,12 +726,17 @@ export const mapBackendPlansToGrowthPlans = (
 export const mapReferralDataToSubscriptions = (
   referralInfo: BackendReferralInfo | null,
   earningsData: BackendEarningsData | null,
-  userInvestment?: any
+  userInvestments?: any[] | any // Can be array or single object
 ): any[] => {
-  // If user has active investment, create subscription based on real data
-  if (userInvestment && userInvestment.investment) {
-    const investment = userInvestment.investment;
+  // Normalize to array
+  const investments = Array.isArray(userInvestments)
+    ? userInvestments
+    : userInvestments?.investment
+    ? [userInvestments.investment]
+    : [];
 
+  // If user has investments, create subscriptions based on real data
+  if (investments.length > 0) {
     // Map backend plan names to frontend plan types
     const planTypeMapping: { [key: string]: string } = {
       bass: "base",
@@ -723,37 +756,37 @@ export const mapReferralDataToSubscriptions = (
       eight: "#DC2626",
     };
 
-    const planKey = investment.planName?.toLowerCase() || "bass";
-    const planType = planTypeMapping[planKey] || "base";
-    const planColor = planColorMapping[planKey] || "#3B82F6";
+    return investments.map((investment: any) => {
+      const planKey = investment.planName?.toLowerCase() || "bass";
+      const planType = planTypeMapping[planKey] || "base";
+      const planColor = planColorMapping[planKey] || "#3B82F6";
 
-    // Calculate days remaining from expiry date
-    let daysRemaining = 750; // default
-    if (investment.expiryDate) {
-      const expiryDate = investment.expiryDate._seconds
-        ? new Date(investment.expiryDate._seconds * 1000)
-        : new Date(investment.expiryDate);
-      const now = new Date();
-      daysRemaining = Math.max(
-        0,
-        Math.ceil(
-          (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-        )
-      );
-    }
+      // Calculate days remaining from expiry date
+      let daysRemaining = 750; // default
+      if (investment.expiryDate) {
+        const expiryDate = investment.expiryDate._seconds
+          ? new Date(investment.expiryDate._seconds * 1000)
+          : new Date(investment.expiryDate);
+        const now = new Date();
+        daysRemaining = Math.max(
+          0,
+          Math.ceil(
+            (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+          )
+        );
+      }
 
-    // Format purchase date
-    let purchaseDate = new Date().toISOString().split("T")[0];
-    if (investment.startDate) {
-      const startDate = investment.startDate._seconds
-        ? new Date(investment.startDate._seconds * 1000)
-        : new Date(investment.startDate);
-      purchaseDate = startDate.toISOString().split("T")[0];
-    }
+      // Format purchase date
+      let purchaseDate = new Date().toISOString().split("T")[0];
+      if (investment.startDate) {
+        const startDate = investment.startDate._seconds
+          ? new Date(investment.startDate._seconds * 1000)
+          : new Date(investment.startDate);
+        purchaseDate = startDate.toISOString().split("T")[0];
+      }
 
-    return [
-      {
-        id: investment.id || "investment_1",
+      return {
+        id: investment.id || `investment_${Math.random()}`,
         name: `${investment.planName || "Bass"} Plan`,
         planType,
         planColor,
@@ -768,8 +801,8 @@ export const mapReferralDataToSubscriptions = (
         referralLink: referralInfo?.userReferralCode || "NO_CODE",
         isActive: investment.isActive || true,
         dailyEarning: earningsData?.dailyEarnings || 0,
-      },
-    ];
+      };
+    });
   }
 
   // Fallback: Create mock subscription with real referral data (if available)

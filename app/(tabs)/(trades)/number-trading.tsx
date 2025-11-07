@@ -10,12 +10,15 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { ScreenWrapper } from '../../../components/common';
 import { useWallet } from '../../../contexts/WalletContext';
 import { useRounds } from '../../../contexts/RoundsContext';
 import { useCart } from '../../../hooks/useCart';
 import { tradingApi } from '../../../services/tradingApi';
 import { Colors, Typography, Spacing, BorderRadius } from '../../../constants/theme';
+import { checkSufficientBalance, formatCurrency } from '../../../utils/walletUtils';
+import { showToast } from '../../../utils/toast';
 
 // Types
 interface Plan {
@@ -36,7 +39,8 @@ const plans: Plan[] = [
 const numbers = Array.from({ length: 100 }, (_, i) => i);
 
 export default function NumberTrading() {
-  const { balance, formattedBalance, refreshWallet } = useWallet();
+  const router = useRouter();
+  const { balance, formattedBalance, deductFromWallet, refreshWallet } = useWallet();
   const {
     numberActiveRounds,
     numberUpcomingRounds,
@@ -131,10 +135,20 @@ export default function NumberTrading() {
       return;
     }
 
-    // Validate balance
-    const balanceCheck = validateCartBalance(balance);
-    if (!balanceCheck.isValid) {
-      Alert.alert('Insufficient Balance', balanceCheck.message);
+    // Check sufficient balance
+    const balanceCheck = checkSufficientBalance(cart.finalAmount, balance);
+    if (!balanceCheck.sufficient) {
+      Alert.alert(
+        'Insufficient Balance',
+        `You need ${formatCurrency(cart.finalAmount)} but have ${formattedBalance}. You need ${formatCurrency(balanceCheck.shortfall)} more.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Add Money',
+            onPress: () => router.push('/(tabs)/(home)/add-money'),
+          },
+        ]
+      );
       return;
     }
 
@@ -149,25 +163,32 @@ export default function NumberTrading() {
         }))
       );
 
+      // Deduct amount from wallet first
+      const paymentSuccess = await deductFromWallet(
+        cart.finalAmount,
+        `Number Trading: ${allSelections.length} bet${allSelections.length > 1 ? 's' : ''}`
+      );
+
+      if (!paymentSuccess) {
+        Alert.alert('Payment Failed', 'Failed to deduct amount from wallet. Please try again.');
+        return;
+      }
+
       // Place order
       const result = await tradingApi.placeOrder(selectedNumberRoundId, allSelections);
 
       if (result) {
-        Alert.alert(
-          'Success! 🎉',
-          `Successfully placed ${allSelections.length} bet${allSelections.length > 1 ? 's' : ''} for ₹${cart.finalAmount}!`,
-          [{ text: 'OK', onPress: () => {} }]
-        );
-        
         clearCart();
         
-        // Refresh wallet and rounds
-        await Promise.all([
-          refreshWallet(),
-          fetchNumberRounds(true)
-        ]);
+        showToast.success({
+          title: 'Bets Placed! 🎉',
+          message: `Successfully placed ${allSelections.length} bet${allSelections.length > 1 ? 's' : ''}`,
+        });
+        
+        // Refresh rounds
+        await fetchNumberRounds(true);
       } else {
-        Alert.alert('Error', 'Failed to place bets');
+        Alert.alert('Error', 'Failed to place bets. Please contact support if amount was deducted.');
       }
     } catch (error: any) {
       console.error('Failed to submit orders:', error);
